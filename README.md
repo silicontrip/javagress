@@ -47,12 +47,15 @@ the backend provides 2 api calls. getportals and getlinks.
 getportals returns portals bounded by different shapes depending on the arguments
 
 Return portals in rect `?ll=portal&l2=portal`
+
 Return portals in triangle `?ll=portal&l2=portal&l3=portal`
+
 Return portals in range (in km) `?ll=portal&rr=range`
+
 Return single portal `?ll=portal`
 
 it returns a json string
-`{"8a9064c9e20743d9b0dc03c109129403.11":{"guid":"8a9064c9e20743d9b0dc03c109129403.11","title":"Ringwood Station North Entrance","health":75,"rescount":7,"team":"E","level":5,"lat":-37815723,"lng":145228945},"ed4f888bfce24edca1215756e35d9710.16":{"guid":"ed4f888bfce24edca1215756e35d9710.16","title":"First Church of Christ, Scientist, Ringwood","health":100,"rescount":8,"team":"R","level":7,"lat":-37816373,"lng":145229531}]
+`[{"8a9064c9e20743d9b0dc03c109129403.11":{"guid":"8a9064c9e20743d9b0dc03c109129403.11","title":"Ringwood Station North Entrance","health":75,"rescount":7,"team":"E","level":5,"lat":-37815723,"lng":145228945},"ed4f888bfce24edca1215756e35d9710.16":{"guid":"ed4f888bfce24edca1215756e35d9710.16","title":"First Church of Christ, Scientist, Ringwood","health":100,"rescount":8,"team":"R","level":7,"lat":-37816373,"lng":145229531}]`
 
 getlinks simply returns the links without parameters. 
 
