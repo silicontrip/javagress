@@ -39,8 +39,8 @@ public class PortalFactory {
                         portalApi = fileProperties.getProperty("portalurl");
 
 
-		System.out.println("link: " + linkApi);
-		System.out.println("portal: " + portalApi);
+		//System.out.println("link: " + linkApi);
+		//System.out.println("portal: " + portalApi);
 	}
 	
 	public HashMap<String,Portal> portalsFromString (String portalDescription) throws IOException
