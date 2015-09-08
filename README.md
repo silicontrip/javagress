@@ -1,6 +1,7 @@
 # javagress
 ## tools to help create different styles of fielding.
 These tools talk to a db backend (via a web api) without the web api these tools do nothing.
+These tools also require the Jackson Library to perform json parsing. https://github.com/FasterXML/jackson
 
 ### alllinker 
 Tool to find the largest field with the fewest blocking links.
