@@ -10,34 +10,46 @@ Tool to find the largest field with the fewest blocking links.
 
 ### multilinker2
 Tool to create multiple layers from a source field.
+
 `multilinker2  <3 point portal range> <number of layers>`
+
 the 3 point range must either be portal/portal/portal or a drawtools description
 
 ### manylinks
 Identifies possible links to create from a keylist file. (used for chasing connector badge)
+
 `manylinks <portal_range> [<portal_range>]`
+
 the second range is usually a keylist.
 
 ### maxfields
 Generates the maximum possible fields in an area. (used for chasing mind controller badge)
+
 `maxfields <portal_range>`
 
 ### targetlinker
 Generates the most layers over a single target. 
+
 `targetlinker <lat> <lng> <portal_range>`
 
 ## Portal range 
 The portal range is a descriptive argument to describe a range of portals.
+
 It can be one of
+
 `portal:range` 
 portal is either lat,lng or a portal name. (portal names are not unique)
 range is in km.  If range is omitted 0 is assumed.
+
 `./file.txt`
 which contains a list of type portal. this is very slow.
+
 `portal/portal`
 Gets portal bounded by the square defined by the 2 portals.
+
 `portal/portal/portal`
 get portals bounded by the triangle defined by the 3 portals
+
 `[{drawtools description}]`
 returns all portals within a 3 point polygon.  Will only handle a 3 point polygon (not a polyline or a different number of points)
 
@@ -56,6 +68,7 @@ Return portals in range (in km) `?ll=portal&rr=range`
 Return single portal `?ll=portal`
 
 it returns a json string
+
 `[{"8a9064c9e20743d9b0dc03c109129403.11":{"guid":"8a9064c9e20743d9b0dc03c109129403.11","title":"Ringwood Station North Entrance","health":75,"rescount":7,"team":"E","level":5,"lat":-37815723,"lng":145228945},"ed4f888bfce24edca1215756e35d9710.16":{"guid":"ed4f888bfce24edca1215756e35d9710.16","title":"First Church of Christ, Scientist, Ringwood","health":100,"rescount":8,"team":"R","level":7,"lat":-37816373,"lng":145229531}]`
 
 getlinks simply returns the links without parameters. 
