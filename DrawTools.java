@@ -18,9 +18,9 @@ public class DrawTools {
 	public void addField (Field f)
 	{	
 		Polygon pg = new Polygon();
-		pg.addPoint(new PolyPoint(f.getLat(0),f.getLng(0)));
-		pg.addPoint(new PolyPoint(f.getLat(1),f.getLng(1)));
-		pg.addPoint(new PolyPoint(f.getLat(2),f.getLng(2)));
+		pg.addPoint(new PolyPoint(f.getLat(0)/1000000.0,f.getLng(0)/1000000.0));
+		pg.addPoint(new PolyPoint(f.getLat(1)/1000000.0,f.getLng(1)/1000000.0));
+		pg.addPoint(new PolyPoint(f.getLat(2)/1000000.0,f.getLng(2)/1000000.0));
 		pg.setColour(colour);
 		entities.add(pg);
 	}	
@@ -28,10 +28,10 @@ public class DrawTools {
 	public void addFieldAsLines (Field f)
 	{	
 		Polyline pg = new Polyline();
-		pg.addPoint(new PolyPoint(f.getLat(0),f.getLng(0)));
-		pg.addPoint(new PolyPoint(f.getLat(1),f.getLng(1)));
-		pg.addPoint(new PolyPoint(f.getLat(2),f.getLng(2)));
-		pg.addPoint(new PolyPoint(f.getLat(0),f.getLng(0)));
+		pg.addPoint(new PolyPoint(f.getLat(0)/1000000.0,f.getLng(0)/1000000.0));
+		pg.addPoint(new PolyPoint(f.getLat(1)/1000000.0,f.getLng(1)/1000000.0));
+		pg.addPoint(new PolyPoint(f.getLat(2)/1000000.0,f.getLng(2)/1000000.0));
+		pg.addPoint(new PolyPoint(f.getLat(0)/1000000.0,f.getLng(0)/1000000.0));
 		pg.setColour(colour);
 		entities.add(pg);
 	}	
@@ -49,10 +49,15 @@ public class DrawTools {
 	}
 		
 
-	public String outputDT () throws JsonProcessingException
+	public String out () 
 	{
-		ObjectMapper mapper = new ObjectMapper();
-		return mapper.writeValueAsString(entities);
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			return mapper.writeValueAsString(entities);
+		} catch (Exception e) {
+			// probably not the best thing to do with the exception.
+			return e.getMessage();
+		}
 	}
 
 
@@ -107,7 +112,7 @@ class PolyPoint {
 	public String lat;
 	public String lng;
 	public PolyPoint(String a, String o) { lat = a; lng = o; }
-	public PolyPoint(Long a, Long o) { this(String.valueOf(a),String.valueOf(o)); }
+	public PolyPoint(Double a, Double o) { this(String.valueOf(a),String.valueOf(o)); }
 
 	public String toString () { return (lat + "," + lng); }
 }
