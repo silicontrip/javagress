@@ -10,27 +10,13 @@ public class megaplan {
 
 	private static String drawFields(List<Field> fa)
 	{
-		
-		StringBuilder rs = new StringBuilder(1024);
-		
-		rs.append("[");
-		
-		boolean first = true;
+	
+		DrawTools dt = new DrawTools();	
 		
 		for (Field fi: fa)
-		{
-			if (!first)
-			{
-				rs.append(",");
-			}
-			
-			rs.append(fi.getDraw());
-			first = false;
-		}
-		rs.append("]");
+			dt.addField(fi);
 		
-		return rs.toString();
-		
+		return dt.out();
 	}
 	
 	private static boolean newFieldIntersect (List<Field> fa,Field f)
@@ -85,7 +71,7 @@ public class megaplan {
 				// we want to maximise number of fields
 				Double thisArea = new Double(list.size());
 				
-				if (thisArea > maxArea) {
+				if (thisArea >= maxArea) {
 					System.out.println(thisArea + " : " + drawFields(list));
 					System.out.println("");
 					maxArea = thisArea;
