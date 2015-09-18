@@ -1,18 +1,60 @@
-
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.type.TypeReference;  
-import java.util.Collection;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 
 public class DrawTools {
 
 	private ArrayList<PolyObject> entities;
+	private String colour;
 
 	public DrawTools() {
 		entities = new ArrayList<PolyObject>();	
+		colour = "#ffffff";
 	}
 
-	
+	public void setDefaultColour(String c) { colour = c; }
+
+	public void addField (Field f)
+	{	
+		Polygon pg = new Polygon();
+		pg.addPoint(new PolyPoint(f.getLat(0),f.getLng(0)));
+		pg.addPoint(new PolyPoint(f.getLat(1),f.getLng(1)));
+		pg.addPoint(new PolyPoint(f.getLat(2),f.getLng(2)));
+		pg.setColour(colour);
+		entities.add(pg);
+	}	
+
+	public void addFieldAsLines (Field f)
+	{	
+		Polyline pg = new Polyline();
+		pg.addPoint(new PolyPoint(f.getLat(0),f.getLng(0)));
+		pg.addPoint(new PolyPoint(f.getLat(1),f.getLng(1)));
+		pg.addPoint(new PolyPoint(f.getLat(2),f.getLng(2)));
+		pg.addPoint(new PolyPoint(f.getLat(0),f.getLng(0)));
+		pg.setColour(colour);
+		entities.add(pg);
+	}	
+
+	public void addMarker (PolyPoint p) { entities.add(new Marker(p,colour)); }
+	public void addMarker (String lat, String lng) { addMarker(new PolyPoint(lat,lng)); }
+	public void addCircle (PolyPoint p, String r) { entities.add(new Circle(p,r,colour)); }
+	public void addCircle (String lat, String lng, String r) { addCircle(new PolyPoint(lat,lng),r); }
+
+	public void addLine (PolyPoint p1, PolyPoint p2) {
+		Polyline pg = new Polyline();
+		pg.addPoint(p1);
+		pg.addPoint(p2);
+		entities.add(pg);
+	}
+		
+
+	public String outputDT () throws JsonProcessingException
+	{
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.writeValueAsString(entities);
+	}
+
 
 }
 
@@ -45,6 +87,8 @@ class Marker extends PolyObject {
 	public String type = "marker";
 	public PolyPoint latLng;
 
+	public Marker(PolyPoint pp) { setPoint(pp); }
+	public Marker(PolyPoint pp,String c) { setPoint(pp); setColour(c); }
 	public void setPoint (PolyPoint pp) { latLng = pp; }
 }
 
@@ -53,6 +97,8 @@ class Circle extends PolyObject {
 	public PolyPoint latLng;
 	public String radius;
 
+	public Circle (PolyPoint p, String r) { setPoint(p); setRadius(r); }
+	public Circle (PolyPoint p, String r, String c) { setPoint(p); setRadius(r); setColour(c); }
 	public void setPoint (PolyPoint pp) { latLng = pp; }
 	public void setRadius (String r) { radius = r; }
 }
@@ -60,10 +106,8 @@ class Circle extends PolyObject {
 class PolyPoint {
 	public String lat;
 	public String lng;
-	public PolyPoint(String a, String o) {
-		lat = a;
-		lng = o;
-	}
+	public PolyPoint(String a, String o) { lat = a; lng = o; }
+	public PolyPoint(Long a, Long o) { this(String.valueOf(a),String.valueOf(o)); }
 
 	public String toString () { return (lat + "," + lng); }
 }
