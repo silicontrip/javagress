@@ -6,10 +6,10 @@ import java.util.ArrayList;
 
 public class DrawTools {
 
-	private Collection<PolyObject> entities;
+	private ArrayList<PolyObject> entities;
 
 	public DrawTools() {
-		entities = new Collection<PolyObject>();	
+		entities = new ArrayList<PolyObject>();	
 	}
 
 	
@@ -28,7 +28,7 @@ class Polygon extends PolyObject {
 	public ArrayList<PolyPoint> latLngs;
 	
 	public Polygon () { latLngs = new ArrayList<PolyPoint>(); }
-	public addPoint(PolyPoint pp) { latLngs.add(pp); }
+	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 
 }
 
@@ -37,7 +37,7 @@ class Polyline extends PolyObject {
 	public ArrayList<PolyPoint> latLngs;
 
 	public Polyline () { latLngs = new ArrayList<PolyPoint>(); }
-	public addPoint(PolyPoint pp) { latLngs.add(pp); }
+	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 
 }
 
