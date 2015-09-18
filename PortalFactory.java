@@ -54,12 +54,12 @@ public class PortalFactory {
 		HashMap<String,HashMap<String,Object>> guidMap;
 		ObjectMapper mapper = new ObjectMapper();
 		
-		ArrayList<Poly> tmpObj;
+		ArrayList<Polygon> tmpObj;
 		
 		// System.out.println(clusterDescription);
 		
 		try {
-			tmpObj = mapper.readValue(clusterDescription,new TypeReference<Collection<Poly>>() {});
+			tmpObj = mapper.readValue(clusterDescription,new TypeReference<Collection<Polygon>>() {});
 		} catch (com.fasterxml.jackson.databind.JsonMappingException e) {
 			throw new IOException("Invalid Drawtools: " + e);
 		}
@@ -67,7 +67,7 @@ public class PortalFactory {
 		// System.out.println(tmpObj.latLngs);
 		
 		// there should be only 1 entry
-		for (Poly entry : tmpObj) {
+		for (Polygon entry : tmpObj) {
 
 			String[] r = new String[3];
 			
@@ -427,19 +427,5 @@ public class PortalFactory {
 	}
 	
 	
-}
-
-
-class Poly {
-	public String type;
-	public Collection<PolyPoint> latLngs;
-	public String color;
-}
-
-class PolyPoint {
-	public String lat;
-	public String lng;
-	
-	public String toString () { return (lat + "," + lng); }
 }
 
