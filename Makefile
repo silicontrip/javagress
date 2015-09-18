@@ -1,5 +1,5 @@
 
-CLASSES = Field.class Line.class Link.class Point.class Portal.class PortalFactory.class  teamCount.class  multilinker.class  alllinker.class multilinker2.class manylinks.class Poly.class PolyPoint.class CombinationFactory.class BlockList.class maxfields.class targetlinker.class
+CLASSES = Field.class Line.class Link.class Point.class Portal.class PortalFactory.class  teamCount.class  multilinker.class  alllinker.class multilinker2.class manylinks.class Poly.class PolyPoint.class CombinationFactory.class BlockList.class maxfields.class targetlinker.class megaplan.class DrawTools.class
 
 CP=jackson-annotations-2.3.3.jar:jackson-core-2.3.4.jar:jackson-databind-2.3.4.jar:.
 
