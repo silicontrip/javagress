@@ -1,0 +1,2 @@
+public enum PolyType { UNKNOWN, POLYGON, POLYLINE, MARKER, CIRCLE }
+
