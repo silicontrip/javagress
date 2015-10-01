@@ -2,6 +2,11 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.type.TypeReference;  
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Collection;
+import java.io.IOException;
+
+
 
 public class DrawTools {
 
@@ -11,6 +16,36 @@ public class DrawTools {
 	public DrawTools() {
 		entities = new ArrayList<PolyObject>();	
 		colour = "#ffffff";
+	}
+
+	public DrawTools(String clusterDescription) throws IOException
+	{
+		HashMap<String,HashMap<String,Object>> guidMap;
+                ObjectMapper mapper = new ObjectMapper();
+                
+                ArrayList<PolyObject> tmpObj;
+                
+                // System.out.println(clusterDescription);
+                
+                try {
+                        tmpObj = mapper.readValue(clusterDescription,new TypeReference<Collection<PolyObject>>() {});
+                } catch (com.fasterxml.jackson.databind.JsonMappingException e) {
+                        throw new IOException("Invalid Drawtools: " + e);
+                }
+        
+                // System.out.println(tmpObj.latLngs);
+                
+                // there should be only 1 entry
+                for (PolyObject entry : tmpObj) {
+
+			System.out.println("Type: " + entry.type);
+
+                }
+                
+                
+                
+                
+	
 	}
 
 	public void setDefaultColour(String c) { colour = c; }
@@ -68,6 +103,13 @@ abstract class PolyObject {
 	public String color = "#ffffff";
 
 	public void setColour (String c) { color = c; }
+	public PolyType getType() { 
+		if ("Polygon".equals(type)) { return PolyType.POLYGON; }
+		if ("Polyline".equals(type)) { return PolyType.POLYLINE; }
+		if ("Marker".equals(type)) { return PolyType.MARKER; }
+		if ("Circle".equals(type)) { return PolyType.CIRCLE; }
+		return PolyType.UNKNOWN;
+	}
 }
 
 class Polygon extends PolyObject {
@@ -75,6 +117,7 @@ class Polygon extends PolyObject {
 	public ArrayList<PolyPoint> latLngs;
 	
 	public Polygon () { latLngs = new ArrayList<PolyPoint>(); }
+	public Polygon(ArrayList<PolyPoint> pp) { latLngs = pp; }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 
 }
@@ -111,8 +154,10 @@ class Circle extends PolyObject {
 class PolyPoint {
 	public String lat;
 	public String lng;
+	public PolyPoint() { lat = "0.0"; lng = "0.0"; }
 	public PolyPoint(String a, String o) { lat = a; lng = o; }
 	public PolyPoint(Double a, Double o) { this(String.valueOf(a),String.valueOf(o)); }
 
 	public String toString () { return (lat + "," + lng); }
 }
+
