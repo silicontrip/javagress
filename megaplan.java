@@ -12,9 +12,10 @@ public class megaplan {
 	{
 	
 		DrawTools dt = new DrawTools();	
+		dt.setDefaultColour("#a24ac3");
 		
 		for (Field fi: fa)
-			dt.addField(fi);
+			dt.addFieldAsLines(fi);
 		
 		return dt.out();
 	}
@@ -24,10 +25,6 @@ public class megaplan {
 		for (Field fi: fa) {
 			if (fi.intersects(f)) { return true; }
 			if (fi.equals(f)) { return true; }
-			
-			//System.err.println("no intersect: [" + fi + "," + f + "]");
-			
-			
 		}
 		return false;
 	}
@@ -70,11 +67,13 @@ public class megaplan {
 			//	Double thisArea = sizeFields(list);
 				// we want to maximise number of fields
 				Double thisArea = new Double(list.size());
+				Double maxAreaSmall = Math.floor(maxArea);
 				
-				if (thisArea >= maxArea) {
-					System.out.println(thisArea + " : " + drawFields(list));
+				if (thisArea >= maxAreaSmall) {
+					int retval = Double.compare(thisArea, maxAreaSmall);
+					if (retval == 0) { maxArea += 0.01; } else { maxArea = thisArea; }
+					System.out.println( String.format("%.2f",maxArea) + " : " + drawFields(list));
 					System.out.println("");
-					maxArea = thisArea;
 				}
 			}
 			
