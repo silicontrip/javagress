@@ -12,7 +12,14 @@ public class teamCount {
 	public static final int NEUTRAL = 0;
 	public static final int ENLIGHTENED = 1;
 	public static final int RESISTANCE = 2;
+
+	public teamCount () { ; } 
 	
+// Alphabetical order
+	public teamCount (Integer ENL, Integer RES) {
+		resistance = RES;
+		enlightened = ENL;
+	}
 	public teamCount (String[] args) {
 		
 		List<String> out = new LinkedList<String>();
@@ -36,13 +43,6 @@ public class teamCount {
 		}
 		
 		out.toArray(args);
-		
-	}
-	
-	public teamCount() {
-	
-		resistance = 0;
-		enlightened = 0;
 		
 	}
 	
