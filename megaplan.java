@@ -8,11 +8,12 @@ import java.util.List;
 
 public class megaplan {
 
-	private static String drawFields(List<Field> fa)
+
+	private static String drawFields(List<Field> fa, DrawTools dt)
 	{
 	
-		DrawTools dt = new DrawTools();	
-		dt.setDefaultColour("#a24ac3");
+
+		dt.erase();
 		
 		for (Field fi: fa)
 			dt.addFieldAsLines(fi);
@@ -60,7 +61,7 @@ public class megaplan {
 	}
 
 	
-	private static Double searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth)
+	private static Double searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth,DrawTools dt)
 	{
 			if (list.size() > 0) {
 				
@@ -72,7 +73,7 @@ public class megaplan {
 				if (thisArea >= maxAreaSmall) {
 					int retval = Double.compare(thisArea, maxAreaSmall);
 					if (retval == 0) { maxArea += 0.01; } else { maxArea = thisArea; }
-					System.out.println( String.format("%.2f",maxArea) + " : " + drawFields(list));
+					System.out.println( String.format("%.2f",maxArea) + " : " + drawFields(list,dt));
 					System.out.println("");
 				}
 			}
@@ -97,7 +98,7 @@ public class megaplan {
 					}
 					
 					
-					maxArea = searchFields(newlist,fields,i+1,maxArea,depth+1);
+					maxArea = searchFields(newlist,fields,i+1,maxArea,depth+1,dt);
 				}
 				
 			}
@@ -146,10 +147,19 @@ public class megaplan {
 public static void main(String[] args) {
 
     
-	teamCount maxBl = new teamCount(args);
+	Arguments ag = new Arguments(args);
+
+	teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+	
+	DrawTools dt = new DrawTools();	
+	if (ag.hasOption("C"))
+		dt.setDefaultColour(ag.getOptionForKey("C"));
+	else
+		dt.setDefaultColour("#a24ac3");
 	
 	
 	// ugly hack to modify args array.s
+/*
 	int newLength =args.length ;
 	for (int c=0; c<args.length; c++)
 	{
@@ -163,7 +173,7 @@ public static void main(String[] args) {
 	String[] newArgs = new String[newLength];
 	System.arraycopy (args,0,newArgs,0,newLength);
 	args = newArgs;
-	
+*/	
     try {
         PortalFactory pf = PortalFactory.getInstance();
         
@@ -174,9 +184,9 @@ public static void main(String[] args) {
 		HashMap<String,Portal> portals3 = new HashMap<String,Portal>();
 		
 		
-		portals1 = pf.portalClusterFromString(args[0]);
-		portals2 = pf.portalClusterFromString(args[1]);
-		portals3 = pf.portalClusterFromString(args[2]);
+		portals1 = pf.portalClusterFromString(ag.getArguments().get(0));
+		portals2 = pf.portalClusterFromString(ag.getArguments().get(1));
+		portals3 = pf.portalClusterFromString(ag.getArguments().get(2));
 		
 		HashMap<String,Portal> allPortals = new HashMap<String,Portal>();
 		
@@ -219,10 +229,8 @@ public static void main(String[] args) {
 		String[] portalKeys3 = portals3.keySet().toArray(new String[portals3.size()]);
 
         boolean first = true;
-     //   System.out.println("[");
-
 		
-		ArrayList<Field> fiList = new ArrayList<Field>();
+	ArrayList<Field> fiList = new ArrayList<Field>();
 		
         for (int li = 0; li < portals1.size(); li++)
         {
