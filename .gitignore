@@ -1,1 +1,9 @@
 *.class
+*.json
+*.jar
+*.txt
+*.html
+jackson*
+*.png
+*.csv
+*.properties
