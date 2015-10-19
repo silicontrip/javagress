@@ -48,6 +48,8 @@ public class DrawTools {
 	
 	}
 
+	public void erase() {entities = new ArrayList<PolyObject>(); }
+
 	public void setDefaultColour(String c) { colour = c; }
 
 	public void addField (Field f)
@@ -103,11 +105,11 @@ abstract class PolyObject {
 	public String color = "#ffffff";
 
 	public void setColour (String c) { color = c; }
-	public PolyType getType() { 
-		if ("Polygon".equals(type)) { return PolyType.POLYGON; }
-		if ("Polyline".equals(type)) { return PolyType.POLYLINE; }
-		if ("Marker".equals(type)) { return PolyType.MARKER; }
-		if ("Circle".equals(type)) { return PolyType.CIRCLE; }
+	public PolyType EnumType() { 
+		if ("polygon".equalsIgnoreCase(type)) { return PolyType.POLYGON; }
+		if ("polyline".equalsIgnoreCase(type)) { return PolyType.POLYLINE; }
+		if ("marker".equalsIgnoreCase(type)) { return PolyType.MARKER; }
+		if ("circle".equalsIgnoreCase(type)) { return PolyType.CIRCLE; }
 		return PolyType.UNKNOWN;
 	}
 }
@@ -126,7 +128,7 @@ class Polyline extends PolyObject {
 	public String type = "polyline";
 	public ArrayList<PolyPoint> latLngs;
 
-	public Polyline () { latLngs = new ArrayList<PolyPoint>(); }
+	public Polyline () { latLngs = new ArrayList<PolyPoint>(); type="polyline"; }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 
 }
