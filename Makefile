@@ -3,7 +3,8 @@ CLASSES = DrawTools.class Field.class Line.class Link.class Point.class Portal.c
 Poly.class  PolyPoint.class BlockList.class \
 multilinker.class  alllinker.class multilinker2.class manylinks.class \
 maxfields.class targetlinker.class megaplan.class \
-PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class
+PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class \
+Arguments.class
 
 
 #PolyPoint.class CombinationFactory.class BlockList.class 
@@ -14,7 +15,7 @@ all: portaltools.jar
 
 
 portaltools.jar: classes
-	jar -cf portaltools.jar $(CLASSES) 'PortalFactory$$1.class' 'PortalFactory$$2.class' 'PortalFactory$$3.class'
+	jar -cf portaltools.jar $(CLASSES) 'PortalFactory$$1.class' 'PortalFactory$$2.class' 'PortalFactory$$3.class' 'DrawTools$$1.class'
 
 classes: $(CLASSES)
 
