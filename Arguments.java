@@ -34,18 +34,25 @@ public Arguments (String a[]) {
 	for (String argument: a2) 
 	{
 		//old = addArg(old, argument, end)
+
+		//System.out.println("old: " + old + " carg: " + argument);
+	
 		if (old != null) {
 			if ("--".equals(old)) 
 				end = true;
 
 			if (end) {
-				arg.add(old);
+				if (!"--".equals(old)) 
+					arg.add(old);
 			} else if (old.startsWith("--")) {
+			
 				if (argument.startsWith("-")) {
 					// old code says to add as bool True.
+					//System.out.println("add (--,-) " + old.substring(2));
 					opt.put(old.substring(2),new String());
 				} else {
 					// add 
+					//System.out.println("add (--,)" + old.substring(2) + " = " + argument);
 					opt.put(old.substring(2),argument);
 					argument = null;
 				}
@@ -53,16 +60,19 @@ public Arguments (String a[]) {
 				if (argument.startsWith("-")) {
 					for (int i=1; i<old.length(); i++)
 					{
-						String letter = old.substring(i,1);
+						String letter = old.substring(i,i+1);
+						//System.out.println("add (-,-) " + letter);
 						opt.put(letter,new String());
 					}		
 				} else {
 					for (int i=1; i<old.length()-1; i++)
 					{
-						String letter = old.substring(i,1);
+						String letter = old.substring(i,i+1);
+						//System.out.println("add (-,)" + letter);
 						opt.put(letter,new String());
 					}		
-					opt.put(old.substring(old.length()-1,1),argument);
+					//System.out.println ("add: (-,)" + old.substring(old.length()-1,old.length()) + " = " + argument);
+					opt.put(old.substring(old.length()-1,old.length()),argument);
 					argument = null;
 				}	
 			} else {
@@ -87,5 +97,7 @@ public String getOptionForKeys(String shortKey, String longKey) {
 	if (hasOption(shortKey)) return getOptionForKey(shortKey);
 	return getOptionForKey(longKey);
 }
+
+public String toString() { return "opt: " + opt + " arg: " + arg; }
 
 }
