@@ -16,7 +16,7 @@ public class megaplan {
 		dt.erase();
 		
 		for (Field fi: fa)
-			dt.addFieldAsLines(fi);
+			dt.addField(fi);
 		
 		return dt.out();
 	}
@@ -93,7 +93,7 @@ public class megaplan {
 					newlist.add((Field)fields[i]);
 					
 					if (fieldIntersect(newlist)) {
-						throw new RuntimeException("Field Collision : " + drawFields(list) + " / " + thisField );
+						throw new RuntimeException("Field Collision : " + drawFields(list,dt) + " / " + thisField );
 						
 					}
 					
@@ -184,9 +184,9 @@ public static void main(String[] args) {
 		HashMap<String,Portal> portals3 = new HashMap<String,Portal>();
 		
 		
-		portals1 = pf.portalClusterFromString(ag.getArguments().get(0));
-		portals2 = pf.portalClusterFromString(ag.getArguments().get(1));
-		portals3 = pf.portalClusterFromString(ag.getArguments().get(2));
+		portals1 = pf.portalClusterFromString(ag.getArgumentAt(0));
+		portals2 = pf.portalClusterFromString(ag.getArgumentAt(1));
+		portals3 = pf.portalClusterFromString(ag.getArgumentAt(2));
 		
 		HashMap<String,Portal> allPortals = new HashMap<String,Portal>();
 		
@@ -275,7 +275,7 @@ public static void main(String[] args) {
 
 			// sort through colliding fields.
 		
-		searchFields(new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
+		searchFields(new ArrayList<Field>() , fiList.toArray(),0,0.0,0,dt);
 		
       //  System.out.println("]");
 
