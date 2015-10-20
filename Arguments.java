@@ -77,6 +77,7 @@ public Arguments (String a[]) {
 
 }
 public ArrayList getArguments() { return arg; }
+public String getArgumentAt(int i) { return arg.get(i); }
 public HashMap getOptions() { return opt; }
 public boolean hasArgument(String s) { return arg.contains(s); }
 public boolean hasOption(String s) { return opt.containsKey(s); }
