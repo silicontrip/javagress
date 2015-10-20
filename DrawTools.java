@@ -12,6 +12,7 @@ public class DrawTools {
 
 	private ArrayList<PolyObject> entities;
 	private String colour;
+	private Boolean addFieldAsLine = false;
 
 	public DrawTools() {
 		entities = new ArrayList<PolyObject>();	
@@ -49,10 +50,21 @@ public class DrawTools {
 	}
 
 	public void erase() {entities = new ArrayList<PolyObject>(); }
+	public void setFieldsAsLines() { addFieldAsLine = true; }
+	public void setFieldsAsPolygon() { addFieldAsLine = false; }
 
 	public void setDefaultColour(String c) { colour = c; }
 
-	public void addField (Field f)
+	
+	public void addField (Field f) 
+	{
+		if (addFieldAsLine) 
+			addFieldAsPolyline(f);
+		else
+			addFieldAsPolygon(f);
+	}
+
+	protected void addFieldAsPolygon (Field f)
 	{	
 		Polygon pg = new Polygon();
 		pg.addPoint(new PolyPoint(f.getLat(0)/1000000.0,f.getLng(0)/1000000.0));
@@ -62,7 +74,7 @@ public class DrawTools {
 		entities.add(pg);
 	}	
 
-	public void addFieldAsLines (Field f)
+	protected void addFieldAsPolyline (Field f)
 	{	
 		Polyline pg = new Polyline();
 		pg.addPoint(new PolyPoint(f.getLat(0)/1000000.0,f.getLng(0)/1000000.0));
