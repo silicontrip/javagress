@@ -50,7 +50,7 @@ public class DrawTools {
 	}
 
 	public void erase() {entities = new ArrayList<PolyObject>(); }
-	public void setFieldsAsLines() { addFieldAsLine = true; }
+	public void setFieldsAsPolyline() { addFieldAsLine = true; }
 	public void setFieldsAsPolygon() { addFieldAsLine = false; }
 
 	public void setDefaultColour(String c) { colour = c; }
