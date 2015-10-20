@@ -20,6 +20,16 @@ public class teamCount {
 		resistance = RES;
 		enlightened = ENL;
 	}
+	public teamCount (String ENL, String RES) {
+		if (RES != null)
+			resistance = new Integer(RES);
+		else
+			RES = null;
+		if (ENL != null)
+			enlightened = new Integer(ENL);
+		else
+			ENL = null;
+	}
 	public teamCount (String[] args) {
 		
 		List<String> out = new LinkedList<String>();
