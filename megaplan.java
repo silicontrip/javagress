@@ -132,7 +132,7 @@ public class megaplan {
                 blocksPerLink.put(pi,pj,bb);
                 for (Link link: links) {
                     if (l.intersects(link.getLine())) {
-                      //  System.out.println("< " + pi  + ":" + pj +  " link: " + blocksPerLink.get(pi,pj));
+                        //System.out.println("< " + pi  + ":" + pj +  " link: " + blocksPerLink.get(pi,pj));
                         blocksPerLink.incTeamEnum(pi,pj,link.getTeamEnum());
                     } else if (l.equalLine(link.getLine())) {
                         blocksPerLink.setExists(pi,pj,true);
@@ -149,6 +149,8 @@ public static void main(String[] args) {
     
 	Arguments ag = new Arguments(args);
 
+	//System.out.println ("Arguments: " + ag );
+
 	teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
 	
 	DrawTools dt = new DrawTools();	
@@ -156,6 +158,11 @@ public static void main(String[] args) {
 		dt.setDefaultColour(ag.getOptionForKey("C"));
 	else
 		dt.setDefaultColour("#a24ac3");
+
+	if (ag.hasOption("L"))
+		dt.setFieldsAsPolyline();
+	else
+		dt.setFieldsAsPolygon();
 	
 	
 	// ugly hack to modify args array.s
