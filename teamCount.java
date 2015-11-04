@@ -84,6 +84,16 @@ public class teamCount {
 	
 	public Integer getResistance() { return resistance; }
 	public Integer getEnlightened() { return enlightened; }
+
+	public int getResistanceAsInt() { 
+		if (resistance == null) return 0;
+		return resistance; 
+	}
+	public int getEnlightenedAsInt() { 
+		if (enlightened == null) return 0;
+		return enlightened; 
+	}
+	
 	
 	public void setResistance(Integer i) { resistance=i; } 
 	public void setEnlightened(Integer i) { enlightened=i; } 
