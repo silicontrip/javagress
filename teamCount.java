@@ -59,10 +59,16 @@ public class teamCount {
 	public void incTeamEnum(int team) {
 	
 		if (team == ENLIGHTENED) {
-			enlightened ++;
+			if (enlightened != null)
+				enlightened ++;
+			else 
+				enlightened = 1;
 		}
 		if (team == RESISTANCE) {
-			resistance ++;
+			if (resistance != null)
+				resistance ++;
+			else 
+				resistance = 1;
 		}
 		
 	}
@@ -90,12 +96,17 @@ public class teamCount {
 	
 	public boolean moreThan(teamCount tc) {
 		// should check for null == don't care
+		boolean res = false;
+		boolean enl = false;
+
+		if (!tc.noEnlightened() && !noEnlightened())
+			enl = getEnlightened() > tc.getEnlightened();
+		if (!tc.noResistance() && !noResistance())
+			res = getResistance() > tc.getResistance();
+			
+		return res || enl;
+			
 		
-		if (tc.noEnlightened() && tc.noResistance()) return false;
-		if (tc.noEnlightened() && !tc.noResistance()) return getResistance() > tc.getResistance();
-		if (!tc.noEnlightened() && tc.noResistance()) return getEnlightened() > tc.getEnlightened();
-		
-		return getResistance() > tc.getResistance() || getEnlightened() > tc.getEnlightened();
 	}
 	public boolean anyEnlightenedBlockers() { return enlightened > 0; }
 	public boolean anyResistanceBlockers() { return resistance > 0; }
