@@ -12,18 +12,26 @@ import java.util.Arrays;
 public class alllinker {
 	
 	private static final Double nanoPerSec = 1000000000.0;
+
+public static void printMap(Map mp) {
+    Iterator it = mp.entrySet().iterator();
+    while (it.hasNext()) {
+        Map.Entry pair = (Map.Entry)it.next();
+        System.out.println(pair.getKey() + " = " + pair.getValue());
+        it.remove(); // avoids a ConcurrentModificationException
+    }
+}
 	
 	private static teamCount getBlocks (Portal pki, Portal pkj, Portal pkk,HashMap<String,teamCount> blocksPerLink)
 	{
 		teamCount block = new teamCount();
+
+		teamCount ij = blocksPerLink.get(pki.getGuid() + pkj.getGuid());
+		teamCount jk = blocksPerLink.get(pkj.getGuid() + pkk.getGuid());
+		teamCount ik = blocksPerLink.get(pki.getGuid() + pkk.getGuid());
 		
-		block.setResistance (blocksPerLink.get(pki.getGuid() + pkj.getGuid()).getResistance()+
-							 blocksPerLink.get(pkj.getGuid() + pkk.getGuid()).getResistance()+
-							 blocksPerLink.get(pki.getGuid() + pkk.getGuid()).getResistance());
-		
-		block.setEnlightened (blocksPerLink.get(pki.getGuid() + pkj.getGuid()).getEnlightened()+
-							  blocksPerLink.get(pkj.getGuid() + pkk.getGuid()).getEnlightened()+
-							  blocksPerLink.get(pki.getGuid() + pkk.getGuid()).getEnlightened());
+		block.setResistance (ij.getResistanceAsInt() + jk.getResistanceAsInt() + ik.getResistanceAsInt());
+		block.setEnlightened (ij.getEnlightenedAsInt() + jk.getEnlightenedAsInt() + ik.getEnlightenedAsInt());
 		
 		return block;
 	}
@@ -34,7 +42,7 @@ public class alllinker {
         
   //  }
 	
-	private static ArrayList<String> tripleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2,HashMap<String,Portal> p3, HashMap<String,teamCount> blocksPerLink,teamCount max) 
+	private static ArrayList<String> tripleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2,HashMap<String,Portal> p3, HashMap<String,teamCount> blocksPerLink,teamCount max, DrawTools dt) 
 	{
 		
 		ArrayList<Double> maxArea = new ArrayList<Double>();
@@ -74,7 +82,9 @@ public class alllinker {
 						
 						if (area >= maxArea.get(block.getResistance())) {
 							maxArea.set(block.getResistance(),area);
-							areaOut.set(block.getResistance(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  [" + fi.getDraw() + "]");
+							dt.erase();
+							dt.addField(fi);
+							areaOut.set(block.getResistance(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  " + dt.out());
 						}
 					}
 					
@@ -87,7 +97,7 @@ public class alllinker {
 	}
 
 	
-	private static ArrayList<String> doubleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2, HashMap<String,teamCount> blocksPerLink,teamCount max) 
+	private static ArrayList<String> doubleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt) 
 	{
 		Object[] portalKeys = p1.values().toArray();
 
@@ -131,7 +141,9 @@ public class alllinker {
 							
 							if (area >= maxArea.get(block.getResistance())) {
 								maxArea.set(block.getResistance(),area);
-								areaOut.set(block.getResistance(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  [" + fi.getDraw() + "]");
+								dt.erase();
+								dt.addField(fi);
+								areaOut.set(block.getResistance(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  " + dt.out());
 							}
 						}
 						
@@ -146,7 +158,7 @@ public class alllinker {
 	}
 	
 	
-	private static  ArrayList<String> singleCluster(HashMap<String,Portal> portals, HashMap<String,teamCount> blocksPerLink,teamCount max) {
+	private static  ArrayList<String> singleCluster(HashMap<String,Portal> portals, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt) {
 		
 		Object[] portalKeys = portals.values().toArray();
 		
@@ -175,6 +187,9 @@ public class alllinker {
 						Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
 						
 						Double area = fi.getGeoArea();
+
+						//System.out.println("1: " + pki.getGuid() + " 2: " + pkj.getGuid() + " 3: " + pkk.getGuid());
+						//printMap(blocksPerLink);
 						
 						teamCount block = getBlocks(pki,pkj,pkk,blocksPerLink);
 						
@@ -191,7 +206,9 @@ public class alllinker {
 							
 							if (area >= maxArea.get(block.getResistance())) {
 								maxArea.set(block.getResistance(),area);
-								areaOut.set(block.getResistance(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  [" + fi.getDraw() + "]");
+								dt.erase();
+								dt.addField(fi);
+								areaOut.set(block.getResistance(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  " + dt.out());
 							}
 						}
 						
@@ -349,32 +366,23 @@ public class alllinker {
 		double totalTime;
 		long endTime;
 		
-//		ArrayList<String> alArgs = new ArrayList<String>(Arrays.asList(args));
-		
-	//	for (String a: args) { System.out.println(a); }
+        Arguments ag = new Arguments(args);
 
-		
-		teamCount maxBl = new teamCount(args);
-		
-		
-		// ugly hack to modify args array.s
-		int newLength =args.length ;
-		for (int c=0; c<args.length; c++) 
-		{
-			if (args[c] == null) {
-				newLength = c;
-				c = args.length;
-			}
-		}
-		
-		
-		String[] newArgs = new String[newLength];
-		System.arraycopy (args,0,newArgs,0,newLength);
-		args = newArgs;
-		
-	//	 for (String a: args) { System.out.println(a); }
+        //System.out.println ("Arguments: " + ag );
 
-		
+        teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+        
+        DrawTools dt = new DrawTools(); 
+        if (ag.hasOption("C"))
+                dt.setDefaultColour(ag.getOptionForKey("C"));
+        else
+                dt.setDefaultColour("#a24ac3");
+
+        if (ag.hasOption("L"))
+                dt.setFieldsAsPolyline();
+        else
+                dt.setFieldsAsPolygon();
+
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
 			
@@ -391,13 +399,14 @@ public class alllinker {
 			
 			ArrayList<String> areaOut;
 			
-			if (args.length == 1) {
+	// ag.getArgumentAt
+			if (ag.getArguments().size() == 1) {
 				
 				// get all 3 points from one cluster 
 				
 				HashMap<String,Portal> portals = new HashMap<String,Portal>();
 				
-				portals = pf.portalClusterFromString(args[0]);
+				portals = pf.portalClusterFromString(ag.getArgumentAt(0));
 				
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
@@ -424,11 +433,9 @@ public class alllinker {
 				startTime = System.nanoTime();
 				
 				
-				areaOut = singleCluster(portals, bpl,maxBl);
+				areaOut = singleCluster(portals, bpl,maxBl,dt);
 				
-			}
-			else if (args.length == 2) {
-				
+			} else if (ag.getArguments().size() == 2) { 
 				// one point from one cluster
 				// and the other two points from the other cluster
 				
@@ -436,8 +443,8 @@ public class alllinker {
 				HashMap<String,Portal> portals2 = new HashMap<String,Portal>();
 
 				
-				portals1 = pf.portalClusterFromString(args[0]);
-				portals2 = pf.portalClusterFromString(args[1]);
+				portals1 = pf.portalClusterFromString(ag.getArgumentAt(0));
+				portals2 = pf.portalClusterFromString(ag.getArgumentAt(1));
 				
 				
 				
@@ -482,11 +489,10 @@ public class alllinker {
 				
 				
 				// portals1 and and portals2 is crucial ordering.
-				areaOut = doubleCluster(portals1,portals2,bpl,maxBl);
+				areaOut = doubleCluster(portals1,portals2,bpl,maxBl,dt);
 				
 
-			}
-			else if (args.length == 3) {
+			} else if (ag.getArguments().size() == 3) { 
 				
 				// one point from each cluster
 				
@@ -495,9 +501,9 @@ public class alllinker {
 				HashMap<String,Portal> portals3 = new HashMap<String,Portal>();
 
 				
-				portals1 = pf.portalClusterFromString(args[0]);
-				portals2 = pf.portalClusterFromString(args[1]);
-				portals3 = pf.portalClusterFromString(args[2]);
+				portals1 = pf.portalClusterFromString(ag.getArgumentAt(0));
+				portals2 = pf.portalClusterFromString(ag.getArgumentAt(1));
+				portals3 = pf.portalClusterFromString(ag.getArgumentAt(2));
 
 				 allPortals = new ArrayList<Portal>();
 				
@@ -540,7 +546,7 @@ public class alllinker {
 				startTime = System.nanoTime();
 				
 				
-				areaOut = tripleCluster(portals1,portals2,portals3,bpl,maxBl);
+				areaOut = tripleCluster(portals1,portals2,portals3,bpl,maxBl,dt);
 				
 			} else {
 				throw new RuntimeException("Invalid command line arguments");
