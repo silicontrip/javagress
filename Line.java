@@ -84,15 +84,16 @@ public class Line {
 	private int greaterCircleIntersectType (Line l)
 	{
 	
-		double vx1 = this.getdX() - this.getoX();
-		double vy1 = this.getdY() - this.getoY();
-		double vz1 = this.getdZ() - this.getoZ();
+		double vx1 = this.getdX();
+		double vy1 = this.getdY();
+		double vz1 = this.getdZ();
 		
 
-		double vx2 = l.getdX() - l.getoX();
-		double vy2 = l.getdY() - l.getoY();
-		double vz2 = l.getdZ() - l.getoZ();
+		double vx2 =  this.getoX();
+		double vy2 =  this.getoY();
+		double vz2 =  this.getoZ();
 
+		// cross v1 x v2
 		
 		double l1 = Math.sqrt(vx1 * vx1 + vy1 * vy1 + vz1 * vz1);
 		double l2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
@@ -124,6 +125,64 @@ public class Line {
 		return 1;
 		
 	}
+
+	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+	/*::	This function converts decimal degrees to radians						 :*/
+	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+	private static double deg2rad(double deg) {
+		return (deg * Math.PI / 180.0);
+	}
+
+	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+	/*::	This function converts radians to decimal degrees						 :*/
+	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+	private static double rad2deg(double rad) {
+		return (rad * 180 / Math.PI);
+	}
+
+	private Double getDst() {
+		return 2*Math.asin(Math.sqrt((Math.sin((deg2rad(this.getoLat()-this.getdLat()))/2))^2+ Math.cos(deg2rad(this.getoLat()))*Math.cos(deg2rad(this.getdLat()))*Math.sin(deg2rad(this.getoLng()-this.getdLng())/2)^2));
+	}
+
+	private Double getCrs() {
+
+		Double dst12=this.getDst();
+
+		if (Math.sin(this.getdLng() - this.getoLng())<0)
+			return Math.acos((Math.sin(this.getdLat())-Math.sin(this.getoLat())*Math.cos(dst12))/(Math.sin(dst12)*Math.cos(this.getoLat())));
+		else
+			return 2*Math.PI-Math.acos((Math.sin(this.getdLat())-Math.sin(this.getoLat())*Math.cos(dst12))/(Math.sin(dst12)*Math.cos(this.getoLat())));
+	}
+
+	private Double getRCrs() {
+
+		Double dst12=this.getDst();
+
+		if (Math.sin(this.getdLng() - this.getoLng())<0)
+			return 2*Math.PI-Math.acos((Math.sin(this.getoLat())-Math.sin(this.getdLat())*Math.cos(dst12))/(Math.sin(dst12)*Math.cos(this.getdLat())));
+		else
+			return Math.acos((Math.sin(this.getoLat())-Math.sin(this.getdLat())*Math.cos(dst12))/(Math.sin(dst12)*Math.cos(this.getdLat())));
+	}
+
+	private int greaterCircleIntersectType2(Line l) 
+	{
+
+		Double crs12 = this.getCrs();
+		Double crs21 = this.getRCrs();
+		
+		Double crs13 = l.getCrs();
+		Double crs23 = l.getRCrs();
+
+		Double ang1=(crs13-crs12+Math.pi)-Math.pi;
+		Double ang2=(crs21-crs23+Math.pi)-Math.pi;
+
+		if (Math.sin(ang1)==0 && Math.sin(ang2)==0)
+			return 0; // "infinity of intersections"
+		else if (Math.sin(ang1)*Math.sin(ang2)<0)
+			return 2; //"intersection ambiguous"
+		else
+			return 1;
+	}
 	
 	private int intersectType(Line l)
 	{
@@ -152,7 +211,11 @@ public class Line {
 		return 2; // no intersection
 	}
 		
-	public Boolean intersects(Line l) { return (intersectType(l) == 1);	}
+	public Boolean intersects(Line l) { 
+		System.out.println ("linear intersect: " + intersectType(l));
+		System.out.println ("greater intersect: " + greaterCircleIntersectType(l));
+		return (intersectType(l) == 1);
+	}
 	public Boolean intersectsOrEqual(Line l) { return (intersectType(l) != 2);	}
     public Boolean equalLine(Line l) { return (intersectType(l) == 0);	}
 
