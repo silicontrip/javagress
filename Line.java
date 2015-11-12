@@ -84,45 +84,126 @@ public class Line {
 	private int greaterCircleIntersectType (Line l)
 	{
 	
-		double vx1 = this.getdX();
-		double vy1 = this.getdY();
-		double vz1 = this.getdZ();
+		double x1 = this.getdX();
+		double y1 = this.getdY();
+		double z1 = this.getdZ();
+
+		double x2 =  this.getoX();
+		double y2 =  this.getoY();
+		double z2 =  this.getoZ();
 		
-
-		double vx2 =  this.getoX();
-		double vy2 =  this.getoY();
-		double vz2 =  this.getoZ();
-
 		// cross v1 x v2
+		double vx = y1 * z2 - y2 * z1;
+		double vy = x2 * z1 - x1 * z2;
+		double vz = x1 * y2 - x2 * y1;
+
+		// normalise the vector
+		double vl = Math.sqrt(vx * vx + vy * vy + vz * vz);
+
+		vx = vx / dl;
+		vy = vy / dl;
+		vz = vz / dl;
+
+		x1 = l.getdX();
+		y1 = l.getdY();
+		z1 = l.getdZ();
+
+		x2 = l.getoX();
+		y2 = l.getoY();
+		z2 = l.getoZ();
 		
-		double l1 = Math.sqrt(vx1 * vx1 + vy1 * vy1 + vz1 * vz1);
-		double l2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
+		// cross v1 x v2
+		double ux = y1 * z2 - y2 * z1;
+		double uy = x2 * z1 - x1 * z2;
+		double uz = x1 * y2 - x2 * y1;
+
+		// normalise the vector
+		double el = Math.sqrt(ux * ux + uy * uy + uz * uz);
+
+		ux = ux / el;
+		uy = uy / el;
+		uz = uz / el;
 		
-		double ux1 = vx1 / l1;
-		double uy1 = vy1 / l1;
-		double uz1 = vz1 / l1;
-		
-		double ux2 = vx2 / l2;
-		double uy2 = vy2 / l2;
-		double uz2 = vz2 / l2;
-		
-		
-		if (Math.abs(ux1-ux2) < eps &&
-			Math.abs(uy1-uy2) < eps &&
-			Math.abs(uz1-uz2) < eps )
+		if (Math.abs(ux-vx) < eps &&
+			Math.abs(uy-vy) < eps &&
+			Math.abs(uz-vz) < eps )
 			return 0;
 		
 		
-		// cross product of u1 and u2
-		double dx = uy1 * uz2 - uy2 * uz1;
-		double dy = ux2 * uz1 - ux1 * uz2;
-		double dz = ux1 * uy2 - ux2 * uy1;
+		// cross product of u and v
+		double dx = vy * uz - uy * vz;
+		double dy = ux * vz - vx * uz;
+		double dz = vx * uy - ux * vy;
 		
 		double dl = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-		// errr now what?
+		double sx = dx / dl;
+		double sy = dy / dl;
+		double sz = dz / dl;
+
+		double s1x = -dx / dl;
+		double s1y = -dy / dl;
+		double s1x = -dz / dl;
+
+		//check if s or s1 are on the lines...
+
+		// convert s and s1 to lat lng
+
+		double lat = Math.asin(sz);
+
+		double tmp = Math.cos(lat);
+		double sign = Math.asin(sy/tmp);
+		double lng = Math.acos(sx/tmp) * sign;
+
+		Line os = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, this.getoLat(), this.getoLng());
+		Line ds = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, this.getdLat(), this.getdLng());
+
+		if (os.getGeoDistance() == 0 || ds.getGeoDistance() == 0)
+			return 3;
+	
+		double test1 = this.getGeoDistance() - os.getGeoDistance() - ds.getGeoDistance();	
+
 		
-		return 1;
+
+		Line los = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, l.getoLat(), l.getoLng());
+		Line lds = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, l.getdLat(), l.getdLng());
+
+		if (los.getGeoDistance() == 0 || lds.getGeoDistance() == 0)
+			return 3;
+
+		double test2 = this.getGeoDistance() - los.getGeoDistance() - lds.getGeoDistance();	
+
+		if (test1 == 0 && test2 == 0) 	
+			return 1;
+
+		lat = Math.asin(s1z);
+
+		tmp = Math.cos(lat);
+		sign = Math.asin(s1y/tmp);
+		lng = Math.acos(s1x/tmp) * sign;
+
+		Line os1 = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, this.getoLat(), this.getoLng());
+		Line ds1 = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, this.getdLat(), this.getdLng());
+
+		if (os1.getGeoDistance() == 0 || ds1.getGeoDistance() == 0)
+			return 3;
+	
+		 test1 = this.getGeoDistance() - os1.getGeoDistance() - ds1.getGeoDistance();	
+
+		
+
+		Line los = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, l.getoLat(), l.getoLng());
+		Line lds = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, l.getdLat(), l.getdLng());
+
+		if (los.getGeoDistance() == 0 || lds.getGeoDistance() == 0)
+			return 3;
+
+		double test2 = this.getGeoDistance() - los.getGeoDistance() - lds.getGeoDistance();	
+
+		if (test1 == 0 && test2 == 0) 	
+			return 1;
+
+		return 2;
 		
 	}
 
