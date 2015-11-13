@@ -276,6 +276,8 @@ public class PortalFactory {
 		BufferedReader rd;
 		String line;
 		String result = "";
+
+		System.out.println("get: " +urlString);
 		
 		url = new URL(urlString);
 		
@@ -326,6 +328,7 @@ public class PortalFactory {
 		ArrayList<Link> purgeList = new ArrayList<Link>();
 		
 		// determine bounds
+		// must move this to serverside
 		boolean first = true;
 		for (Portal portal : portals) {
 			
@@ -354,7 +357,7 @@ public class PortalFactory {
 		Line line2 = new Line(maxLat,maxLng, maxLat, minLng);
 		Line line3 = new Line(maxLat, minLng,minLat,minLng);
 		
-		// System.err.println("Bounds: Lat: " + minLat + " - " + maxLat + " Lng: " + minLng + " - " + maxLng);
+		//System.err.println("Bounds: Lat: " + minLat + " - " + maxLat + " Lng: " + minLng + " - " + maxLng);
 		
 		HashMap<String,Link> links = this.getLinks();
 		
@@ -362,6 +365,8 @@ public class PortalFactory {
 		for (Link link: links.values()) {
 			
 			Line linkLine = link.getLine();
+
+		//	System.out.println("link: " + link);
 			
 			// if link intesects or is contained in bounding box
 			if ((line0.intersects(linkLine) ||
