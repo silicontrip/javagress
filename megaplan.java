@@ -72,8 +72,8 @@ public class megaplan {
 				
 				if (thisArea >= maxAreaSmall) {
 					int retval = Double.compare(thisArea, maxAreaSmall);
-					if (retval == 0) { maxArea += 0.01; } else { maxArea = thisArea; }
-					System.out.println( String.format("%.2f",maxArea) + " : " + drawFields(list,dt));
+					if (retval == 0) { maxArea += 0.0001; } else { maxArea = thisArea; }
+					System.out.println( String.format("%.4f",maxArea) + " : " + drawFields(list,dt));
 					System.out.println("");
 				}
 			}
@@ -132,7 +132,7 @@ public class megaplan {
                 blocksPerLink.put(pi,pj,bb);
                 for (Link link: links) {
                     if (l.intersects(link.getLine())) {
-                        //System.out.println("< " + pi  + ":" + pj +  " link: " + blocksPerLink.get(pi,pj));
+                        // System.out.println("< " + pi  + ":" + pj +  " link: " + blocksPerLink.get(pi,pj));
                         blocksPerLink.incTeamEnum(pi,pj,link.getTeamEnum());
                     } else if (l.equalLine(link.getLine())) {
                         blocksPerLink.setExists(pi,pj,true);
@@ -165,22 +165,6 @@ public static void main(String[] args) {
 		dt.setFieldsAsPolygon();
 	
 	
-	// ugly hack to modify args array.s
-/*
-	int newLength =args.length ;
-	for (int c=0; c<args.length; c++)
-	{
-		if (args[c] == null) {
-			newLength = c;
-			c = args.length;
-		}
-	}
-	
-	
-	String[] newArgs = new String[newLength];
-	System.arraycopy (args,0,newArgs,0,newLength);
-	args = newArgs;
-*/	
     try {
         PortalFactory pf = PortalFactory.getInstance();
         
@@ -201,8 +185,10 @@ public static void main(String[] args) {
 		allPortals.putAll(portals2);
 		allPortals.putAll(portals3);
 
+        System.err.println("== Reading links ==");
 		ArrayList<Link> links = pf.getPurgedLinks(allPortals.values());
 
+        System.err.println("== Getting Blocks ==");
         BlockList bl = getLinkBlockersSingle(allPortals.values().toArray(), links);
         
         // remove proposed links that exceed our maximum blockers
