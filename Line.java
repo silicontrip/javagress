@@ -1,3 +1,4 @@
+import javax.vecmath.Vector3d;
 public class Line {
 
 	Long oLat;
@@ -24,13 +25,16 @@ public class Line {
 	public Double getdLatAsDouble() { return new Double(dLat); }
 	public Double getdLngAsDouble() { return new Double(dLng); }
 
+	public Vector3d getoVect() { return new Vector3d(getoX(),getoY(),getoZ()); }
+	public Vector3d getdVect() { return new Vector3d(getdX(),getdY(),getdZ()); }
+	
 	public double getoX() { return Math.cos(Math.toRadians(oLat)) * Math.cos(Math.toRadians(oLng)); }
 	public double getoY() { return Math.cos(Math.toRadians(oLat)) * Math.sin(Math.toRadians(oLng)); }
 	public double getoZ() { return Math.sin(Math.toRadians(oLat)); }
 
-	public double getdX() { return Math.cos(Math.toRadians(oLat)) * Math.cos(Math.toRadians(oLng)); }
-	public double getdY() { return Math.cos(Math.toRadians(oLat)) * Math.sin(Math.toRadians(oLng)); }
-	public double getdZ() { return Math.sin(Math.toRadians(oLat)); }
+	public double getdX() { return Math.cos(Math.toRadians(dLat)) * Math.cos(Math.toRadians(dLng)); }
+	public double getdY() { return Math.cos(Math.toRadians(dLat)) * Math.sin(Math.toRadians(dLng)); }
+	public double getdZ() { return Math.sin(Math.toRadians(dLat)); }
 
 	
 	public void setoLat(Long l) { oLat=l; }
@@ -81,16 +85,22 @@ public class Line {
 	
 	
 	// looks like I need a 3d point class
-	private int greaterCircleIntersectType (Line l)
+	public int greaterCircleIntersectType (Line l)
 	{
-	
-		double x1 = this.getdX();
-		double y1 = this.getdY();
-		double z1 = this.getdZ();
 
-		double x2 =  this.getoX();
-		double y2 =  this.getoY();
-		double z2 =  this.getoZ();
+		double x1,y1,z1,x2,y2,z2;
+		double ll;
+	
+		x1 = this.getdX();
+		y1 = this.getdY();
+		z1 = this.getdZ();
+
+		//System.out.println ("PD: " + x1 + ", " +y1+", " + z1);
+
+		x2 =  this.getoX();
+		y2 =  this.getoY();
+		z2 =  this.getoZ();
+		//System.out.println ("OD: " + x2 + ", " +y2+", " + z2);
 		
 		// cross v1 x v2
 		double vx = y1 * z2 - y2 * z1;
@@ -98,11 +108,17 @@ public class Line {
 		double vz = x1 * y2 - x2 * y1;
 
 		// normalise the vector
-		double vl = Math.sqrt(vx * vx + vy * vy + vz * vz);
+		ll = Math.sqrt(vx * vx + vy * vy + vz * vz);
 
-		vx = vx / dl;
-		vy = vy / dl;
-		vz = vz / dl;
+		vx = vx / ll;
+		vy = vy / ll;
+		vz = vz / ll;
+
+		Vector3d V = new Vector3d();
+		V.cross( this.getoVect(),this.getdVect());
+		V.normalize();
+
+		System.out.println ("norm V: " + vx + ", " +vy+", " + vz);
 
 		x1 = l.getdX();
 		y1 = l.getdY();
@@ -117,13 +133,18 @@ public class Line {
 		double uy = x2 * z1 - x1 * z2;
 		double uz = x1 * y2 - x2 * y1;
 
-		// normalise the vector
-		double el = Math.sqrt(ux * ux + uy * uy + uz * uz);
 
-		ux = ux / el;
-		uy = uy / el;
-		uz = uz / el;
+		// normalise the vector
+		ll = Math.sqrt(ux * ux + uy * uy + uz * uz);
+
+		ux = ux / ll;
+		uy = uy / ll;
+		uz = uz / ll;
 		
+		System.out.println ("norm U: " + ux + ", " +uy+", " + uz);
+
+		// lines equal
+		// this bombs out earlier if they are equal as the |cross product| == 0
 		if (Math.abs(ux-vx) < eps &&
 			Math.abs(uy-vy) < eps &&
 			Math.abs(uz-vz) < eps )
@@ -134,72 +155,92 @@ public class Line {
 		double dx = vy * uz - uy * vz;
 		double dy = ux * vz - vx * uz;
 		double dz = vx * uy - ux * vy;
+
+		System.out.println ("D: " + dx + ", " +dy+", " + dz);
 		
-		double dl = Math.sqrt(dx * dx + dy * dy + dz * dz);
+		ll = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-		double sx = dx / dl;
-		double sy = dy / dl;
-		double sz = dz / dl;
+		double sx = dx / ll;
+		double sy = dy / ll;
+		double sz = dz / ll;
 
-		double s1x = -dx / dl;
-		double s1y = -dy / dl;
-		double s1x = -dz / dl;
+		double s1x = -dx / ll;
+		double s1y = -dy / ll;
+		double s1z = -dz / ll;
 
 		//check if s or s1 are on the lines...
 
 		// convert s and s1 to lat lng
 
-		double lat = Math.asin(sz);
+		System.out.println ("S: " + sx + ", " +sy+", " + sz);
 
+		double lat = Math.asin(sz);
 		double tmp = Math.cos(lat);
 		double sign = Math.asin(sy/tmp);
 		double lng = Math.acos(sx/tmp) * sign;
 
-		Line os = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, this.getoLat(), this.getoLng());
-		Line ds = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, this.getdLat(), this.getdLng());
+		System.out.println ("lat " + lat + " tmp " + tmp + " sign " + sign + " long " + lng);
+
+
+		Long latd = new Double(lat / Math.PI * 180 * 1000000).longValue();
+		Long lngd = new Double(lng / Math.PI * 180 * 1000000).longValue();
+
+		System.out.println("intersect at: " + latd + ", " + lngd);
+
+		Line os = new Line(latd , lngd, this.getoLat(), this.getoLng());
+		Line ds = new Line(latd , lngd, this.getdLat(), this.getdLng());
+
+		System.out.println ( "distance: " + os.getGeoDistance() + " " + ds.getGeoDistance());
 
 		if (os.getGeoDistance() == 0 || ds.getGeoDistance() == 0)
 			return 3;
 	
 		double test1 = this.getGeoDistance() - os.getGeoDistance() - ds.getGeoDistance();	
 
-		
+		Line los = new Line(latd  , lngd , l.getoLat(), l.getoLng());
+		Line lds = new Line(latd , lngd , l.getdLat(), l.getdLng());
 
-		Line los = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, l.getoLat(), l.getoLng());
-		Line lds = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, l.getdLat(), l.getdLng());
-
+		System.out.println ( "l distance: " + los.getGeoDistance() + " " + lds.getGeoDistance());
 		if (los.getGeoDistance() == 0 || lds.getGeoDistance() == 0)
 			return 3;
 
 		double test2 = this.getGeoDistance() - los.getGeoDistance() - lds.getGeoDistance();	
+
+		System.out.println ("test: " + test1 + " " + test2);
 
 		if (test1 == 0 && test2 == 0) 	
 			return 1;
 
 		lat = Math.asin(s1z);
-
 		tmp = Math.cos(lat);
 		sign = Math.asin(s1y/tmp);
 		lng = Math.acos(s1x/tmp) * sign;
+		latd = new Double(lat / Math.PI * 180 * 1000000).longValue();
+		lngd = new Double(lng / Math.PI * 180 * 1000000).longValue();
 
-		Line os1 = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, this.getoLat(), this.getoLng());
-		Line ds1 = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, this.getdLat(), this.getdLng());
+		System.out.println("intersect at: " + latd + ", " + lngd);
 
-		if (os1.getGeoDistance() == 0 || ds1.getGeoDistance() == 0)
+		Line os2 = new Line(latd, lngd, this.getoLat(), this.getoLng());
+		Line ds2 = new Line(latd , lngd, this.getdLat(), this.getdLng());
+
+		System.out.println ( "distance 2: " + os2.getGeoDistance() + " " + ds2.getGeoDistance());
+		if (os2.getGeoDistance() == 0 || ds2.getGeoDistance() == 0)
 			return 3;
 	
-		 test1 = this.getGeoDistance() - os1.getGeoDistance() - ds1.getGeoDistance();	
+		test1 = this.getGeoDistance() - os2.getGeoDistance() - ds2.getGeoDistance();	
 
 		
 
-		Line los = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, l.getoLat(), l.getoLng());
-		Line lds = new Line(lat / Math.PI * 180 * 1000000 , lng / Math.PI * 180 * 1000000, l.getdLat(), l.getdLng());
+		Line los2 = new Line(latd , lngd, l.getoLat(), l.getoLng());
+		Line lds2 = new Line(latd , lngd, l.getdLat(), l.getdLng());
 
-		if (los.getGeoDistance() == 0 || lds.getGeoDistance() == 0)
+		System.out.println ( "l distance 2: " + los2.getGeoDistance() + " " + lds2.getGeoDistance());
+		if (los2.getGeoDistance() == 0 || lds2.getGeoDistance() == 0)
 			return 3;
 
-		double test2 = this.getGeoDistance() - los.getGeoDistance() - lds.getGeoDistance();	
+		test2 = this.getGeoDistance() - los2.getGeoDistance() - lds2.getGeoDistance();	
 
+		System.out.println ("test 2: " + test1 + " " + test2);
 		if (test1 == 0 && test2 == 0) 	
 			return 1;
 
@@ -207,64 +248,6 @@ public class Line {
 		
 	}
 
-	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	/*::	This function converts decimal degrees to radians						 :*/
-	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	private static double deg2rad(double deg) {
-		return (deg * Math.PI / 180.0);
-	}
-
-	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	/*::	This function converts radians to decimal degrees						 :*/
-	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	private static double rad2deg(double rad) {
-		return (rad * 180 / Math.PI);
-	}
-
-	private Double getDst() {
-		return 2*Math.asin(Math.sqrt((Math.sin((deg2rad(this.getoLat()-this.getdLat()))/2))^2+ Math.cos(deg2rad(this.getoLat()))*Math.cos(deg2rad(this.getdLat()))*Math.sin(deg2rad(this.getoLng()-this.getdLng())/2)^2));
-	}
-
-	private Double getCrs() {
-
-		Double dst12=this.getDst();
-
-		if (Math.sin(this.getdLng() - this.getoLng())<0)
-			return Math.acos((Math.sin(this.getdLat())-Math.sin(this.getoLat())*Math.cos(dst12))/(Math.sin(dst12)*Math.cos(this.getoLat())));
-		else
-			return 2*Math.PI-Math.acos((Math.sin(this.getdLat())-Math.sin(this.getoLat())*Math.cos(dst12))/(Math.sin(dst12)*Math.cos(this.getoLat())));
-	}
-
-	private Double getRCrs() {
-
-		Double dst12=this.getDst();
-
-		if (Math.sin(this.getdLng() - this.getoLng())<0)
-			return 2*Math.PI-Math.acos((Math.sin(this.getoLat())-Math.sin(this.getdLat())*Math.cos(dst12))/(Math.sin(dst12)*Math.cos(this.getdLat())));
-		else
-			return Math.acos((Math.sin(this.getoLat())-Math.sin(this.getdLat())*Math.cos(dst12))/(Math.sin(dst12)*Math.cos(this.getdLat())));
-	}
-
-	private int greaterCircleIntersectType2(Line l) 
-	{
-
-		Double crs12 = this.getCrs();
-		Double crs21 = this.getRCrs();
-		
-		Double crs13 = l.getCrs();
-		Double crs23 = l.getRCrs();
-
-		Double ang1=(crs13-crs12+Math.pi)-Math.pi;
-		Double ang2=(crs21-crs23+Math.pi)-Math.pi;
-
-		if (Math.sin(ang1)==0 && Math.sin(ang2)==0)
-			return 0; // "infinity of intersections"
-		else if (Math.sin(ang1)*Math.sin(ang2)<0)
-			return 2; //"intersection ambiguous"
-		else
-			return 1;
-	}
-	
 	private int intersectType(Line l)
 	{
 		//  System.out.println ( this.getoLat() + "," + this.getoLng() + " - " + this.getdLat() + "," + this.getdLng());
@@ -293,9 +276,16 @@ public class Line {
 	}
 		
 	public Boolean intersects(Line l) { 
-		System.out.println ("linear intersect: " + intersectType(l));
-		System.out.println ("greater intersect: " + greaterCircleIntersectType(l));
-		return (intersectType(l) == 1);
+
+		int i = intersectType(l);
+		int gi = greaterCircleIntersectType(l);
+
+		if ( i != gi ) {
+			System.out.println ("linear intersect: " + intersectType(l));
+			System.out.println ("greater intersect: " + greaterCircleIntersectType(l));
+		}
+		// reall would like some unit tests now.
+		return (i == 1);
 	}
 	public Boolean intersectsOrEqual(Line l) { return (intersectType(l) != 2);	}
     public Boolean equalLine(Line l) { return (intersectType(l) == 0);	}
