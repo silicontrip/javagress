@@ -55,6 +55,14 @@ public class DrawTools {
 
 	public void setDefaultColour(String c) { colour = c; }
 
+
+	public void addLine (Line l) {
+		Polyline pg = new Polyline();
+		pg.addPoint(new PolyPoint(l.getoLat()/1000000.0,l.getoLng()/1000000.0));
+		pg.addPoint(new PolyPoint(l.getdLat()/1000000.0,l.getdLng()/1000000.0));
+		pg.setColour(colour);
+		entities.add(pg);
+	}	
 	
 	public void addField (Field f) 
 	{

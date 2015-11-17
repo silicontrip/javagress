@@ -85,7 +85,7 @@ public class maxfields {
 				// we want to maximise number of fields
 				Double thisArea = new Double(list.size());
 				
-				if (thisArea > maxArea) {
+				if (thisArea >= maxArea) {
 					System.out.println(thisArea + " : " + drawFields(list));
 					System.out.println("");
 					maxArea = thisArea;

@@ -1,3 +1,4 @@
+import com.google.common.geometry.*;
 public class Line {
 
 	Long oLat;
@@ -8,7 +9,7 @@ public class Line {
 	public static Double earthRadius = 6371.0;
 	
 	// close to zero threshold
-	final static  double eps = 0.001;
+	final static  double eps = 1E-9;
 
 
 	public Long getdLat() { return dLat; }
@@ -24,13 +25,16 @@ public class Line {
 	public Double getdLatAsDouble() { return new Double(dLat); }
 	public Double getdLngAsDouble() { return new Double(dLng); }
 
+	public S2Point getoVect() { return new S2Point(getoX(),getoY(),getoZ()); }
+	public S2Point getdVect() { return new S2Point(getdX(),getdY(),getdZ()); }
+	
 	public double getoX() { return Math.cos(Math.toRadians(oLat)) * Math.cos(Math.toRadians(oLng)); }
 	public double getoY() { return Math.cos(Math.toRadians(oLat)) * Math.sin(Math.toRadians(oLng)); }
 	public double getoZ() { return Math.sin(Math.toRadians(oLat)); }
 
-	public double getdX() { return Math.cos(Math.toRadians(oLat)) * Math.cos(Math.toRadians(oLng)); }
-	public double getdY() { return Math.cos(Math.toRadians(oLat)) * Math.sin(Math.toRadians(oLng)); }
-	public double getdZ() { return Math.sin(Math.toRadians(oLat)); }
+	public double getdX() { return Math.cos(Math.toRadians(dLat)) * Math.cos(Math.toRadians(dLng)); }
+	public double getdY() { return Math.cos(Math.toRadians(dLat)) * Math.sin(Math.toRadians(dLng)); }
+	public double getdZ() { return Math.sin(Math.toRadians(dLat)); }
 
 	
 	public void setoLat(Long l) { oLat=l; }
@@ -80,51 +84,41 @@ public class Line {
 	}
 	
 	
-	// looks like I need a 3d point class
-	private int greaterCircleIntersectType (Line l)
+	public int greaterCircleIntersectType (Line l)
 	{
-	
-		double vx1 = this.getdX() - this.getoX();
-		double vy1 = this.getdY() - this.getoY();
-		double vz1 = this.getdZ() - this.getoZ();
-		
 
-		double vx2 = l.getdX() - l.getoX();
-		double vy2 = l.getdY() - l.getoY();
-		double vz2 = l.getdZ() - l.getoZ();
+		S2Point a = this.getoVect();
+		S2Point b = this.getdVect();
+		S2Point c = l.getoVect();
+		S2Point d = l.getdVect();
 
-		
-		double l1 = Math.sqrt(vx1 * vx1 + vy1 * vy1 + vz1 * vz1);
-		double l2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
-		
-		double ux1 = vx1 / l1;
-		double uy1 = vy1 / l1;
-		double uz1 = vz1 / l1;
-		
-		double ux2 = vx2 / l2;
-		double uy2 = vy2 / l2;
-		double uz2 = vz2 / l2;
-		
-		
-		if (Math.abs(ux1-ux2) < eps &&
-			Math.abs(uy1-uy2) < eps &&
-			Math.abs(uz1-uz2) < eps )
-			return 0;
-		
-		
-		// cross product of u1 and u2
-		double dx = uy1 * uz2 - uy2 * uz1;
-		double dy = ux2 * uz1 - ux1 * uz2;
-		double dz = ux1 * uy2 - ux2 * uy1;
-		
-		double dl = Math.sqrt(dx * dx + dy * dy + dz * dz);
+		S2Point abx = S2Point.crossProd(a,b);
+		S2Point cdx = S2Point.crossProd(c,d);
 
-		// errr now what?
-		
-		return 1;
+		S2Point t = S2Point.normalize(S2Point.crossProd(abx,cdx));
+
+		double s0 = S2Point.crossProd(abx,a).dotProd(t);
+		double s1 = S2Point.crossProd(b,abx).dotProd(t);
+		double s2 = S2Point.crossProd(cdx,c).dotProd(t);
+		double s3 = S2Point.crossProd(d,cdx).dotProd(t);
+
+		System.out.println("Signs: " + s0 + " " + s1 + " " + s2 + " " + s3 );
+
+		System.out.println ("simpleCrossing: " + S2EdgeUtil.simpleCrossing(a,b,c,d));
+		System.out.println ("vertexCrossing: " + S2EdgeUtil.vertexCrossing(a,b,c,d));
+		System.out.println ("smartCrossing: " + S2EdgeUtil.edgeOrVertexCrossing(a,b,c,d));
+		//System.out.println ("intersect: " + S2EdgeUtil.getIntersection(a,b,c,d));
+		int cross = S2EdgeUtil.robustCrossing(a,b,c,d);
+
+		if (cross==-1)
+			return 2;
+
+		// test for touching lines.
+
+		return cross;
 		
 	}
-	
+
 	private int intersectType(Line l)
 	{
 		//  System.out.println ( this.getoLat() + "," + this.getoLng() + " - " + this.getdLat() + "," + this.getdLng());
@@ -152,7 +146,25 @@ public class Line {
 		return 2; // no intersection
 	}
 		
-	public Boolean intersects(Line l) { return (intersectType(l) == 1);	}
+	public Boolean intersects(Line l) { 
+
+		DrawTools dt = new DrawTools();
+		//dt.addLine(this);
+		//dt.addLine(l);
+
+		int i = intersectType(l);
+		int gi = greaterCircleIntersectType(l);
+
+		if ( i != gi ) {
+                        dt.addLine(this);
+                        dt.addLine(l);
+                        System.out.println (dt.out());
+
+			System.out.println ("linear intersect: " + intersectType(l) + " greater intersect: " + greaterCircleIntersectType(l));
+		}
+		// really would like some unit tests now.
+		return (gi == 1);
+	}
 	public Boolean intersectsOrEqual(Line l) { return (intersectType(l) != 2);	}
     public Boolean equalLine(Line l) { return (intersectType(l) == 0);	}
 
