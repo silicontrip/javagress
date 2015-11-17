@@ -1,4 +1,4 @@
-import javax.vecmath.Vector3d;
+import com.google.common.geometry.*;
 public class Line {
 
 	Long oLat;
@@ -9,7 +9,7 @@ public class Line {
 	public static Double earthRadius = 6371.0;
 	
 	// close to zero threshold
-	final static  double eps = 1E-10;
+	final static  double eps = 1E-9;
 
 
 	public Long getdLat() { return dLat; }
@@ -25,8 +25,8 @@ public class Line {
 	public Double getdLatAsDouble() { return new Double(dLat); }
 	public Double getdLngAsDouble() { return new Double(dLng); }
 
-	public Vector3d getoVect() { return new Vector3d(getoX(),getoY(),getoZ()); }
-	public Vector3d getdVect() { return new Vector3d(getdX(),getdY(),getdZ()); }
+	public S2Point getoVect() { return new S2Point(getoX(),getoY(),getoZ()); }
+	public S2Point getdVect() { return new S2Point(getdX(),getdY(),getdZ()); }
 	
 	public double getoX() { return Math.cos(Math.toRadians(oLat)) * Math.cos(Math.toRadians(oLng)); }
 	public double getoY() { return Math.cos(Math.toRadians(oLat)) * Math.sin(Math.toRadians(oLng)); }
@@ -87,87 +87,35 @@ public class Line {
 	public int greaterCircleIntersectType (Line l)
 	{
 
-		Vector3d p0 = this.getoVect();
-		Vector3d p1 = this.getdVect();
-		Vector3d p2 = l.getoVect();
-		Vector3d p3 = l.getdVect();
+		S2Point a = this.getoVect();
+		S2Point b = this.getdVect();
+		S2Point c = l.getoVect();
+		S2Point d = l.getdVect();
 
-		Vector3d V = new Vector3d();
-		V.cross(p0,p1);
-		V.normalize();
+		S2Point abx = S2Point.crossProd(a,b);
+		S2Point cdx = S2Point.crossProd(c,d);
 
-		Vector3d U = new Vector3d();
-		U.cross(p2,p3);
-		U.normalize();
+		S2Point t = S2Point.normalize(S2Point.crossProd(abx,cdx));
 
-		Vector3d D = new Vector3d();
-		D.cross( V, U );
-		if (D.length() == 0)
-			return 0; // equal
-		D.normalize();
-		
-				
-		Vector3d S1 = new Vector3d();
-		Vector3d S2 = new Vector3d();
-		Vector3d S3 = new Vector3d();
-		Vector3d S4 = new Vector3d();
+		double s0 = S2Point.crossProd(abx,a).dotProd(t);
+		double s1 = S2Point.crossProd(b,abx).dotProd(t);
+		double s2 = S2Point.crossProd(cdx,c).dotProd(t);
+		double s3 = S2Point.crossProd(d,cdx).dotProd(t);
 
-		S1.cross(p0,V);
-		S2.cross(p1,V);
-		S3.cross(p2,U);
-		S4.cross(p3,U);
+		System.out.println("Signs: " + s0 + " " + s1 + " " + s2 + " " + s3 );
 
-		double sign1 = -S1.dot(D);
-		double sign2 = S2.dot(D);
-		double sign3 = -S3.dot(D);
-		double sign4 = S4.dot(D);
+		System.out.println ("simpleCrossing: " + S2EdgeUtil.simpleCrossing(a,b,c,d));
+		System.out.println ("vertexCrossing: " + S2EdgeUtil.vertexCrossing(a,b,c,d));
+		System.out.println ("smartCrossing: " + S2EdgeUtil.edgeOrVertexCrossing(a,b,c,d));
+		//System.out.println ("intersect: " + S2EdgeUtil.getIntersection(a,b,c,d));
+		int cross = S2EdgeUtil.robustCrossing(a,b,c,d);
 
-		System.out.println("SIGNS: " +sign1 + " " + sign2 + " " + sign3 + " " + sign4);
+		if (cross==-1)
+			return 2;
 
-		int zeros =0, pos=0, neg=0;
-		if (Math.abs(sign1) <= eps) 
-			zeros++;
-		else if (sign1>0) 
-			pos++;
-		else 
-			neg++;
-		if (Math.abs(sign2) <= eps) 
-			zeros++;
-		else if (sign2>0) 
-			pos++;
-		else 
-			neg++;
-		if (Math.abs(sign3) <= eps) 
-			zeros++;
-		else if (sign3>0) 
-			pos++;
-		else 
-			neg++;
-		if (Math.abs(sign4) <= eps) 
-			zeros++;
-		else if (sign4>0) 
-			pos++;
-		else 
-			neg++;
-	
+		// test for touching lines.
 
-	// haven't tested all conditions
-		if ( zeros == 2 && (neg==2 || pos ==2))
-		{
-			/*
-			DrawTools dt = new DrawTools();
-			dt.addLine(this);
-			dt.addLine(l);
-			System.out.println (dt.out());
-			System.out.println("WARNING Signs: " +sign1 + " " + sign2 + " " + sign3 + " " + sign4);
-*/
-			return 3; //intersect with touch
-		}
-
-		if (neg==4 || pos == 4)
-			return 1;
-
-		return 2;
+		return cross;
 		
 	}
 
