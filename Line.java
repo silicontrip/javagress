@@ -28,13 +28,13 @@ public class Line {
 	public Vector3d getoVect() { return new Vector3d(getoX(),getoY(),getoZ()); }
 	public Vector3d getdVect() { return new Vector3d(getdX(),getdY(),getdZ()); }
 	
-	public double getoX() { return Math.cos(Math.toRadians(oLat)) * Math.cos(Math.toRadians(oLng)); }
-	public double getoY() { return Math.cos(Math.toRadians(oLat)) * Math.sin(Math.toRadians(oLng)); }
-	public double getoZ() { return Math.sin(Math.toRadians(oLat)); }
+	public double getoX() { return Math.cos(Math.toRadians(oLat/1000000.0)) * Math.cos(Math.toRadians(oLng/1000000.0)); }
+	public double getoY() { return Math.cos(Math.toRadians(oLat/1000000.0)) * Math.sin(Math.toRadians(oLng/1000000.0)); }
+	public double getoZ() { return Math.sin(Math.toRadians(oLat/1000000.0)); }
 
-	public double getdX() { return Math.cos(Math.toRadians(dLat)) * Math.cos(Math.toRadians(dLng)); }
-	public double getdY() { return Math.cos(Math.toRadians(dLat)) * Math.sin(Math.toRadians(dLng)); }
-	public double getdZ() { return Math.sin(Math.toRadians(dLat)); }
+	public double getdX() { return Math.cos(Math.toRadians(dLat/1000000.0)) * Math.cos(Math.toRadians(dLng/1000000.0)); }
+	public double getdY() { return Math.cos(Math.toRadians(dLat/1000000.0)) * Math.sin(Math.toRadians(dLng/1000000.0)); }
+	public double getdZ() { return Math.sin(Math.toRadians(dLat/1000000.0)); }
 
 	
 	public void setoLat(Long l) { oLat=l; }
@@ -122,53 +122,39 @@ public class Line {
 		double sign3 = -S3.dot(D);
 		double sign4 = S4.dot(D);
 
-		System.out.println("SIGNS: " +sign1 + " " + sign2 + " " + sign3 + " " + sign4);
+		//System.out.println("Signs: " + s0 + " " + s1 + " " + s2 + " " + s3 );
 
-		int zeros =0, pos=0, neg=0;
-		if (Math.abs(sign1) <= eps) 
-			zeros++;
-		else if (sign1>0) 
-			pos++;
-		else 
-			neg++;
-		if (Math.abs(sign2) <= eps) 
-			zeros++;
-		else if (sign2>0) 
-			pos++;
-		else 
-			neg++;
-		if (Math.abs(sign3) <= eps) 
-			zeros++;
-		else if (sign3>0) 
-			pos++;
-		else 
-			neg++;
-		if (Math.abs(sign4) <= eps) 
-			zeros++;
-		else if (sign4>0) 
-			pos++;
-		else 
-			neg++;
-	
+		int count=0,zero=0;
 
-	// haven't tested all conditions
-		if ( zeros == 2 && (neg==2 || pos ==2))
-		{
-			/*
-			DrawTools dt = new DrawTools();
-			dt.addLine(this);
-			dt.addLine(l);
-			System.out.println (dt.out());
-			System.out.println("WARNING Signs: " +sign1 + " " + sign2 + " " + sign3 + " " + sign4);
-*/
-			return 3; //intersect with touch
-		}
+		if (Math.abs(s0) < eps) 
+			zero++; 
+		else 
+			count += Math.signum(s0);
+		if (Math.abs(s1) < eps) 
+			zero++; 	
+		else 
+			count += Math.signum(s1);
+		if (Math.abs(s2) < eps) 
+			zero++; 
+		else 
+			count += Math.signum(s2);
 
-		if (neg==4 || pos == 4)
+		if (Math.abs(s3) < eps) 
+			zero++; 
+		else 
+			count += Math.signum(s3);
+
+		if (count == -4 || count == 4)
 			return 1;
 
+		if (zero==4)
+			return 0;
+
+		if (zero > 0)
+			return 3;
+
 		return 2;
-		
+
 	}
 
 	private int intersectType(Line l)
@@ -184,7 +170,7 @@ public class Line {
 		// i assume this means that the two lines are the same
 		// means that a link already exists.
 		
-		if (base == 0) { return 0; } // equal
+		if (base == 0) { return 0; } // equal or paralell
 		
 		Double s = ((-s1.getLat().longValue()) * (this.getoLng().longValue() - l.getoLng().longValue()) + s1.getLng().longValue() * (this.getoLat().longValue() - l.getoLat().longValue())) / ( base * 1.0);
 		Double t = (s2.getLng().longValue() * (this.getoLat().longValue() -l.getoLat().longValue()) - s2.getLat().longValue() * (this.getoLng().longValue() -l.getoLng().longValue())) / ( base * 1.0);
@@ -193,7 +179,7 @@ public class Line {
 		
 		// don't care if the end points touch
 		if (s > 0 && s < 1 && t > 0 && t < 1) { return 1; } // intersects without touching
-		// if (s >= 0 && s <= 1 && t >= 0 && t <= 1) { return 3; } // intersects with touching
+		if (s >= 0 && s <= 1 && t >= 0 && t <= 1) { return 3; } // intersects with touching
 
 		return 2; // no intersection
 	}
@@ -204,9 +190,10 @@ public class Line {
 		//dt.addLine(this);
 		//dt.addLine(l);
 
-		int i = intersectType(l);
+		//int i = intersectType(l);
 		int gi = greaterCircleIntersectType(l);
 
+	/*
 		if ( i != gi ) {
                         dt.addLine(this);
                         dt.addLine(l);
@@ -214,6 +201,7 @@ public class Line {
 
 			System.out.println ("linear intersect: " + intersectType(l) + " greater intersect: " + greaterCircleIntersectType(l));
 		}
+	*/
 		// really would like some unit tests now.
 		return (gi == 1);
 	}
