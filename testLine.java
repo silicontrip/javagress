@@ -12,6 +12,10 @@ public static void main(String[] args) {
 	Line l7 = new Line (0L,180000000L,-45000000L,180000000L);
 
 
+	Line l8 = new Line ( -37876987L,145287126L , -37839598L,145287126L);
+	Line l9 = new Line (-37816232L,145192321L,-37816784L,145192659L);
+
+
 	//intersects
 	System.out.println ("1==" +l1.greaterCircleIntersectType(l2));
 	// not intersects
@@ -24,6 +28,12 @@ public static void main(String[] args) {
 	// touches at middle
 	System.out.println ("3==" +l6.greaterCircleIntersectType(l7));
 	System.out.println ("3==" +l7.greaterCircleIntersectType(l6));
+
+	DrawTools dt = new DrawTools();
+	dt.addLine(l8);
+	dt.addLine(l9);
+	System.out.println(dt.out());
+	System.out.println ("2==" +l9.greaterCircleIntersectType(l8));
 
 
 }
