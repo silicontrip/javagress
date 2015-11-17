@@ -1,5 +1,12 @@
 class testLine {
 
+public static void print(Line a, Line b) 
+{
+	DrawTools dt = new DrawTools();
+	dt.addLine(a);
+	dt.addLine(b);
+	System.out.println(dt.out());
+}
 public static void main(String[] args) {
 
 	Line l1 = new Line (-37000000L,144500000L,-37000000L,145500000L);
@@ -17,22 +24,24 @@ public static void main(String[] args) {
 
 
 	//intersects
+	print(l1,l2);
 	System.out.println ("1==" +l1.greaterCircleIntersectType(l2));
 	// not intersects
+	print(l1,l3);
 	System.out.println ("2==" +l1.greaterCircleIntersectType(l3));
 	// equal
+	print(l1,l4);
 	System.out.println ("0==" +l1.greaterCircleIntersectType(l4));
 	// touches at end
+	print(l1,l5);
 	System.out.println ("3==" +l1.greaterCircleIntersectType(l5));
 	System.out.println ("3==" +l5.greaterCircleIntersectType(l1));
 	// touches at middle
+	print(l6,l7);
 	System.out.println ("3==" +l6.greaterCircleIntersectType(l7));
 	System.out.println ("3==" +l7.greaterCircleIntersectType(l6));
 
-	DrawTools dt = new DrawTools();
-	dt.addLine(l8);
-	dt.addLine(l9);
-	System.out.println(dt.out());
+	print(l8,l9);
 	System.out.println ("2==" +l9.greaterCircleIntersectType(l8));
 
 

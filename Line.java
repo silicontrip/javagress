@@ -27,14 +27,22 @@ public class Line {
 
 	public S2Point getoVect() { return new S2Point(getoX(),getoY(),getoZ()); }
 	public S2Point getdVect() { return new S2Point(getdX(),getdY(),getdZ()); }
-	
-	public double getoX() { return Math.cos(Math.toRadians(oLat)) * Math.cos(Math.toRadians(oLng)); }
-	public double getoY() { return Math.cos(Math.toRadians(oLat)) * Math.sin(Math.toRadians(oLng)); }
-	public double getoZ() { return Math.sin(Math.toRadians(oLat)); }
+ /*
+	public S2Point getNormVect() { 
 
-	public double getdX() { return Math.cos(Math.toRadians(dLat)) * Math.cos(Math.toRadians(dLng)); }
-	public double getdY() { return Math.cos(Math.toRadians(dLat)) * Math.sin(Math.toRadians(dLng)); }
-	public double getdZ() { return Math.sin(Math.toRadians(dLat)); }
+		return new S2Point(
+			Math.sin(
+
+	}
+*/
+	
+	public double getoX() { return Math.cos(Math.toRadians(oLat/1000000.0)) * Math.cos(Math.toRadians(oLng/1000000.0)); }
+	public double getoY() { return Math.cos(Math.toRadians(oLat/1000000.0)) * Math.sin(Math.toRadians(oLng/1000000.0)); }
+	public double getoZ() { return Math.sin(Math.toRadians(oLat/1000000.0)); }
+
+	public double getdX() { return Math.cos(Math.toRadians(dLat/1000000.0)) * Math.cos(Math.toRadians(dLng/1000000.0)); }
+	public double getdY() { return Math.cos(Math.toRadians(dLat/1000000.0)) * Math.sin(Math.toRadians(dLng/1000000.0)); }
+	public double getdZ() { return Math.sin(Math.toRadians(dLat/1000000.0)); }
 
 	
 	public void setoLat(Long l) { oLat=l; }
@@ -92,6 +100,9 @@ public class Line {
 		S2Point c = l.getoVect();
 		S2Point d = l.getdVect();
 
+
+		//System.out.println("" + getoLat() + ", " + getoLng() + ": " + getdLat() + ", " + getdLng());
+
 		S2Point abx = S2Point.crossProd(a,b);
 		S2Point cdx = S2Point.crossProd(c,d);
 
@@ -102,20 +113,53 @@ public class Line {
 		double s2 = S2Point.crossProd(cdx,c).dotProd(t);
 		double s3 = S2Point.crossProd(d,cdx).dotProd(t);
 
-		System.out.println("Signs: " + s0 + " " + s1 + " " + s2 + " " + s3 );
+		//System.out.println("Signs: " + s0 + " " + s1 + " " + s2 + " " + s3 );
 
-		System.out.println ("simpleCrossing: " + S2EdgeUtil.simpleCrossing(a,b,c,d));
-		System.out.println ("vertexCrossing: " + S2EdgeUtil.vertexCrossing(a,b,c,d));
-		System.out.println ("smartCrossing: " + S2EdgeUtil.edgeOrVertexCrossing(a,b,c,d));
+		int count=0,zero=0;
+
+		if (Math.abs(s0) < eps) 
+			zero++; 
+		else 
+			count += Math.signum(s0);
+		if (Math.abs(s1) < eps) 
+			zero++; 	
+		else 
+			count += Math.signum(s1);
+		if (Math.abs(s2) < eps) 
+			zero++; 
+		else 
+			count += Math.signum(s2);
+
+		if (Math.abs(s3) < eps) 
+			zero++; 
+		else 
+			count += Math.signum(s3);
+
+		if (count == -4 || count == 4)
+			return 1;
+
+		if (zero==4)
+			return 0;
+
+		if (zero > 0)
+			return 3;
+
+		return 2;
+
+		//System.out.println ("Zeros: " + zero + " sign: " + count);
+
+		//System.out.println ("simpleCrossing: " + S2EdgeUtil.simpleCrossing(a,b,c,d));
+		//System.out.println ("vertexCrossing: " + S2EdgeUtil.vertexCrossing(a,b,c,d));
+		//System.out.println ("smartCrossing: " + S2EdgeUtil.edgeOrVertexCrossing(a,b,c,d));
 		//System.out.println ("intersect: " + S2EdgeUtil.getIntersection(a,b,c,d));
-		int cross = S2EdgeUtil.robustCrossing(a,b,c,d);
+		//int cross = S2EdgeUtil.robustCrossing(a,b,c,d);
 
-		if (cross==-1)
-			return 2;
+		//if (cross==-1)
+		//	return 2;
 
 		// test for touching lines.
 
-		return cross;
+		//return cross;
 		
 	}
 
@@ -132,7 +176,7 @@ public class Line {
 		// i assume this means that the two lines are the same
 		// means that a link already exists.
 		
-		if (base == 0) { return 0; } // equal
+		if (base == 0) { return 0; } // equal or paralell
 		
 		Double s = ((-s1.getLat().longValue()) * (this.getoLng().longValue() - l.getoLng().longValue()) + s1.getLng().longValue() * (this.getoLat().longValue() - l.getoLat().longValue())) / ( base * 1.0);
 		Double t = (s2.getLng().longValue() * (this.getoLat().longValue() -l.getoLat().longValue()) - s2.getLat().longValue() * (this.getoLng().longValue() -l.getoLng().longValue())) / ( base * 1.0);
@@ -141,7 +185,7 @@ public class Line {
 		
 		// don't care if the end points touch
 		if (s > 0 && s < 1 && t > 0 && t < 1) { return 1; } // intersects without touching
-		// if (s >= 0 && s <= 1 && t >= 0 && t <= 1) { return 3; } // intersects with touching
+		if (s >= 0 && s <= 1 && t >= 0 && t <= 1) { return 3; } // intersects with touching
 
 		return 2; // no intersection
 	}
@@ -152,9 +196,10 @@ public class Line {
 		//dt.addLine(this);
 		//dt.addLine(l);
 
-		int i = intersectType(l);
+		//int i = intersectType(l);
 		int gi = greaterCircleIntersectType(l);
 
+	/*
 		if ( i != gi ) {
                         dt.addLine(this);
                         dt.addLine(l);
@@ -162,6 +207,7 @@ public class Line {
 
 			System.out.println ("linear intersect: " + intersectType(l) + " greater intersect: " + greaterCircleIntersectType(l));
 		}
+	*/
 		// really would like some unit tests now.
 		return (gi == 1);
 	}
