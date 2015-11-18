@@ -1,10 +1,13 @@
 import com.google.common.geometry.*;
 public class Line {
 
-	Long oLat;
-	Long dLat;
-	Long oLng;
-	Long dLng;
+	//Long oLat;
+	//Long dLat;
+	//Long oLng;
+	//Long dLng;
+
+	S2LatLng orig;
+	S2LatLng dest;
 	
 	public static Double earthRadius = 6371.0;
 	
@@ -12,59 +15,45 @@ public class Line {
 	final static  double eps = 1E-9;
 
 
-	public Long getdLat() { return dLat; }
-	public Long getdLng() { return dLng; }
-	public void setdLat(Long l) { dLat=l; }
-	public void setdLng(Long l) { dLng=l; }
+	//public Long getdLat() { return dLat; }
+	//public Long getdLng() { return dLng; }
+	//public void setdLat(Long l) { dLat=l; }
+	//public void setdLng(Long l) { dLng=l; }
 
-	public Long getoLat() { return oLat; }
-	public Long getoLng() { return oLng; }
+	//public Long getoLat() { return oLat; }
+	//public Long getoLng() { return oLng; }
 	
-	public Double getoLatAsDouble() { return new Double(oLat); }
-	public Double getoLngAsDouble() { return new Double(oLng); }
-	public Double getdLatAsDouble() { return new Double(dLat); }
-	public Double getdLngAsDouble() { return new Double(dLng); }
+	//public Double getoLatAsDouble() { return new Double(oLat); }
+	//public Double getoLngAsDouble() { return new Double(oLng); }
+	//public Double getdLatAsDouble() { return new Double(dLat); }
+	//public Double getdLngAsDouble() { return new Double(dLng); }
 
-	public S2Point getoVect() { return new S2Point(getoX(),getoY(),getoZ()); }
-	public S2Point getdVect() { return new S2Point(getdX(),getdY(),getdZ()); }
- /*
-	public S2Point getNormVect() { 
-
-		return new S2Point(
-			Math.sin(
-
-	}
-*/
+	public S2Point getoVect() { return orig.toPoint(); }
+	public S2Point getdVect() { return dest.toPoint(); }
 	
-	public double getoX() { return Math.cos(Math.toRadians(oLat/1000000.0)) * Math.cos(Math.toRadians(oLng/1000000.0)); }
-	public double getoY() { return Math.cos(Math.toRadians(oLat/1000000.0)) * Math.sin(Math.toRadians(oLng/1000000.0)); }
-	public double getoZ() { return Math.sin(Math.toRadians(oLat/1000000.0)); }
-
-	public double getdX() { return Math.cos(Math.toRadians(dLat/1000000.0)) * Math.cos(Math.toRadians(dLng/1000000.0)); }
-	public double getdY() { return Math.cos(Math.toRadians(dLat/1000000.0)) * Math.sin(Math.toRadians(dLng/1000000.0)); }
-	public double getdZ() { return Math.sin(Math.toRadians(dLat/1000000.0)); }
+	//public void setoLat(Long l) { oLat=l; }
+	//public void setoLng(Long l) { oLng=l; }
 
 	
-	public void setoLat(Long l) { oLat=l; }
-	public void setoLng(Long l) { oLng=l; }
-
-	
-	public Line (Point d, Point o) 
+	public Line (S2LatLng d, S2LatLng o) 
 	{
 	
-		setdLat(d.getLat());
-		setdLng(d.getLng());
+		orig = o;
+		dest = d;
+		//setdLat(d.getLat());
+		//setdLng(d.getLng());
 
-		setoLat(o.getLat());
-		setoLng(o.getLng());
+		//setoLat(o.getLat());
+		//setoLng(o.getLng());
 
 		
 	}
 	
 	public Line (Portal d, Portal o) {
-		this(d.getPoint(), o.getPoint());
+		this(d.getLatLng(), o.getLatLng());
 	}
 	
+/*
 	public Line (Long dla,Long dlo, Long ola,Long olo)
 	{
 		setdLat(dla);
@@ -72,12 +61,15 @@ public class Line {
 		setoLat(ola);
 		setoLng(olo);
 	}
-	
-	public boolean equals(Line l) 
+*/	
+	public boolean equals(Object o) 
 	{
-	
-		return ((l.getdLat().equals(getdLat())) && (l.getoLat().equals(getoLat())) && (l.getdLng().equals(getdLng())) && (l.getoLng().equals(getoLng())) ||
-				(l.getdLat().equals(getoLat())) && (l.getoLat().equals(getdLat())) && (l.getdLng().equals(getoLng())) && (l.getoLng().equals(getdLng())));
+		if (o == null || !(o instanceof Line)) {
+		      return false;
+		}
+		Line l = (Line) o;
+
+		return ( (getoVect().equals(l.getoVect()) && getdVect().equals(l.getdVect())) || (getdVect().equals(l.getoVect()) && getoVect().equals(l.getdVect())));
 		
 	}
 	
@@ -146,73 +138,12 @@ public class Line {
 
 		return 2;
 
-		//System.out.println ("Zeros: " + zero + " sign: " + count);
-
-		//System.out.println ("simpleCrossing: " + S2EdgeUtil.simpleCrossing(a,b,c,d));
-		//System.out.println ("vertexCrossing: " + S2EdgeUtil.vertexCrossing(a,b,c,d));
-		//System.out.println ("smartCrossing: " + S2EdgeUtil.edgeOrVertexCrossing(a,b,c,d));
-		//System.out.println ("intersect: " + S2EdgeUtil.getIntersection(a,b,c,d));
-		//int cross = S2EdgeUtil.robustCrossing(a,b,c,d);
-
-		//if (cross==-1)
-		//	return 2;
-
-		// test for touching lines.
-
-		//return cross;
 		
 	}
 
-	private int intersectType(Line l)
-	{
-		//  System.out.println ( this.getoLat() + "," + this.getoLng() + " - " + this.getdLat() + "," + this.getdLng());
-		// System.out.println ( l.getoLat() + "," + l.getoLng() + " - " + l.getdLat() + "," + l.getdLng());
-		
-		Point s2 = new Point (this.getoLat() - this.getdLat(), this.getoLng() - this.getdLng());
-		Point s1 = new Point (l.getoLat() - l.getdLat(), l.getoLng() - l.getdLng());
-		
-		Long base = ((-s2.getLng().longValue()) * s1.getLat().longValue() + s1.getLng().longValue() * s2.getLat().longValue()) ;
-		
-		// i assume this means that the two lines are the same
-		// means that a link already exists.
-		
-		if (base == 0) { return 0; } // equal or paralell
-		
-		Double s = ((-s1.getLat().longValue()) * (this.getoLng().longValue() - l.getoLng().longValue()) + s1.getLng().longValue() * (this.getoLat().longValue() - l.getoLat().longValue())) / ( base * 1.0);
-		Double t = (s2.getLng().longValue() * (this.getoLat().longValue() -l.getoLat().longValue()) - s2.getLat().longValue() * (this.getoLng().longValue() -l.getoLng().longValue())) / ( base * 1.0);
-		
-		// System.out.println("Base:  " + base + " s:t " + s + " : " + t);
-		
-		// don't care if the end points touch
-		if (s > 0 && s < 1 && t > 0 && t < 1) { return 1; } // intersects without touching
-		if (s >= 0 && s <= 1 && t >= 0 && t <= 1) { return 3; } // intersects with touching
-
-		return 2; // no intersection
-	}
-		
-	public Boolean intersects(Line l) { 
-
-		DrawTools dt = new DrawTools();
-		//dt.addLine(this);
-		//dt.addLine(l);
-
-		//int i = intersectType(l);
-		int gi = greaterCircleIntersectType(l);
-
-	/*
-		if ( i != gi ) {
-                        dt.addLine(this);
-                        dt.addLine(l);
-                        System.out.println (dt.out());
-
-			System.out.println ("linear intersect: " + intersectType(l) + " greater intersect: " + greaterCircleIntersectType(l));
-		}
-	*/
-		// really would like some unit tests now.
-		return (gi == 1);
-	}
-	public Boolean intersectsOrEqual(Line l) { return (intersectType(l) != 2);	}
-    public Boolean equalLine(Line l) { return (intersectType(l) == 0);	}
+	public Boolean intersects(Line l) { return greaterCircleIntersectType(l) ==1; }
+	public Boolean intersectsOrEqual(Line l) { return (greaterCircleIntersectType(l) != 2);	}
+    //public Boolean equalLine(Line l) { return (intersectType(l) == 0);	}
 
     
 	public boolean intersects (Link[] links)
@@ -238,44 +169,14 @@ public class Line {
 	
 	
 	public Double getGeoDistance() {
-	
-		Double oLat = this.getoLat()/1000000.0;
-		Double oLng = this.getoLng()/1000000.0;
-		Double dLat = this.getdLat()/1000000.0;
-		Double dLng = this.getdLng()/1000000.0;
-		
-//System.err.println("point: " + dLat + "," + dLng + " - " + oLat + "," + oLng); 
-		
-		Double lat = Math.toRadians(dLat - oLat);
-		Double lng = Math.toRadians(dLng - oLng);
-		
-		Double a = (Math.sin(lat / 2.0) * Math.sin(lat / 2.0)) +
-		Math.cos(Math.toRadians(oLat)) * Math.cos(Math.toRadians(dLat)) *
-		Math.sin(lng / 2.0) * Math.sin(lng/2.0);
-		
-		
-		
-		Double c = 2.0 * Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-		
-		Double len = earthRadius * c;
-		
-	//	System.err.println("point: " + dLat + "," + dLng + " - " + oLat + "," + oLng + " = " + len + " A: " + a); 
-
-		
-		return len;
-		
-		
+		return orig.getEarthDistance(dest);
 	}
 	
 	public String toString() {
 		
-		return new String ( "{\"type\":\"polyline\",\"latLngs\":[{\"lat\":" + this.getoLat()/1000000.0 + 
-						   ",\"lng\":" + this.getoLng()/1000000.0 +
-						   "},{\"lat\":" + this.getdLat()/1000000.0 +
-						   ",\"lng\":" + this.getdLng()/1000000.0 +
-						   "}],\"color\":\"#F00000\"}" );
-		
-		// return new String ( getoLatAsDouble() + "," + getoLngAsDouble() + " - " + getdLatAsDouble() +","+ getdLngAsDouble());
+	   return String.format("Edge: (%s -> %s)\n   or [%s -> %s]",
+		orig.toStringDegrees(), dest.toStringDegrees(), orig, dest);
+
 		
 	}
 	

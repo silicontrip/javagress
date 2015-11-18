@@ -14,7 +14,6 @@ import java.util.Properties;
 
 public class PortalFactory {
 	
-    // TODO: move this to a properties file
 	protected String portalApi;
 	protected String linkApi;
 	private static PortalFactory instance = null;
@@ -332,8 +331,8 @@ public class PortalFactory {
 		boolean first = true;
 		for (Portal portal : portals) {
 			
-			Long lat = portal.getLatE6();
-			Long lng = portal.getLngE6();
+			Long lat = portal.getLatLng().latDegrees() * 1000000;
+			Long lng = portal.getLngLng().lngDegrees() * 1000000;
 			
 			if (first) {
 				minLng = lng;
@@ -350,12 +349,12 @@ public class PortalFactory {
 			
 		}
 		
-		// create bounding box
+		// create bounding boxo
+	
 		
-		Line line0 = new Line(minLat,minLng, minLat, maxLng);
-		Line line1 = new Line(minLat, maxLng,maxLat,maxLng);		
-		Line line2 = new Line(maxLat,maxLng, maxLat, minLng);
-		Line line3 = new Line(maxLat, minLng,minLat,minLng);
+		S2LatLng p1 = S2LatLng.fromE6(minLat,minLng);
+		S2LatLng p2 = S2LatLng.fromE6(maxLat,maxLng);
+		S2LatLngRect bbox = S2LatLngRect.fromPointPair(p1,p2);
 		
 		//System.err.println("Bounds: Lat: " + minLat + " - " + maxLat + " Lng: " + minLng + " - " + maxLng);
 		
