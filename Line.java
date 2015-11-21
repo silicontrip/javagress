@@ -117,10 +117,10 @@ public class Line {
 		S3.cross(p2,U);
 		S4.cross(p3,U);
 
-		double sign1 = -S1.dot(D);
-		double sign2 = S2.dot(D);
-		double sign3 = -S3.dot(D);
-		double sign4 = S4.dot(D);
+		double s0 = -S1.dot(D);
+		double s1 = S2.dot(D);
+		double s2 = -S3.dot(D);
+		double s3 = S4.dot(D);
 
 		//System.out.println("Signs: " + s0 + " " + s1 + " " + s2 + " " + s3 );
 
