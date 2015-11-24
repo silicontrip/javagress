@@ -291,7 +291,7 @@ public class PortalFactory {
 		
 	}
 	
-	protected Point getLocation(HashMap<String,HashMap<String,Object>> portalMap,String locationDesc) 
+	protected Point getLocation(HashMap<String,HashMap<String,Object>> portalMap,String locationDesc) throws IOException
 	{
 
 		// check for lat/lng
@@ -319,11 +319,13 @@ public class PortalFactory {
 			}
 		}
 
-		return null; // or should throw exception.
+		throw new IOException("No Matching Portals: "+ search + "="+locationDesc);
+		
+//		return null; // or should throw exception.
 
 	}
 
-	protected HashMap<String,HashMap<String,Object>> purgePortals(HashMap<String,HashMap<String,Object>> portalMap, URL url) throws java.io.UnsupportedEncodingException
+	protected HashMap<String,HashMap<String,Object>> purgePortals(HashMap<String,HashMap<String,Object>> portalMap, URL url) throws java.io.UnsupportedEncodingException, IOException
 	{
 		// determine query type
 		//
@@ -339,25 +341,16 @@ public class PortalFactory {
 		// circle ll=, rr=
 		// since this string is constructed internally, we will do minimal checking.
 		
-		System.out.println(query.get("ll"));
+		//System.out.println(query.get("ll"));
 		
 		if (query.containsKey("rr")) {
 
 			Point loc = getLocation (portalMap,query.get("ll").get(0));
-			//Point loc = getLocation (portalMap,"garbage");
-
 			Float range = Float.valueOf(query.get("rr").get(0));
-			//Float range = Float.valueOf("1");
 			PortalSelectionStrategy  pss = new PortalSelectionRangeStrategy(loc,range);
 			
 			portalMap = portalSearch(pss,portalMap);
 			
-				// filter portal
-				// call back filter function...	
-			
-				//resultMap.put(key,portal);
-
-			// circular range
 		} else if (query.containsKey("l3")) {
 			// triangle
 			
@@ -370,7 +363,11 @@ public class PortalFactory {
 			// box
 			Point loc1 = getLocation (portalMap,query.get("ll").get(0));
 			Point loc2 = getLocation (portalMap,query.get("l2").get(0));
+			PortalSelectionStrategy  pss = new PortalSelectionBoxStrategy(loc1,loc2);
 
+			portalMap = portalSearch(pss,portalMap);
+			
+			
 		} else {
 			// single
 		}
@@ -390,7 +387,7 @@ public class PortalFactory {
 
 		
 		url = new URL(urlString);
-		System.out.println("query: " +url.getQuery());
+		//System.out.println("query: " +url.getQuery());
 
 		
 		//conn = (HttpURLConnection) url.openConnection();

@@ -1,6 +1,6 @@
 import java.util.Map;
 import java.util.HashMap;
-public class PortalSelectionRangeStrategy implements PortalSelectionStrategy  {
+public class PortalSelectionRangeStrategy extends PortalSelectionStrategy  {
 
 	private Point location;
 	private Float range;
@@ -13,7 +13,8 @@ public class PortalSelectionRangeStrategy implements PortalSelectionStrategy  {
 	
 	public  boolean match ( HashMap<String,Object> portal)
 	{
-		Point pp = new Point (((Integer)portal.get("lat")).longValue(),((Integer)portal.get("lng")).longValue());
+		Point pp = getPointFromPortal(portal);
+		
 		Line ll = new Line(location,pp);
 		return ll.getGeoDistance() <= range;
 	}
