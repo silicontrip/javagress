@@ -2,23 +2,16 @@ import java.io.*;
 import java.net.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.type.TypeReference;  
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.List;
-import java.util.Collection;
-import java.util.Properties;
+import java.util.*;
 
 
 
 
 public class PortalFactory {
 	
-    // TODO: move this to a properties file
 	protected String portalApi;
 	protected String linkApi;
 	private static PortalFactory instance = null;
-	
 	
 	public static PortalFactory getInstance() throws java.io.IOException {
 		if (instance == null) {
@@ -26,7 +19,21 @@ public class PortalFactory {
 		}
 		return instance;
 	}
-	
+	// from http://stackoverflow.com/questions/13592236/parse-the-uri-string-into-name-value-collection-in-java	
+	public static Map<String, List<String>> splitQuery(URL url) throws UnsupportedEncodingException {
+		final Map<String, List<String>> query_pairs = new LinkedHashMap<String, List<String>>();
+		final String[] pairs = url.getQuery().split("&");
+		for (String pair : pairs) {
+			final int idx = pair.indexOf("=");
+			final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;
+			if (!query_pairs.containsKey(key)) {
+				query_pairs.put(key, new LinkedList<String>());
+			}
+			final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : null;
+			query_pairs.get(key).add(value);
+		}
+		return query_pairs;
+	}
 	
 	public PortalFactory () throws java.io.IOException {
                         Properties fileProperties = new Properties();
@@ -35,6 +42,7 @@ public class PortalFactory {
                         fileProperties.load (fis);
                         fis.close();
 
+			// will use file:// for cache
                         linkApi = fileProperties.getProperty("linkurl");
                         portalApi = fileProperties.getProperty("portalurl");
 
@@ -77,8 +85,6 @@ public class PortalFactory {
 			r[2] = pp[2].toString();
 			return r;
 		}
-		
-		
 		
 		return null;
 		
@@ -267,6 +273,111 @@ public class PortalFactory {
 		// return hashmap
 		
 	}
+
+	protected HashMap<String,HashMap<String,Object>> portalSearch (PortalSelectionStrategy ps, HashMap<String,HashMap<String,Object>> pm)
+	{
+		HashMap<String,HashMap<String,Object>> newList = new HashMap<String,HashMap<String,Object>>();
+		
+		
+		for (Map.Entry<String, HashMap<String,Object>> entry : pm.entrySet()) {
+			String portalKey = entry.getKey();
+			HashMap<String, Object> portalEntry = entry.getValue();
+			if (ps.match(portalEntry)) {
+				newList.put(portalKey,portalEntry);
+			}
+		}
+
+		return newList;
+		
+	}
+	
+	protected Point getLocation(HashMap<String,HashMap<String,Object>> portalMap,String locationDesc) 
+	{
+
+		// check for lat/lng
+		String latlng[] = locationDesc.split(",");
+		// check for guid
+		boolean guid = locationDesc.matches("/^[0-9a-fA-F]{32}.1[16]$/");
+		// check for title
+
+		String search;
+		
+		if (latlng.length == 2)
+		{
+			return new Point(Float.valueOf(latlng[0]),Float.valueOf(latlng[1]));
+		} else if (guid) {
+			search ="guid";
+		} else {
+			search = "title";
+		}
+		
+		for (Map.Entry<String, HashMap<String,Object>> entry : portalMap.entrySet()) {
+			HashMap<String, Object> portalEntry = entry.getValue();
+			String portalSearch = (String)portalEntry.get(search);
+			if (locationDesc.equals(portalSearch)) {
+				return new Point (((Integer)portalEntry.get("lat")).longValue(),((Integer)portalEntry.get("lng")).longValue());
+			}
+		}
+
+		return null; // or should throw exception.
+
+	}
+
+	protected HashMap<String,HashMap<String,Object>> purgePortals(HashMap<String,HashMap<String,Object>> portalMap, URL url) throws java.io.UnsupportedEncodingException
+	{
+		// determine query type
+		//
+		// determine portal-location type
+
+
+		Map<String, List<String>> query = splitQuery(url);
+		
+		// ll, l2, l3, rr
+		// single portal ll=
+		// box ll=, l2=
+		// tri ll=, l2=, l3=
+		// circle ll=, rr=
+		// since this string is constructed internally, we will do minimal checking.
+		
+		System.out.println(query.get("ll"));
+		
+		if (query.containsKey("rr")) {
+
+			Point loc = getLocation (portalMap,query.get("ll").get(0));
+			//Point loc = getLocation (portalMap,"garbage");
+
+			Float range = Float.valueOf(query.get("rr").get(0));
+			//Float range = Float.valueOf("1");
+			PortalSelectionStrategy  pss = new PortalSelectionRangeStrategy(loc,range);
+			
+			portalMap = portalSearch(pss,portalMap);
+			
+				// filter portal
+				// call back filter function...	
+			
+				//resultMap.put(key,portal);
+
+			// circular range
+		} else if (query.containsKey("l3")) {
+			// triangle
+			
+			Point loc1 = getLocation (portalMap,query.get("ll").get(0));
+			Point loc2 = getLocation (portalMap,query.get("l2").get(0));
+			Point loc3 = getLocation (portalMap,query.get("l3").get(0));
+
+			
+		} else if (query.containsKey("l2")) {
+			// box
+			Point loc1 = getLocation (portalMap,query.get("ll").get(0));
+			Point loc2 = getLocation (portalMap,query.get("l2").get(0));
+
+		} else {
+			// single
+		}
+	
+		return portalMap;	
+
+	}
 	
 	protected HashMap<String,Portal> readPortalsFromUrl (String urlString) throws IOException
 	{
@@ -277,13 +388,15 @@ public class PortalFactory {
 		String line;
 		String result = "";
 
-		System.out.println("get: " +urlString);
 		
 		url = new URL(urlString);
+		System.out.println("query: " +url.getQuery());
+
 		
-		conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		//conn = (HttpURLConnection) url.openConnection();
+		//conn.setRequestMethod("GET");
+		//rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		rd = new BufferedReader(new InputStreamReader(url.openStream()));
 		while ((line = rd.readLine()) != null) {
 			result += line;
 		}
@@ -296,6 +409,10 @@ public class PortalFactory {
 			 guidMap = mapper.readValue(result,new TypeReference<HashMap<String,HashMap<String,Object>>>() {});
 		} catch (com.fasterxml.jackson.databind.JsonMappingException e) {
 			throw new IOException("Cannot decode request: " + urlString);
+		}
+		if (url.getProtocol().equals("file")) {
+			// purge portals		
+			guidMap = purgePortals(guidMap,url);
 		}
 		
 		HashMap<String,Portal> resultMap = new HashMap<String,Portal>();
@@ -400,9 +517,9 @@ public class PortalFactory {
 		
 		url = new URL(urlString);
 		
-		conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		//conn = (HttpURLConnection) url.openConnection();
+		//conn.setRequestMethod("GET");
+		rd = new BufferedReader(new InputStreamReader(url.openStream()));
 		while ((line = rd.readLine()) != null) {
 			result += line;
 		}

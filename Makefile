@@ -4,7 +4,7 @@ Poly.class  PolyPoint.class BlockList.class \
 multilinker.class  alllinker.class multilinker2.class manylinks.class \
 maxfields.class targetlinker.class megaplan.class \
 PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class \
-Arguments.class
+Arguments.class PortalSelectionStrategy.class PortalSelectionRangeStrategy.class
 
 
 #PolyPoint.class CombinationFactory.class BlockList.class 
