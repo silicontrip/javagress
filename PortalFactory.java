@@ -370,6 +370,11 @@ public class PortalFactory {
 			
 		} else {
 			// single
+			Point loc = getLocation (portalMap,query.get("ll").get(0));
+			PortalSelectionStrategy  pss = new PortalSelectionRangeStrategy(loc,new Float(0));
+			
+			portalMap = portalSearch(pss,portalMap);
+
 		}
 	
 		return portalMap;	
