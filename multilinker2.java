@@ -16,14 +16,14 @@ public class multilinker2 {
 	private static final Double nanoPerSec = 1000000000.0;
 	
 	
-	private static Double  searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth, int maxFields) 
+	private static Double  searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth, int maxFields, DrawTools dt) 
 	{
 		if (depth <= maxFields) {
 			if (list.size() > 0) {
 				
 				Double thisArea = sizeFields(list);
 				if (thisArea > maxArea) {
-					System.out.println(thisArea + " : " + drawFields(list));
+					System.out.println(thisArea + " : " + drawFields(list,dt));
 					System.out.println("");
 					maxArea = thisArea;
 				}
@@ -44,12 +44,12 @@ public class multilinker2 {
 					newlist.add((Field)fields[i]);
 					
 					if (fieldIntersect(newlist)) {
-						throw new RuntimeException("Field Collision : " + drawFields(list) + " / " + thisField );
+						throw new RuntimeException("Field Collision : " + drawFields(list,dt) + " / " + thisField );
 						
 					}
 					
 					
-					maxArea = searchFields(newlist,fields,i+1,maxArea,depth+1,maxFields);
+					maxArea = searchFields(newlist,fields,i+1,maxArea,depth+1,maxFields,dt);
 				}
 				
 			}
@@ -163,30 +163,17 @@ public class multilinker2 {
 		return area;
 	}
 	
-	private static String drawFields(List<Field> fa) 
-	{
-		
-		StringBuilder rs = new StringBuilder(1024);
-		
-		rs.append("[");
-		
-		boolean first = true;
-		
-		for (Field fi: fa) 
-		{
-			if (!first)
-			{
-				rs.append(",");
-			}
-			
-			rs.append(fi.getDraw());
-			first = false;
-		}
-		rs.append("]");
-		
-		return rs.toString();
-		
-	}
+        private static String drawFields(List<Field> fa, DrawTools dt)
+        {
+        
+
+                dt.erase();
+                
+                for (Field fi: fa)
+                        dt.addField(fi);
+                
+                return dt.out();
+        }
 	
 	private static boolean newFieldIntersect (List<Field> fa,Field f) 
 	{
@@ -280,27 +267,27 @@ public class multilinker2 {
 		double totalTime;
 		long endTime;
 		
-		
-		teamCount maxBl = new teamCount(args);
-		
-		
-		// ugly hack to modify args array.s
-		int newLength =args.length ;
-		for (int c=0; c<args.length; c++) 
-		{
-			if (args[c] == null) {
-				newLength = c;
-				c = args.length;
-			}
-		}
+
+        Arguments ag = new Arguments(args);
+
+        //System.out.println ("Arguments: " + ag );
+
+        teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+        
+        DrawTools dt = new DrawTools(); 
+        if (ag.hasOption("C"))
+                dt.setDefaultColour(ag.getOptionForKey("C"));
+        else
+                dt.setDefaultColour("#a24ac3");
+
+        if (ag.hasOption("L"))
+                dt.setFieldsAsPolyline();
+        else
+                dt.setFieldsAsPolygon();
+
 		
         if (maxBl.dontCare())
             System.out.println("limits: " + maxBl);
-		
-		String[] newArgs = new String[newLength];
-		System.arraycopy (args,0,newArgs,0,newLength);
-		args = newArgs;
-		
 		
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
@@ -315,9 +302,9 @@ public class multilinker2 {
 			
 			HashMap<String,Portal> portals = new HashMap<String,Portal>();
 			
-			int maxLinks = Integer.parseInt(args[1]);
+			int maxLinks = Integer.parseInt(ag.getArgumentAt(1));
 			
-			portals = pf.portalClusterFromString(args[0]);
+			portals = pf.portalClusterFromString(ag.getArgumentAt(0));
 			
 			//portals = pf.getPortalsInTri(args[0],args[1],args[2]);
 			
@@ -328,7 +315,7 @@ public class multilinker2 {
 			Portal corner[] ;
 			
 			
-			corner = pf.getCornerPortalsFromString(args[0]);
+			corner = pf.getCornerPortalsFromString(ag.getArgumentAt(0));
 
 			
 			Field outerField = new Field(corner[0],corner[1],corner[2]);
@@ -401,7 +388,7 @@ public class multilinker2 {
 			
 			
 			Double thisArea = sizeFields(result);
-				System.out.println(thisArea + " : " + drawFields(result));
+				System.out.println(thisArea + " : " + drawFields(result,dt));
 				System.out.println("");
 				
 			
