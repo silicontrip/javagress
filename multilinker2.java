@@ -125,15 +125,19 @@ public class multilinker2 {
 				//	System.out.println("Portal: " + pkk.getGuid());
 				
                 if (!max.dontCare()) {
-                    teamCount l1 = blocksPerLink.get(anchor1.getGuid() + anchor2.getGuid());
-                    teamCount l2 = blocksPerLink.get(anchor2.getGuid() + anchorSearch.getGuid());
-                    teamCount l3 = blocksPerLink.get(anchorSearch.getGuid() + anchor1.getGuid());
+			teamCount l1 = blocksPerLink.get(anchor1.getGuid() + anchor2.getGuid());
+			teamCount l2 = blocksPerLink.get(anchor2.getGuid() + anchorSearch.getGuid());
+			teamCount l3 = blocksPerLink.get(anchorSearch.getGuid() + anchor1.getGuid());
 				
-				//	System.out.println ("link 1 " + l1 + ". link 2 " + l2 + ". link 3 " + l3 + ".");
+			//System.out.println ("link 1 " + l1 + ". link 2 " + l2 + ". link 3 " + l3 + ".");
 				
-				// block.setResistance (l1.getResistance() + l2.getResistance() + l3.getResistance());
+			block.setResistance (l1.getResistance());
+			block.addResistance (l2.getResistance());
+			block.addResistance (l3.getResistance());
 				
-                    block.setEnlightened (l1.getEnlightened() + l2.getEnlightened() + l3.getEnlightened());
+			block.setEnlightened (l1.getEnlightened());
+			block.addEnlightened (l2.getEnlightened());
+			block.addEnlightened (l3.getEnlightened());
                 }
 				
 				if (!block.moreThan(max)) {
