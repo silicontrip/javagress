@@ -285,6 +285,10 @@ public class multilinker2 {
         else
                 dt.setFieldsAsPolygon();
 
+	int maxLinks=0; 
+	if (ag.hasOption("N"))
+		maxLinks = Integer.parseInt(ag.getOptionForKey("N"));
+		
 		
         if (maxBl.dontCare())
             System.out.println("limits: " + maxBl);
@@ -302,7 +306,6 @@ public class multilinker2 {
 			
 			HashMap<String,Portal> portals = new HashMap<String,Portal>();
 			
-			int maxLinks = Integer.parseInt(ag.getArgumentAt(1));
 			
 			portals = pf.portalClusterFromString(ag.getArgumentAt(0));
 			
@@ -364,7 +367,7 @@ public class multilinker2 {
 				ArrayList <Field> fields1 = findFields(portalArray,blocksPerLink,outerField,1,maxBl);
 				ArrayList <Field> fields2 = findFields(portalArray,blocksPerLink,outerField,2,maxBl);
 
-				  largest = new ArrayList <Field>();
+				largest = new ArrayList <Field>();
 
 			
 				if (fields0.size() > 0) { largest.add(getLargest(fields0)); }
@@ -373,14 +376,14 @@ public class multilinker2 {
 			
 				
 				if (largest.size() > 0) {
- 				Field l = getLargest(largest);
+					Field l = getLargest(largest);
 				
 				//System.out.println(l.getGeoArea() + " + [" + l + "]");
 
 				
 				
-				outerField = l;
-			}
+					outerField = l;
+				}
 			
 				maxLinks--;
 				
