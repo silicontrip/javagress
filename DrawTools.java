@@ -95,6 +95,7 @@ public class DrawTools {
 
 	public void addMarker (PolyPoint p) { entities.add(new Marker(p,colour)); }
 	public void addMarker (String lat, String lng) { addMarker(new PolyPoint(lat,lng)); }
+	public void addMarker (Double lat, Double lng) { addMarker(new PolyPoint(lat,lng)); }
 	public void addCircle (PolyPoint p, String r) { entities.add(new Circle(p,r,colour)); }
 	public void addCircle (String lat, String lng, String r) { addCircle(new PolyPoint(lat,lng),r); }
 
