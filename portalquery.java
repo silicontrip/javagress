@@ -63,10 +63,14 @@ public class portalquery {
 			Iterator it = portals.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry pair = (Map.Entry)it.next();
-				System.out.println(pair.getKey() + ":" + pair.getValue());
+				Portal pt = (Portal)pair.getValue();
+				System.out.println(pair.getKey() + ":" + pair.getValue() + ((Portal)pair.getValue()).getUrl());
+
+				dt.addMarker(pt.getPoint().getLat()/1000000.0, (pt.getPoint().getLng()/1000000.0));
 				it.remove(); // avoids a ConcurrentModificationException
 			}
 
+			System.out.println(dt.out());
 				
 		} else {
 			throw new RuntimeException("Invalid command line arguments");
