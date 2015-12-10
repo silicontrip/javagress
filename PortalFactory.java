@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Collection;
 import java.util.Properties;
 
+import com.google.common.geometry.S2LatLng;
+import com.google.common.geometry.S2LatLngRect;
 
 
 
@@ -331,8 +333,8 @@ public class PortalFactory {
 		boolean first = true;
 		for (Portal portal : portals) {
 			
-			Long lat = portal.getLatLng().latDegrees() * 1000000;
-			Long lng = portal.getLngLng().lngDegrees() * 1000000;
+			Long lat = new Double(portal.getLatLng().latDegrees() * 1000000).longValue();
+			Long lng = new Double(portal.getLatLng().lngDegrees() * 1000000).longValue();
 			
 			if (first) {
 				minLng = lng;

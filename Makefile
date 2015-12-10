@@ -1,13 +1,11 @@
 
-CLASSES = DrawTools.class Field.class Line.class Link.class Point.class Portal.class PortalFactory.class  teamCount.class \
+CLASSES = DrawTools.class Field.class Link.class Portal.class PortalFactory.class  teamCount.class \
 Poly.class  PolyPoint.class BlockList.class \
+PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class \
+Arguments.class testLine.class \
 multilinker.class  alllinker.class multilinker2.class manylinks.class \
 maxfields.class targetlinker.class megaplan.class \
-PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class \
-Arguments.class testLine.class
 
-
-#PolyPoint.class CombinationFactory.class BlockList.class 
 
 CP=s2-geometry-java.jar:jackson-annotations-2.3.3.jar:jackson-core-2.3.4.jar:jackson-databind-2.3.4.jar:.
 
