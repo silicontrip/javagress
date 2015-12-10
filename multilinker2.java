@@ -16,14 +16,14 @@ public class multilinker2 {
 	private static final Double nanoPerSec = 1000000000.0;
 	
 	
-	private static Double  searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth, int maxFields) 
+	private static Double  searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth, int maxFields, DrawTools dt) 
 	{
 		if (depth <= maxFields) {
 			if (list.size() > 0) {
 				
 				Double thisArea = sizeFields(list);
 				if (thisArea > maxArea) {
-					System.out.println(thisArea + " : " + drawFields(list));
+					System.out.println(thisArea + " : " + drawFields(list,dt));
 					System.out.println("");
 					maxArea = thisArea;
 				}
@@ -44,12 +44,12 @@ public class multilinker2 {
 					newlist.add((Field)fields[i]);
 					
 					if (fieldIntersect(newlist)) {
-						throw new RuntimeException("Field Collision : " + drawFields(list) + " / " + thisField );
+						throw new RuntimeException("Field Collision : " + drawFields(list,dt) + " / " + thisField );
 						
 					}
 					
 					
-					maxArea = searchFields(newlist,fields,i+1,maxArea,depth+1,maxFields);
+					maxArea = searchFields(newlist,fields,i+1,maxArea,depth+1,maxFields,dt);
 				}
 				
 			}
@@ -125,15 +125,19 @@ public class multilinker2 {
 				//	System.out.println("Portal: " + pkk.getGuid());
 				
                 if (!max.dontCare()) {
-                    teamCount l1 = blocksPerLink.get(anchor1.getGuid() + anchor2.getGuid());
-                    teamCount l2 = blocksPerLink.get(anchor2.getGuid() + anchorSearch.getGuid());
-                    teamCount l3 = blocksPerLink.get(anchorSearch.getGuid() + anchor1.getGuid());
+			teamCount l1 = blocksPerLink.get(anchor1.getGuid() + anchor2.getGuid());
+			teamCount l2 = blocksPerLink.get(anchor2.getGuid() + anchorSearch.getGuid());
+			teamCount l3 = blocksPerLink.get(anchorSearch.getGuid() + anchor1.getGuid());
 				
-				//	System.out.println ("link 1 " + l1 + ". link 2 " + l2 + ". link 3 " + l3 + ".");
+			//System.out.println ("link 1 " + l1 + ". link 2 " + l2 + ". link 3 " + l3 + ".");
 				
-				// block.setResistance (l1.getResistance() + l2.getResistance() + l3.getResistance());
+			block.setResistance (l1.getResistance());
+			block.addResistance (l2.getResistance());
+			block.addResistance (l3.getResistance());
 				
-                    block.setEnlightened (l1.getEnlightened() + l2.getEnlightened() + l3.getEnlightened());
+			block.setEnlightened (l1.getEnlightened());
+			block.addEnlightened (l2.getEnlightened());
+			block.addEnlightened (l3.getEnlightened());
                 }
 				
 				if (!block.moreThan(max)) {
@@ -159,30 +163,17 @@ public class multilinker2 {
 		return area;
 	}
 	
-	private static String drawFields(List<Field> fa) 
-	{
-		
-		StringBuilder rs = new StringBuilder(1024);
-		
-		rs.append("[");
-		
-		boolean first = true;
-		
-		for (Field fi: fa) 
-		{
-			if (!first)
-			{
-				rs.append(",");
-			}
-			
-			rs.append(fi.getDraw());
-			first = false;
-		}
-		rs.append("]");
-		
-		return rs.toString();
-		
-	}
+        private static String drawFields(List<Field> fa, DrawTools dt)
+        {
+        
+
+                dt.erase();
+                
+                for (Field fi: fa)
+                        dt.addField(fi);
+                
+                return dt.out();
+        }
 	
 	private static boolean newFieldIntersect (List<Field> fa,Field f) 
 	{
@@ -276,27 +267,31 @@ public class multilinker2 {
 		double totalTime;
 		long endTime;
 		
+
+        Arguments ag = new Arguments(args);
+
+        //System.out.println ("Arguments: " + ag );
+
+        teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+        
+        DrawTools dt = new DrawTools(); 
+        if (ag.hasOption("C"))
+                dt.setDefaultColour(ag.getOptionForKey("C"));
+        else
+                dt.setDefaultColour("#a24ac3");
+
+        if (ag.hasOption("L"))
+                dt.setFieldsAsPolyline();
+        else
+                dt.setFieldsAsPolygon();
+
+	int maxLinks=0; 
+	if (ag.hasOption("N"))
+		maxLinks = Integer.parseInt(ag.getOptionForKey("N"));
 		
-		teamCount maxBl = new teamCount(args);
-		
-		
-		// ugly hack to modify args array.s
-		int newLength =args.length ;
-		for (int c=0; c<args.length; c++) 
-		{
-			if (args[c] == null) {
-				newLength = c;
-				c = args.length;
-			}
-		}
 		
         if (maxBl.dontCare())
             System.out.println("limits: " + maxBl);
-		
-		String[] newArgs = new String[newLength];
-		System.arraycopy (args,0,newArgs,0,newLength);
-		args = newArgs;
-		
 		
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
@@ -311,9 +306,8 @@ public class multilinker2 {
 			
 			HashMap<String,Portal> portals = new HashMap<String,Portal>();
 			
-			int maxLinks = Integer.parseInt(args[1]);
 			
-			portals = pf.portalClusterFromString(args[0]);
+			portals = pf.portalClusterFromString(ag.getArgumentAt(0));
 			
 			//portals = pf.getPortalsInTri(args[0],args[1],args[2]);
 			
@@ -324,7 +318,7 @@ public class multilinker2 {
 			Portal corner[] ;
 			
 			
-			corner = pf.getCornerPortalsFromString(args[0]);
+			corner = pf.getCornerPortalsFromString(ag.getArgumentAt(0));
 
 			
 			Field outerField = new Field(corner[0],corner[1],corner[2]);
@@ -373,7 +367,7 @@ public class multilinker2 {
 				ArrayList <Field> fields1 = findFields(portalArray,blocksPerLink,outerField,1,maxBl);
 				ArrayList <Field> fields2 = findFields(portalArray,blocksPerLink,outerField,2,maxBl);
 
-				  largest = new ArrayList <Field>();
+				largest = new ArrayList <Field>();
 
 			
 				if (fields0.size() > 0) { largest.add(getLargest(fields0)); }
@@ -382,14 +376,14 @@ public class multilinker2 {
 			
 				
 				if (largest.size() > 0) {
- 				Field l = getLargest(largest);
+					Field l = getLargest(largest);
 				
 				//System.out.println(l.getGeoArea() + " + [" + l + "]");
 
 				
 				
-				outerField = l;
-			}
+					outerField = l;
+				}
 			
 				maxLinks--;
 				
@@ -397,7 +391,7 @@ public class multilinker2 {
 			
 			
 			Double thisArea = sizeFields(result);
-				System.out.println(thisArea + " : " + drawFields(result));
+				System.out.println(thisArea + " : " + drawFields(result,dt));
 				System.out.println("");
 				
 			

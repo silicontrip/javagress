@@ -2,12 +2,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class teamCount {
-
 	
 	// should make team name an ENUM
 	private Integer resistance = null;
 	private Integer enlightened = null;
-    private boolean exists = false;
+	private boolean exists = false;
 
 	public static final int NEUTRAL = 0;
 	public static final int ENLIGHTENED = 1;
@@ -15,7 +14,7 @@ public class teamCount {
 
 	public teamCount () { ; } 
 	
-// Alphabetical order
+	// Alphabetical order
 	public teamCount (Integer ENL, Integer RES) {
 		resistance = RES;
 		enlightened = ENL;
@@ -74,12 +73,8 @@ public class teamCount {
 	}
 	
 	public void incTeam(String team) {
-		if (team.startsWith("R")) {
-			resistance ++;
-		}
-        if (team.startsWith("E")) {
-			enlightened ++;
-		}
+		if (team.startsWith("R")) { incTeamEnum(RESISTANCE); }
+		if (team.startsWith("E")) { incTeamEnum(ENLIGHTENED); }
 	}
 	
 	public Integer getResistance() { return resistance; }
@@ -97,12 +92,33 @@ public class teamCount {
 	
 	public void setResistance(Integer i) { resistance=i; } 
 	public void setEnlightened(Integer i) { enlightened=i; } 
+	public void addResistance(Integer i) { addTeamEnum(RESISTANCE,i); } 
+	public void addEnlightened(Integer i) { addTeamEnum(ENLIGHTENED,i); } 
+
+	public void addTeamEnum(int team, Integer i) { 
+
+		if (i != null) {
+			if (team == ENLIGHTENED) {
+				if (enlightened != null)
+					enlightened += i;
+				else
+					enlightened = i;
+			}
+			if (team == RESISTANCE) {
+				if (resistance != null)
+					resistance += i;
+				else
+					resistance = i;
+			}
+		}
+
+        }
 
 	public boolean noResistance() { return resistance == null; }
 	public boolean noEnlightened() { return enlightened == null; }
 	
-    public boolean getExists() { return exists; }
-    public void setExists(boolean b) { exists = b; }
+	public boolean getExists() { return exists; }
+	public void setExists(boolean b) { exists = b; }
 	
 	public boolean moreThan(teamCount tc) {
 		// should check for null == don't care
@@ -122,7 +138,7 @@ public class teamCount {
 	public boolean anyResistanceBlockers() { return resistance > 0; }
 	public boolean anyBlockers() { return resistance >0 || enlightened>0; }
 	
-    public boolean dontCare() { return resistance == null && enlightened == null; }
+	public boolean dontCare() { return resistance == null && enlightened == null; }
     
 	public String toString() { return ("E:" + enlightened + ", R:" + resistance); }
 	
