@@ -93,8 +93,9 @@ public class PortalFactory {
 	public Portal[] getCornerPortalsFromString(String clusterDescription) throws IOException
 	{
 		// split on -
-        // make that / as some portals have - in their name
-		String[] parts = clusterDescription.split("/");
+		// make that / as some portals have - in their name
+		// going for = now found a portal with / in it's name
+		String[] parts = clusterDescription.split("=");
 		Portal[] portals;
 		
 		int size =  parts.length;
@@ -128,7 +129,7 @@ public class PortalFactory {
 	{
 		
 		// split on -
-		String[] parts = clusterDescription.split("/");
+		String[] parts = clusterDescription.split("=");
 		
 		int size =  parts.length;
 		
