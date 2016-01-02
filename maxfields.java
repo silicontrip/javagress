@@ -8,28 +8,15 @@ import java.util.List;
 
 public class maxfields {
 
-	private static String drawFields(List<Field> fa)
+	private static String drawFields(List<Field> fa,DrawTools dt)
 	{
 		
-		StringBuilder rs = new StringBuilder(1024);
-		
-		rs.append("[");
-		
-		boolean first = true;
+		dt.erase();
 		
 		for (Field fi: fa)
-		{
-			if (!first)
-			{
-				rs.append(",");
-			}
-			
-			rs.append(fi.getDraw());
-			first = false;
-		}
-		rs.append("]");
+			dt.addField(fi);
 		
-		return rs.toString();
+		return dt.out();
 		
 	}
 	
@@ -77,7 +64,7 @@ public class maxfields {
 	}
 
 	
-	private static Double searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth)
+	private static Double searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth)
 	{
 			if (list.size() > 0) {
 				
@@ -86,7 +73,7 @@ public class maxfields {
 				Double thisArea = new Double(list.size());
 				
 				if (thisArea > maxArea) {
-					System.out.println(thisArea + " : " + drawFields(list));
+					System.out.println(thisArea + " : " + drawFields(list,dt));
 					System.out.println("");
 					maxArea = thisArea;
 				}
@@ -107,12 +94,12 @@ public class maxfields {
 					newlist.add((Field)fields[i]);
 					
 					if (fieldIntersect(newlist)) {
-						throw new RuntimeException("Field Collision : " + drawFields(list) + " / " + thisField );
+						throw new RuntimeException("Field Collision : " + drawFields(list,dt) + " / " + thisField );
 						
 					}
 					
 					
-					maxArea = searchFields(newlist,fields,i+1,maxArea,depth+1);
+					maxArea = searchFields(dt,newlist,fields,i+1,maxArea,depth+1);
 				}
 				
 			}
@@ -160,21 +147,31 @@ public class maxfields {
 
 public static void main(String[] args) {
 
-    
-    teamCount maxBl = new teamCount();
-    
-    // require 0 blockers, for testing.
-    maxBl.setEnlightened(0);
-    maxBl.setResistance(0);
-                            
-    try {
+
+	Arguments ag = new Arguments(args);
+
+	
+	teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+	
+	DrawTools dt = new DrawTools();
+	if (ag.hasOption("C"))
+		dt.setDefaultColour(ag.getOptionForKey("C"));
+	else
+		dt.setDefaultColour("#a24ac3");
+	
+	if (ag.hasOption("L"))
+		dt.setFieldsAsPolyline();
+	else
+		dt.setFieldsAsPolygon();
+
+	try {
         PortalFactory pf = PortalFactory.getInstance();
-        
+		
         System.err.println("== Reading portals ==");
         
         HashMap<String,Portal> portals;
         
-        portals = pf.portalClusterFromString(args[0]);
+        portals = pf.portalClusterFromString(ag.getArgumentAt(0));
         ArrayList<Link> links = pf.getPurgedLinks(portals.values());
 
         BlockList bl = getLinkBlockersSingle(portals.values().toArray(), links);
@@ -255,7 +252,7 @@ public static void main(String[] args) {
 
 			// sort through colliding fields.
 		
-		searchFields(new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
+		searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
 		
       //  System.out.println("]");
 
