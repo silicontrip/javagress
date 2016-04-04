@@ -67,13 +67,13 @@ public class megaplan {
 				
 			//	Double thisArea = sizeFields(list);
 				// we want to maximise number of fields
-				Double thisArea = new Double(list.size());
+				Double thisArea = new Double(list.size()); // not really area but number of fields
 				Double maxAreaSmall = Math.floor(maxArea);
 				
 				if (thisArea >= maxAreaSmall) {
 					int retval = Double.compare(thisArea, maxAreaSmall);
 					if (retval == 0) { maxArea += 0.0001; } else { maxArea = thisArea; }
-					System.out.println( String.format("%.4f",maxArea) + " : " + drawFields(list,dt));
+					System.out.println( String.format("%.4f",maxArea) +  " : " + thisAreaSize + " : " + drawFields(list,dt));
 					System.out.println("");
 				}
 			}
