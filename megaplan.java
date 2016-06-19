@@ -60,6 +60,62 @@ public class megaplan {
 		return area;
 	}
 
+        private static int iterSearchFields (DrawTools dt, Object[] fields)
+        {
+
+                int mostFields = 0;
+		Double largestArea = 0.0;
+
+                ArrayList<Integer> sStack = new ArrayList<Integer>();
+                ArrayList<ArrayList<Field>> fStack = new ArrayList<ArrayList<Field>>();
+
+		sStack.add(new Integer(0));
+		fStack.add(new ArrayList<Field>());
+
+                while (sStack.size() > 0) {
+
+                        ArrayList<Field> list = fStack.remove(fStack.size()-1);
+                        Integer start = sStack.remove(sStack.size()-1);
+                        if (list.size() > 0) {
+                                int thisSize = list.size();
+
+                                if (thisSize > mostFields)
+					largestArea = 0.0;
+                                if (thisSize >= mostFields)
+                                {
+                                        mostFields = thisSize;
+                                        Double thisAreaSize = sizeFields(list);
+					if (thisAreaSize > largestArea) {
+						System.out.println(thisSize + " : " +thisAreaSize + " : "  + drawFields(list,dt));
+						System.out.println("");
+						largestArea = thisAreaSize;
+					}
+                                }
+                        }
+
+                        for (int i =start; i<fields.length; i++)
+                        {
+                                Field thisField = (Field)fields[i];
+                                if (!newFieldIntersect(list,thisField))
+                                {
+                                        ArrayList<Field> newlist = new ArrayList<Field>(list);
+                                        newlist.add((Field)fields[i]);
+
+
+                                        sStack.add (new Integer(i+1));
+                                        fStack.add (newlist);
+
+                                }
+                        }
+
+                }
+
+                return mostFields;
+
+
+        }
+
+
 	
 	private static Double searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth,DrawTools dt)
 	{
@@ -268,7 +324,8 @@ public static void main(String[] args) {
 
 			// sort through colliding fields.
 		
-		searchFields(new ArrayList<Field>() , fiList.toArray(),0,0.0,0,dt);
+		iterSearchFields(dt , fiList.toArray());
+		//searchFields(new ArrayList<Field>() , fiList.toArray(),0,0.0,0,dt);
 		
       //  System.out.println("]");
 
