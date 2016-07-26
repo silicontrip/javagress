@@ -118,6 +118,8 @@ public class DrawTools {
 		}
 	}
 
+	public int size ()  { return entities.size(); }
+
 
 }
 
