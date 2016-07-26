@@ -63,6 +63,49 @@ public class maxfields {
 		return area;
 	}
 
+	private static int iterSearchFields (DrawTools dt, Object[] fields)
+	{
+
+		int mostFields = 0;
+
+		ArrayList<Integer> sStack = new ArrayList<Integer>();
+		ArrayList<ArrayList<Field>> fStack = new ArrayList<ArrayList<Field>>();
+
+		while (sStack.size() > 0) {
+
+			ArrayList<Field> list = fStack.remove(fStack.size()-1);
+			Integer start = sStack.remove(sStack.size()-1);
+			if (list.size() > 0) {
+				int thisSize = list.size();
+				if (thisSize > mostFields)
+				{
+					mostFields = thisSize;
+					System.out.println(thisSize + " : " + drawFields(list,dt));
+					System.out.println("");
+				}
+			}
+
+			for (int i =start; i<fields.length; i++)
+			{
+				Field thisField = (Field)fields[i];
+				if (!newFieldIntersect(list,thisField))
+				{
+					ArrayList<Field> newlist = new ArrayList<Field>(list);
+					newlist.add((Field)fields[i]);
+					
+
+					sStack.add (new Integer(i+1));
+					fStack.add (newlist);
+
+				}
+			}
+
+		}
+
+		return mostFields;
+		
+
+	}
 	
 	private static Double searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth)
 	{
@@ -252,7 +295,8 @@ public static void main(String[] args) {
 
 			// sort through colliding fields.
 		
-		searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
+		iterSearchFields(dt,  fiList.toArray());
+		//searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
 		
       //  System.out.println("]");
 
