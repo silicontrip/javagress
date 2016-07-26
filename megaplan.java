@@ -73,6 +73,7 @@ public class megaplan {
 				if (thisArea >= maxAreaSmall) {
 					int retval = Double.compare(thisArea, maxAreaSmall);
 					if (retval == 0) { maxArea += 0.0001; } else { maxArea = thisArea; }
+					Double thisAreaSize = sizeFields(list);
 					System.out.println( String.format("%.4f",maxArea) +  " : " + thisAreaSize + " : " + drawFields(list,dt));
 					System.out.println("");
 				}
