@@ -45,7 +45,18 @@ public class targetlinker {
 		}
 		return false;
 	}
-	
+
+	private static ArrayList<Field> removeIntersecting ( List<Field> fa,Field f )
+	{
+		ArrayList<Field> nf = new ArrayList<Field>();
+		for (Field fi: fa) {
+			if (!fi.intersects(f) && !fi.equals(f))
+				nf.add(fi);
+
+                }
+		return nf;	
+	}
+
 	private static ArrayList<Field> getFieldsOverPoint (Point p, HashMap<String,Portal> portals)
 	{
 
@@ -64,12 +75,49 @@ public class targetlinker {
 			    for (int lk = lj+1; lk < portals.size(); lk++)
 			    {
 				Portal pkk = portals.get(portalKeys[lk]);
-                                Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+                                Field fi = new Field (pki,pkj,pkk);
 				// check if field is over point.
 				// add field to array
 				if (fi.inside(p))
 					fields.add(fi);
 				}
+			}
+		}
+		return fields;
+	}
+
+	private static ArrayList<Field> getFieldsOverPoints (ArrayList<Point> p, HashMap<String,Portal> portals)
+	{
+
+		ArrayList <Field> fields = new ArrayList<Field>();
+		String[] portalKeys = portals.keySet().toArray(new String[portals.size()]);
+
+		for (int li = 0; li < portals.size(); li++)
+		{
+         
+		    Portal pki = portals.get(portalKeys[li]);
+
+		    for (int lj = li+1; lj < portals.size(); lj++)
+		    {
+			Portal pkj = portals.get(portalKeys[lj]);
+
+			    for (int lk = lj+1; lk < portals.size(); lk++)
+			    {
+				Portal pkk = portals.get(portalKeys[lk]);
+                                Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+				
+				boolean inside = true;
+				// check if field is over point.
+				// add field to array
+				for (int pp =0; pp < p.size(); pp++)
+					if (!fi.inside(p.get(pp))) {
+						inside = false;
+						break;
+					}
+	
+				if (inside)
+					fields.add(fi);
+			}
 			}
 		}
 		return fields;
@@ -86,14 +134,60 @@ public class targetlinker {
 		return area;
 	}
 	
+private static ArrayList<Portal> getCadencePortals(int c, Field f)
+{
+
+	if (f == null)
+		return null;
+	int nc = c % 3;
+	ArrayList<Portal> cp = new ArrayList<Portal>();
+
+	cp.add(f.getPortal(nc));
+	nc ++;
+	nc = nc % 3;
+	cp.add(f.getPortal(nc));
+	
+	return cp;
+}
+
+private static boolean matchPortals(ArrayList<Portal> p, Field f)
+{
+	if  (p==null || f==null)
+		return true;
+
+	Portal p0 = p.get(0);
+	Portal p1 = p.get(1);
+
+	Portal f0 = f.getPortal(0);
+	Portal f1 = f.getPortal(1);
+	Portal f2 = f.getPortal(2);
+
+	return( (p0.equals(f0) || p0.equals(f1) || p0.equals(f2)) && (p1.equals(f0) || p1.equals(f1) || p1.equals(f2))); 
+}
+
+private static boolean notMatchPortals(ArrayList<Portal> p, Field f)
+{
+	if  (p==null || f==null)
+		return true;
+
+	Portal p0 = p.get(0);
+	Portal p1 = p.get(1);
+
+	Portal f0 = f.getPortal(0);
+	Portal f1 = f.getPortal(1);
+	Portal f2 = f.getPortal(2);
+
+	return !( (p0.equals(f0) || p0.equals(f1) || p0.equals(f2)) && (p1.equals(f0) || p1.equals(f1) || p1.equals(f2))); 
+}
+	
 public static void main(String[] args) {
 
 	Point target ;
 	ArrayList <Field> fieldList = new ArrayList<Field>();
-
+	int cyclone_cadence =-1; // set by command line
         Arguments ag = new Arguments(args);
 
-        //System.out.println ("Arguments: " + ag );
+        System.out.println ("Arguments: " + ag );
 
         teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
 
@@ -108,7 +202,10 @@ public static void main(String[] args) {
         else
                 dt.setFieldsAsPolygon();
 
+	if (ag.hasOption("c"))
+		cyclone_cadence = new Integer(ag.getOptionForKey("c")).intValue();
 
+	System.err.println("Cadence pattern: " + cyclone_cadence);
 
 	Float lat = Float.parseFloat(ag.getArgumentAt(0));
 	Float lng = Float.parseFloat(ag.getArgumentAt(1));
@@ -124,31 +221,77 @@ public static void main(String[] args) {
         System.err.println("== calculating all fields ==");
 	ArrayList<Field> validFields = getFieldsOverPoint(target,portals);
 
+	System.err.println("Found " + validFields.size() + " fields");
+
 	// find smallest that doesn't intersect field list
         
         System.err.println("== searching fields ==");
 	Double max = 0.0;
 	Field thisField=null;
+	ArrayList<Portal> cadencePortals = null;
 	while (max != 10000) 
 	{
 		max = 10000.0;
 		for (Field fi: validFields) {
 			if (!newFieldIntersect(fieldList,fi))
 			{
-				if (fi.getGeoPerimeter() < max) 
-				{
-					max=fi.getGeoPerimeter();
-					thisField = fi;
+			// and portals match cadence
+				if (cyclone_cadence >= 0) {
+					// get cadence portals
+					// check field matches cadence
+					if (matchPortals(cadencePortals,fi)) {
+						if (fi.getGeoPerimeter() < max) 
+						{
+							max=fi.getGeoPerimeter();
+							thisField = fi;
+						}
+					}
+				} else {
+					if (ag.hasOption("r")) 
+					{
+						if (notMatchPortals(cadencePortals,fi)) {
+							if (fi.getGeoPerimeter() < max) 
+							{
+								max=fi.getGeoPerimeter();
+								thisField = fi;
+							}
+						}
+					} else {
+						if (fi.getGeoPerimeter() < max) 
+						{
+							max=fi.getGeoPerimeter();
+							thisField = fi;
+						}
+					}
 				}
 			}
 
 		}
         // System.err.println(thisField.getDraw());
-		fieldList.add(thisField);
-		dt.addField(thisField);	
+		if (max != 10000) {
+			fieldList.add(thisField);
+			dt.addField(thisField);	
+			validFields = removeIntersecting(validFields,thisField);
+	
+			if (cyclone_cadence >= 0) {
+				if (cadencePortals == null)  {
+					cadencePortals = getCadencePortals(cyclone_cadence,thisField);
+					System.err.println("Cadence: " + cadencePortals);
+				} else {
+					System.err.print("Cadence before: " + cadencePortals);
+					if (ag.hasOption("r"))
+						cadencePortals = thisField.getPrevPortalLink(cadencePortals);
+					else
+						cadencePortals = thisField.getNextPortalLink(cadencePortals);
+					System.err.println("  after: " + cadencePortals);
+				}
+			}
+		}
 	}
 	
 // print plan
+	
+	System.out.println("Layers: " + dt.size());
 
         System.out.println(dt.out());
 
