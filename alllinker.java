@@ -68,10 +68,12 @@ public static void printMap(Map mp) {
 					Double area = fi.getGeoArea();
 					
 					teamCount block = getBlocks(pki,pkj,pkk,blocksPerLink);
+
+					int bb = block.getResistance() + block.getEnlightened();
 										
 					if (!block.moreThan(max)) {
 						
-						for(int ii =block.getResistance(); ii<1024; ii++) 
+						for(int ii =bb; ii<1024; ii++) 
 						{
 							if (area > maxArea.get(ii)) 
 							{
@@ -80,11 +82,11 @@ public static void printMap(Map mp) {
 							}
 						}
 						
-						if (area >= maxArea.get(block.getResistance())) {
-							maxArea.set(block.getResistance(),area);
+						if (area >= maxArea.get(bb)) {
+							maxArea.set(bb,area);
 							dt.erase();
 							dt.addField(fi);
-							areaOut.set(block.getResistance(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  " + dt.out());
+							areaOut.set(bb, area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  " + dt.out());
 						}
 					}
 					
@@ -130,7 +132,7 @@ public static void printMap(Map mp) {
 						
 						if (!block.moreThan(max)) {
 							
-							for(int ii =block.getResistance(); ii<1024; ii++) 
+							for(int ii =block.getResistance()+block.getEnlightened(); ii<1024; ii++) 
 							{
 								if (area > maxArea.get(ii)) 
 								{
@@ -139,11 +141,11 @@ public static void printMap(Map mp) {
 								}
 							}
 							
-							if (area >= maxArea.get(block.getResistance())) {
-								maxArea.set(block.getResistance(),area);
+							if (area >= maxArea.get(block.getResistance() + block.getEnlightened())) {
+								maxArea.set(block.getResistance()+block.getEnlightened(),area);
 								dt.erase();
 								dt.addField(fi);
-								areaOut.set(block.getResistance(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  " + dt.out());
+								areaOut.set(block.getResistance() + block.getEnlightened(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  " + dt.out());
 							}
 						}
 						
@@ -192,10 +194,10 @@ public static void printMap(Map mp) {
 						//printMap(blocksPerLink);
 						
 						teamCount block = getBlocks(pki,pkj,pkk,blocksPerLink);
-						
+						int bb = block.getResistance() + block.getEnlightened();	
 						if (!block.moreThan(max)) {
 							
-							for(int ii =block.getResistance(); ii<1024; ii++) 
+							for(int ii =bb; ii<1024; ii++) 
 							{
 								if (area > maxArea.get(ii)) 
 								{
@@ -204,11 +206,11 @@ public static void printMap(Map mp) {
 								}
 							}
 							
-							if (area >= maxArea.get(block.getResistance())) {
-								maxArea.set(block.getResistance(),area);
+							if (area >= maxArea.get(bb)) {
+								maxArea.set(bb,area);
 								dt.erase();
 								dt.addField(fi);
-								areaOut.set(block.getResistance(), area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  " + dt.out());
+								areaOut.set(bb, area + ", " + block + ", " + pki + ", " + pkj + ", " +pkk + "  " + dt.out());
 							}
 						}
 						
