@@ -137,12 +137,14 @@ public class Field {
 
 	public boolean touches(Field f) 
 	{
-		return (f.getPoint(0) == this.getPoint(0)  ||
-			f.getPoint(0) == this.getPoint(1)  ||
-			f.getPoint(0) == this.getPoint(2)  ||
-			f.getPoint(1) == this.getPoint(1)  ||
-			f.getPoint(1) == this.getPoint(2)  ||
-			f.getPoint(2) == this.getPoint(2)) ;
+
+
+		return (f.getPortal(0) == this.getPortal(0)  ||
+			f.getPortal(0) == this.getPortal(1)  ||
+			f.getPortal(0) == this.getPortal(2)  ||
+			f.getPortal(1) == this.getPortal(1)  ||
+			f.getPortal(1) == this.getPortal(2)  ||
+			f.getPortal(2) == this.getPortal(2)) ;
 
 	}
 	
