@@ -21,11 +21,12 @@ public class megaplan {
 		return dt.out();
 	}
 	
-	private static boolean newFieldIntersect (List<Field> fa,Field f)
+	private static boolean newFieldIntersect (List<Field> fa,Field f,boolean touch)
 	{
 		for (Field fi: fa) {
 			if (fi.intersects(f)) { return true; }
 			if (fi.equals(f)) { return true; }
+			if (touch && fi.touches(f)) { return true; }
 		}
 		return false;
 	}
@@ -60,7 +61,7 @@ public class megaplan {
 		return area;
 	}
 
-        private static int iterSearchFields (DrawTools dt, Object[] fields)
+        private static int iterSearchFields (DrawTools dt, Object[] fields,boolean touch)
         {
 
                 int mostFields = 0;
@@ -96,7 +97,7 @@ public class megaplan {
                         for (int i =start; i<fields.length; i++)
                         {
                                 Field thisField = (Field)fields[i];
-                                if (!newFieldIntersect(list,thisField))
+                                if (!newFieldIntersect(list,thisField,touch))
                                 {
                                         ArrayList<Field> newlist = new ArrayList<Field>(list);
                                         newlist.add((Field)fields[i]);
@@ -117,7 +118,7 @@ public class megaplan {
 
 
 	
-	private static Double searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth,DrawTools dt)
+	private static Double searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth,DrawTools dt,boolean touch)
 	{
 			if (list.size() > 0) {
 				
@@ -141,7 +142,7 @@ public class megaplan {
 				
 				//	System.err.println(" - new Field Intersect - ");
 				
-				if (!newFieldIntersect(list,thisField))
+				if (!newFieldIntersect(list,thisField,touch))
 				{
 					//		System.err.println(" = END new Field Intersect = ");
 					
@@ -155,7 +156,7 @@ public class megaplan {
 					}
 					
 					
-					maxArea = searchFields(newlist,fields,i+1,maxArea,depth+1,dt);
+					maxArea = searchFields(newlist,fields,i+1,maxArea,depth+1,dt,touch);
 				}
 				
 			}
@@ -325,7 +326,10 @@ public static void main(String[] args) {
 
 			// sort through colliding fields.
 		
-		iterSearchFields(dt , fiList.toArray());
+	        if (ag.hasOption("T"))
+			iterSearchFields(dt , fiList.toArray(),true);
+		else
+			iterSearchFields(dt , fiList.toArray(),false);
 		//searchFields(new ArrayList<Field>() , fiList.toArray(),0,0.0,0,dt);
 		
       //  System.out.println("]");
