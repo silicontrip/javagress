@@ -70,8 +70,17 @@ public class CellMUDB {
 
 		if (s2id.level() < 13) {
 			// sub divide cell
-			System.out.println(s2id.level());
-			System.out.println("divide");
+			//System.out.println(s2id.level());
+			//System.out.println("divide");
+
+		    S2CellId id = s2id.childBegin();
+			double ttmu = 0;
+			for (int pos = 0; pos < 4; ++pos, id = id.next()) {
+				//System.out.println(id.toToken());
+				ttmu += getMUKM(id);
+			}
+			return ttmu / 4.0;
+
 		}
 		if (mudb.containsKey(s2id.toToken())) {
 			return  mudb.get(s2id.toToken()).doubleValue();
