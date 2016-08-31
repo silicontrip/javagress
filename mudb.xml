@@ -13,5 +13,10 @@
   <void method="put"> <string>6ad63b64</string> <double>1062.25</double> </void> 
   <void method="put"> <string>6ad63b7c</string> <double>1065.64</double> </void> 
   <void method="put"> <string>6ad63b2c</string> <double>981.36</double> </void> 
+  <void method="put"> <string>6ad63b5c</string> <double>1064.66</double> </void> 
+  <void method="put"> <string>6ad63b9c</string> <double>1055.32</double> </void> 
+  <void method="put"> <string>6ad63b4c</string> <double>1047.43</double> </void> 
+  <void method="put"> <string>6ad63ba4</string> <double>1048.79</double> </void> 
+  <void method="put"> <string>6ad63b04</string> <double>982.52</double> </void> 
  </object> 
 </java> 
