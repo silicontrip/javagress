@@ -82,14 +82,14 @@ public class CellMUDB {
 				//System.out.println(id.toToken());
 					ttmu += getMUKM(id);
 				}
-				mudb.put(s2id.toToken, ttmu/4.0);
+				mudb.put(s2id.toToken(), ttmu/4.0);
 				return ttmu / 4.0;
 
 			}
 			String s2tok = s2id.toToken();
 			System.out.print(s2tok + " ");
 			printCell(new S2Cell(s2id));
-			mudb.put(s2tok,0);
+			mudb.put(s2tok,0.0);
 			return 0;
 		}
 			
