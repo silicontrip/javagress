@@ -68,29 +68,28 @@ public class CellMUDB {
 	public double getMUKM (S2CellId s2id) {
 		
 
-		if (s2id.level() < 13) {
+		if (mudb.containsKey(s2id.toToken())) {
+			return  mudb.get(s2id.toToken()).doubleValue();
+		} else {
+			if (s2id.level() < 13) {
 			// sub divide cell
 			//System.out.println(s2id.level());
 			//System.out.println("divide");
 
-		    S2CellId id = s2id.childBegin();
-			double ttmu = 0;
-			for (int pos = 0; pos < 4; ++pos, id = id.next()) {
+				S2CellId id = s2id.childBegin();
+				double ttmu = 0;
+				for (int pos = 0; pos < 4; ++pos, id = id.next()) {
 				//System.out.println(id.toToken());
-				ttmu += getMUKM(id);
-			}
-			return ttmu / 4.0;
+					ttmu += getMUKM(id);
+				}
+				mudb.put(s2id.toToken, ttmu/4.0);
+				return ttmu / 4.0;
 
-		}
-		if (mudb.containsKey(s2id.toToken())) {
-			return  mudb.get(s2id.toToken()).doubleValue();
-		} else {
-			String s2tok = s2id.toToken();
-			if (!seen.contains(s2tok)) {
-				System.out.print(s2tok + " ");
-				printCell(new S2Cell(s2id));
-				seen.add(s2tok);
 			}
+			String s2tok = s2id.toToken();
+			System.out.print(s2tok + " ");
+			printCell(new S2Cell(s2id));
+			mudb.put(s2tok,0);
 			return 0;
 		}
 			
