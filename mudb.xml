@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_65" class="java.beans.XMLDecoder"> 
+ <object class="java.util.HashMap"> 
+  <void method="put"> 
+   <string>6ad63b3c</string> 
+   <double>1050.90</double> 
+  </void> 
+  <void method="put"> 
+   <string>6ad63b44</string> 
+   <double>1063.46</double> 
+  </void> 
+  <void method="put"> 
+   <string>6ad63b24</string> 
+   <double>1001.95</double> 
+  </void> 
+  <void method="put"> 
+   <string>6ad63b0c</string> 
+   <double>1010.73</double> 
+  </void> 
+  <void method="put"> 
+   <string>6ad63b6c</string> 
+   <double>1065.03</double> 
+  </void> 
+  <void method="put"> 
+   <string>6ad63b74</string> 
+   <double>1054.67</double> 
+  </void> 
+  <void method="put"> 
+   <string>6ad63b14</string> 
+   <double>1044.74</double> 
+  </void> 
+ </object> 
+</java> 
