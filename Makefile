@@ -4,12 +4,13 @@ Poly.class  PolyPoint.class BlockList.class \
 multilinker.class  alllinker.class multilinker2.class manylinks.class \
 maxfields.class targetlinker.class megaplan.class portalquery.class \
 PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class \
-Arguments.class PortalSelectionStrategy.class PortalSelectionRangeStrategy.class PortalSelectionBoxStrategy.class PortalSelectionTriangleStrategy.class
+Arguments.class PortalSelectionStrategy.class PortalSelectionRangeStrategy.class PortalSelectionBoxStrategy.class PortalSelectionTriangleStrategy.class \
+CellMUDB.class
 
 
 #PolyPoint.class CombinationFactory.class BlockList.class 
 
-CP=jackson-annotations-2.3.3.jar:jackson-core-2.3.4.jar:jackson-databind-2.3.4.jar:.
+CP=s2-geometry-java.jar:jackson-annotations-2.3.3.jar:jackson-core-2.3.4.jar:jackson-databind-2.3.4.jar:.
 
 all: portaltools.jar
 

@@ -80,8 +80,11 @@ public class Field {
 		double area;
 		double mukm;
 
+		CellMUDB mudb = CellMUDB.getInstance();
+
 		S2Polygon thisField = getS2Polygon();
 
+		//mukm = 1000;
 		for (S2CellId cell: getS2CellUnion()) {
 
 			S2Cell s2cell = new S2Cell(cell);
@@ -91,15 +94,17 @@ public class Field {
 			intPoly.initToIntersection(thisField, cellPoly);
 			area = intPoly.getArea() * 6371 * 6371 ;
 
-			System.out.print(cell.toToken() + " " );
-			printCell(s2cell);
+		//	System.out.print(cell.toToken() + " " );
+		//	printCell(s2cell);
 			
 			// get mu for cellid
-			mukm = 1000;
+			//mudb.getHash().put(cell.toToken(),new Double(mukm));	
+			mukm = mudb.getMUKM(cell);
 
 			ttmu += area * mukm;
 
 		}
+		//mudb.write();
 		return ttmu;
 	}
 

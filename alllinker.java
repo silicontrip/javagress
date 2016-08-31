@@ -65,7 +65,8 @@ public static void printMap(Map mp) {
 					
 					Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
 					
-					Double area = fi.getGeoArea();
+					//Double area = fi.getGeoArea();
+					Double area = fi.getEstMu();
 					
 					teamCount block = getBlocks(pki,pkj,pkk,blocksPerLink);
 
@@ -123,7 +124,8 @@ public static void printMap(Map mp) {
 						Portal pkk = (Portal)portalKeys[k];
 						Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
 						
-						Double area = fi.getGeoArea();
+						//Double area = fi.getGeoArea();
+						Double area = fi.getEstMu();
 						
 						teamCount block = getBlocks(pki,pkj,pkk,blocksPerLink);
 						
@@ -188,7 +190,8 @@ public static void printMap(Map mp) {
 						Portal pkk = (Portal)portalKeys[k];
 						Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
 						
-						Double area = fi.getGeoArea();
+						//Double area = fi.getGeoArea();
+						Double area = fi.getEstMu();
 
 						//System.out.println("1: " + pki.getGuid() + " 2: " + pkj.getGuid() + " 3: " + pkk.getGuid());
 						//printMap(blocksPerLink);
