@@ -1,4 +1,6 @@
 import java.util.ArrayList; 
+import com.google.common.geometry.*;
+
 public class Field {
 
 
@@ -43,9 +45,89 @@ public class Field {
 		}
 
 	}
+
+	private void printCell(S2Cell cell) {
+
+			// quick and dirty drawtools output
+		S2LatLng p0 = new S2LatLng(cell.getVertex(0));
+		S2LatLng p1 = new S2LatLng(cell.getVertex(1));
+		S2LatLng p2 = new S2LatLng(cell.getVertex(2));
+		S2LatLng p3 = new S2LatLng(cell.getVertex(3));
+
+		System.out.print("[{\"type\":\"polygon\",\"color\":\"#ffffff\",\"latLngs\":[");
+		System.out.print("{\"lat\": " + Double.toString(p0.latDegrees()) + ",\"lng\": " + Double.toString(p0.lngDegrees()) + "},");
+		System.out.print("{\"lat\": " + Double.toString(p1.latDegrees()) + ",\"lng\": " + Double.toString(p1.lngDegrees()) + "},");
+		System.out.print("{\"lat\": " + Double.toString(p2.latDegrees()) + ",\"lng\": " + Double.toString(p2.lngDegrees()) + "},");
+		System.out.print("{\"lat\": " + Double.toString(p3.latDegrees()) + ",\"lng\": " + Double.toString(p3.lngDegrees()) + "}");
+		System.out.println("]}]");
+
+	}
+	
+        private static S2Polygon polyFromCell (S2Cell cell) 
+        {
+                S2PolygonBuilder pb = new S2PolygonBuilder(S2PolygonBuilder.Options.UNDIRECTED_UNION);
+                pb.addEdge(cell.getVertex(0),cell.getVertex(1));
+                pb.addEdge(cell.getVertex(1),cell.getVertex(2));
+                pb.addEdge(cell.getVertex(2),cell.getVertex(3));
+                pb.addEdge(cell.getVertex(3),cell.getVertex(0));
+                return pb.assemblePolygon();
+                
+        }
+
+	public double getEstMu() {
+
+		double ttmu=0;
+		double area;
+		double mukm;
+
+		S2Polygon thisField = getS2Polygon();
+
+		for (S2CellId cell: getS2CellUnion()) {
+
+			S2Cell s2cell = new S2Cell(cell);
+			S2Polygon intPoly = new S2Polygon();
+			S2Polygon cellPoly = polyFromCell(s2cell);
+
+			intPoly.initToIntersection(thisField, cellPoly);
+			area = intPoly.getArea() * 6371 * 6371 ;
+
+			System.out.print(cell.toToken() + " " );
+			printCell(s2cell);
+			
+			// get mu for cellid
+			mukm = 1000;
+
+			ttmu += area * mukm;
+
+		}
+		return ttmu;
+	}
+
+
+	public S2CellUnion getS2CellUnion() {
+		S2RegionCoverer rc = new S2RegionCoverer();
+
+		rc.setMaxLevel(13);
+		rc.setMinLevel(0);
+		rc.setMaxCells(20);     
+
+		return rc.getCovering(getS2Polygon());
+	
+	}
+	
+	public S2Polygon getS2Polygon() {
+		S2PolygonBuilder pb = new S2PolygonBuilder(S2PolygonBuilder.Options.UNDIRECTED_UNION);
+		pb.addEdge(getS2LatLng(0).toPoint(),getS2LatLng(1).toPoint());
+		pb.addEdge(getS2LatLng(1).toPoint(),getS2LatLng(2).toPoint());
+		pb.addEdge(getS2LatLng(2).toPoint(),getS2LatLng(0).toPoint());
+
+		return pb.assemblePolygon();
+
+	}
 	
 	public Portal getPortal(int index) { return portals[index]; }
 	public Point getPoint(int index) { return points[index]; }
+	public S2LatLng getS2LatLng(int index) { return S2LatLng.fromE6(getLat(index),getLng(index)); }
 	
 	public void setLat(int index, Long l)
 	{
