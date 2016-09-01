@@ -47,5 +47,9 @@ public class Point {
 	public String toString() {
 		return new String (lat + ", " + lng);
 	}
+
+	public Point inverse() {
+		return new Point(-this.getLat(),180000000 - this.getLng());
+	}
 	
 }
