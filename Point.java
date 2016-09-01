@@ -49,7 +49,7 @@ public class Point {
 	}
 
 	public Point inverse() {
-		return new Point(-this.getLat(),180.0 - this.getLng());
+		return new Point(-this.getLat(),180000000 - this.getLng());
 	}
 	
 }
