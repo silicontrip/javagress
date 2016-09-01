@@ -39,13 +39,7 @@ public static void printMap(Map mp) {
 		return block;
 	}
 	
- //   private static setArea(Double area, Integer res, Integer enl)
-  //  {
-        
-        
-  //  }
-	
-	private static ArrayList<String> tripleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2,HashMap<String,Portal> p3, HashMap<String,teamCount> blocksPerLink,teamCount max, DrawTools dt)throws ParserConfigurationException, IOException
+	private static ArrayList<String> tripleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2,HashMap<String,Portal> p3, HashMap<String,teamCount> blocksPerLink,teamCount max, DrawTools dt, int calc)throws ParserConfigurationException, IOException
 	{
 		
 		ArrayList<Double> maxArea = new ArrayList<Double>();
@@ -68,8 +62,11 @@ public static void printMap(Map mp) {
 					
 					Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
 					
-					//Double area = fi.getGeoArea();
-					Double area = fi.getEstMu();
+					Double area;	
+					if (calc==0)
+						area = fi.getGeoArea();
+					else
+						area = fi.getEstMu();
 					
 					teamCount block = getBlocks(pki,pkj,pkk,blocksPerLink);
 
@@ -103,7 +100,7 @@ public static void printMap(Map mp) {
 	}
 
 	
-	private static ArrayList<String> doubleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt)  throws ParserConfigurationException, IOException
+	private static ArrayList<String> doubleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt,int calc)  throws ParserConfigurationException, IOException
 	{
 		Object[] portalKeys = p1.values().toArray();
 
@@ -127,8 +124,11 @@ public static void printMap(Map mp) {
 						Portal pkk = (Portal)portalKeys[k];
 						Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
 						
-						//Double area = fi.getGeoArea();
-						Double area = fi.getEstMu();
+						Double area;
+						if (calc==0)
+							area = fi.getGeoArea();
+						else
+							area = fi.getEstMu();
 						
 						teamCount block = getBlocks(pki,pkj,pkk,blocksPerLink);
 						
@@ -165,7 +165,7 @@ public static void printMap(Map mp) {
 	}
 	
 	
-	private static  ArrayList<String> singleCluster(HashMap<String,Portal> portals, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt) throws ParserConfigurationException, IOException {
+	private static  ArrayList<String> singleCluster(HashMap<String,Portal> portals, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt,int calc) throws ParserConfigurationException, IOException {
 		
 		Object[] portalKeys = portals.values().toArray();
 		
@@ -193,8 +193,11 @@ public static void printMap(Map mp) {
 						Portal pkk = (Portal)portalKeys[k];
 						Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
 						
-						//Double area = fi.getGeoArea();
-						Double area = fi.getEstMu();
+						Double area;
+						if (calc==0)
+							area = fi.getGeoArea();
+						else
+							area = fi.getEstMu();
 
 						//System.out.println("1: " + pki.getGuid() + " 2: " + pkj.getGuid() + " 3: " + pkk.getGuid());
 						//printMap(blocksPerLink);
@@ -373,6 +376,7 @@ public static void printMap(Map mp) {
 		long runTime;
 		double totalTime;
 		long endTime;
+		int calc=0;
 		
         Arguments ag = new Arguments(args);
 
@@ -390,6 +394,10 @@ public static void printMap(Map mp) {
                 dt.setFieldsAsPolyline();
         else
                 dt.setFieldsAsPolygon();
+
+	// mu calculation
+	if (ag.hasOption("M"))
+		calc=1;
 
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
@@ -441,7 +449,7 @@ public static void printMap(Map mp) {
 				startTime = System.nanoTime();
 				
 				
-				areaOut = singleCluster(portals, bpl,maxBl,dt);
+				areaOut = singleCluster(portals, bpl,maxBl,dt,calc);
 				
 			} else if (ag.getArguments().size() == 2) { 
 				// one point from one cluster
@@ -497,7 +505,7 @@ public static void printMap(Map mp) {
 				
 				
 				// portals1 and and portals2 is crucial ordering.
-				areaOut = doubleCluster(portals1,portals2,bpl,maxBl,dt);
+				areaOut = doubleCluster(portals1,portals2,bpl,maxBl,dt,calc);
 				
 
 			} else if (ag.getArguments().size() == 3) { 
@@ -554,7 +562,7 @@ public static void printMap(Map mp) {
 				startTime = System.nanoTime();
 				
 				
-				areaOut = tripleCluster(portals1,portals2,portals3,bpl,maxBl,dt);
+				areaOut = tripleCluster(portals1,portals2,portals3,bpl,maxBl,dt,calc);
 				
 			} else {
 				throw new RuntimeException("Invalid command line arguments");
