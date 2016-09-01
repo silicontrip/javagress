@@ -8,70 +8,82 @@ import java.net.*;
 public class CellMUDB {
 
 
-        static CellMUDB instance = null;
+	static CellMUDB instance = null;
 	HashMap<String,Double> mudb = null;
-	HashSet<String> seen = null;
+	S2RegionCoverer rc;
+	int maxLevel;
 
 
-        public static CellMUDB getInstance() {
-                if (instance == null) {
-                        instance = new CellMUDB();
-                }
-                return instance;
-        }
 
-        private void printCell(S2Cell cell) {
+	public static CellMUDB getInstance() throws ParserConfigurationException, IOException {
+		if (instance == null) {
+			instance = new CellMUDB();
+		}
+		return instance;
+	}
 
-                        // quick and dirty drawtools output
-                S2LatLng p0 = new S2LatLng(cell.getVertex(0));
-                S2LatLng p1 = new S2LatLng(cell.getVertex(1));
-                S2LatLng p2 = new S2LatLng(cell.getVertex(2));
-                S2LatLng p3 = new S2LatLng(cell.getVertex(3));
+	private void printCell(S2Cell cell) {
 
-                System.out.print("[{\"type\":\"polygon\",\"color\":\"#ffffff\",\"latLngs\":[");
-                System.out.print("{\"lat\": " + Double.toString(p0.latDegrees()) + ",\"lng\": " + Double.toString(p0.lngDegrees()) + "},");
-                System.out.print("{\"lat\": " + Double.toString(p1.latDegrees()) + ",\"lng\": " + Double.toString(p1.lngDegrees()) + "},");
-                System.out.print("{\"lat\": " + Double.toString(p2.latDegrees()) + ",\"lng\": " + Double.toString(p2.lngDegrees()) + "},");
-                System.out.print("{\"lat\": " + Double.toString(p3.latDegrees()) + ",\"lng\": " + Double.toString(p3.lngDegrees()) + "}");
-                System.out.println("]}]");
+		// quick and dirty drawtools output
+		S2LatLng p0 = new S2LatLng(cell.getVertex(0));
+		S2LatLng p1 = new S2LatLng(cell.getVertex(1));
+		S2LatLng p2 = new S2LatLng(cell.getVertex(2));
+		S2LatLng p3 = new S2LatLng(cell.getVertex(3));
 
-        }
-
-
-	public CellMUDB() {
-
-
-               DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-
-                try {
-
-                        DocumentBuilder db = dbf.newDocumentBuilder();
-
-				URL xmlURL = new File("mudb.xml").toURI().toURL();
-        
-			XMLDecoder d = new XMLDecoder(new BufferedInputStream(xmlURL.openStream()));
-			mudb  = (HashMap<String,Double>) d.readObject();
-			d.close();
-                        
-                        
-                } catch (ParserConfigurationException pce) {
-                        System.out.println("Parser Configuration Error " + pce);
-                } catch (IOException ioe) {
-                        System.out.println("CardFactory: IO Error " + ioe);
-                }
-
-//		mudb = new HashMap<String,Double>();
-		seen = new HashSet<String>();
+		System.out.print("[{\"type\":\"polygon\",\"color\":\"#ffffff\",\"latLngs\":[");
+		System.out.print("{\"lat\": " + Double.toString(p0.latDegrees()) + ",\"lng\": " + Double.toString(p0.lngDegrees()) + "},");
+		System.out.print("{\"lat\": " + Double.toString(p1.latDegrees()) + ",\"lng\": " + Double.toString(p1.lngDegrees()) + "},");
+		System.out.print("{\"lat\": " + Double.toString(p2.latDegrees()) + ",\"lng\": " + Double.toString(p2.lngDegrees()) + "},");
+		System.out.print("{\"lat\": " + Double.toString(p3.latDegrees()) + ",\"lng\": " + Double.toString(p3.lngDegrees()) + "}");
+		System.out.println("]}]");
 
 	}
 
-	public double getMUKM (S2CellId s2id) {
-		
 
+	public CellMUDB() throws ParserConfigurationException, IOException {
+
+		int minLevel,maxCells,levelMod;
+		String mudbUrl;
+
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+
+		Properties fileProperties = new Properties();
+
+		FileInputStream fis = new FileInputStream(new File("portalfactory.properties"));
+		fileProperties.load (fis);
+		fis.close();
+
+		mudbUrl = fileProperties.getProperty("mudburl");
+
+		maxLevel = Integer.parseInt( fileProperties.getProperty("maxlevel"));
+		minLevel = Integer.parseInt( fileProperties.getProperty("minlevel"));
+		maxCells = Integer.parseInt( fileProperties.getProperty("maxcells"));
+		levelMod = Integer.parseInt( fileProperties.getProperty("levelmod"));
+
+
+		rc = new S2RegionCoverer();
+                rc.setMaxLevel(maxLevel);
+                rc.setMinLevel(minLevel);
+                rc.setMaxCells(maxCells);
+		rc.setLevelMod(levelMod);
+
+
+		DocumentBuilder db = dbf.newDocumentBuilder();
+
+		URL xmlURL = new URL(mudbUrl);
+
+		XMLDecoder d = new XMLDecoder(new BufferedInputStream(xmlURL.openStream()));
+		mudb  = (HashMap<String,Double>) d.readObject();
+		d.close();
+
+	}
+
+	private double getMUKM (S2CellId s2id) {
+		
 		if (mudb.containsKey(s2id.toToken())) {
 			return  mudb.get(s2id.toToken()).doubleValue();
 		} else {
-			if (s2id.level() < 13) {
+			if (s2id.level() < maxLevel) {
 			// sub divide cell
 			//System.out.println(s2id.level());
 			//System.out.println("divide");
@@ -96,17 +108,59 @@ public class CellMUDB {
 
 	}
 
-//	public HashMap<String,Double> getHash() { return mudb; }
+	public double getEstMu(Field f) {
 
-	public void write() {
-	                try {
-                        XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("mudb.xml")));
-                        e.writeObject(mudb);
-                        e.close();
-                } catch (FileNotFoundException fnfe) {
-                        System.out.println("deckfactory: file not found " + fnfe);
+                double ttmu=0;
+                double area;
+                double mukm;
+
+                S2Polygon thisField = getS2Polygon(f);
+
+                for (S2CellId cell: getS2CellUnion(f)) {
+
+                        S2Cell s2cell = new S2Cell(cell);
+                        S2Polygon intPoly = new S2Polygon();
+                        S2Polygon cellPoly = polyFromCell(s2cell);
+
+                        intPoly.initToIntersection(thisField, cellPoly);
+                        area = intPoly.getArea() * 6371 * 6371 ;
+
+                        // get mu for cellid
+                        //mudb.getHash().put(cell.toToken(),new Double(mukm));
+                        mukm = getMUKM(cell);
+
+                        ttmu += area * mukm;
+
                 }
+                return ttmu;
+        }
+
+
+        private static S2Polygon polyFromCell (S2Cell cell)
+        {
+                S2PolygonBuilder pb = new S2PolygonBuilder(S2PolygonBuilder.Options.UNDIRECTED_UNION);
+                pb.addEdge(cell.getVertex(0),cell.getVertex(1));
+                pb.addEdge(cell.getVertex(1),cell.getVertex(2));
+                pb.addEdge(cell.getVertex(2),cell.getVertex(3));
+                pb.addEdge(cell.getVertex(3),cell.getVertex(0));
+                return pb.assemblePolygon();
+
+        }
+
+        private S2CellUnion getS2CellUnion(Field f) {
+                return rc.getCovering(getS2Polygon(f));
+        }
+
+        public S2Polygon getS2Polygon(Field f) {
+                S2PolygonBuilder pb = new S2PolygonBuilder(S2PolygonBuilder.Options.UNDIRECTED_UNION);
+                pb.addEdge(getS2LatLng(f,0).toPoint(),getS2LatLng(f,1).toPoint());
+                pb.addEdge(getS2LatLng(f,1).toPoint(),getS2LatLng(f,2).toPoint());
+                pb.addEdge(getS2LatLng(f,2).toPoint(),getS2LatLng(f,0).toPoint());
+
+                return pb.assemblePolygon();
+
 	}
 
+	private S2LatLng getS2LatLng(Field f, int index) { return S2LatLng.fromE6(f.getLat(index),f.getLng(index)); }
 
 }
