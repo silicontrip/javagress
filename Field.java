@@ -1,4 +1,6 @@
 import java.util.ArrayList; 
+import com.google.common.geometry.*;
+
 public class Field {
 
 
@@ -43,7 +45,12 @@ public class Field {
 		}
 
 	}
-	
+
+	public double getEstMu() {
+		CellMUDB mudb = CellMUDB.getInstance();
+		return mudb.getEstMu(this);
+	}
+
 	public Portal getPortal(int index) { return portals[index]; }
 	public Point getPoint(int index) { return points[index]; }
 	
