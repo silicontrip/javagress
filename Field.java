@@ -1,6 +1,9 @@
 import java.util.ArrayList; 
 import com.google.common.geometry.*;
 
+import javax.xml.parsers.*;
+import java.io.*;
+
 public class Field {
 
 
@@ -46,7 +49,7 @@ public class Field {
 
 	}
 
-	public double getEstMu() {
+	public double getEstMu() throws ParserConfigurationException, IOException {
 		CellMUDB mudb = CellMUDB.getInstance();
 		return mudb.getEstMu(this);
 	}

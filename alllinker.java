@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.util.Arrays;
+import javax.xml.parsers.*;
+import java.io.*;
+
 
 public class alllinker {
 	
@@ -42,7 +45,7 @@ public static void printMap(Map mp) {
         
   //  }
 	
-	private static ArrayList<String> tripleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2,HashMap<String,Portal> p3, HashMap<String,teamCount> blocksPerLink,teamCount max, DrawTools dt) 
+	private static ArrayList<String> tripleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2,HashMap<String,Portal> p3, HashMap<String,teamCount> blocksPerLink,teamCount max, DrawTools dt)throws ParserConfigurationException, IOException
 	{
 		
 		ArrayList<Double> maxArea = new ArrayList<Double>();
@@ -100,7 +103,7 @@ public static void printMap(Map mp) {
 	}
 
 	
-	private static ArrayList<String> doubleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt) 
+	private static ArrayList<String> doubleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt)  throws ParserConfigurationException, IOException
 	{
 		Object[] portalKeys = p1.values().toArray();
 
@@ -162,7 +165,7 @@ public static void printMap(Map mp) {
 	}
 	
 	
-	private static  ArrayList<String> singleCluster(HashMap<String,Portal> portals, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt) {
+	private static  ArrayList<String> singleCluster(HashMap<String,Portal> portals, HashMap<String,teamCount> blocksPerLink,teamCount max,DrawTools dt) throws ParserConfigurationException, IOException {
 		
 		Object[] portalKeys = portals.values().toArray();
 		
