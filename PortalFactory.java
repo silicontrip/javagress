@@ -194,7 +194,7 @@ public class PortalFactory {
 	public HashMap<String,Portal> getPortalsInBox (String loc1, String loc2) throws IOException 
 	{
 		
-		String urlString = portalApi + "ll=" + URLEncoder.encode(loc1,"UTF-8") +"&l2="+URLEncoder.encode(loc2,"UTF-8") ;
+		String urlString = portalApi + "?ll=" + URLEncoder.encode(loc1,"UTF-8") +"&l2="+URLEncoder.encode(loc2,"UTF-8") ;
 		
 		// System.out.println(urlString);
 		
@@ -206,7 +206,7 @@ public class PortalFactory {
 	public HashMap<String,Portal> getPortalsInTri (String loc1, String loc2, String loc3) throws IOException
 	{
 		
-		String urlString = portalApi + "ll=" + URLEncoder.encode(loc1,"UTF-8") +"&l2="+URLEncoder.encode(loc2,"UTF-8") + "&l3=" + URLEncoder.encode(loc3,"UTF-8");
+		String urlString = portalApi + "?ll=" + URLEncoder.encode(loc1,"UTF-8") +"&l2="+URLEncoder.encode(loc2,"UTF-8") + "&l3=" + URLEncoder.encode(loc3,"UTF-8");
 		
 		// System.out.println(urlString);
 		
@@ -218,7 +218,7 @@ public class PortalFactory {
 	public HashMap<String,Portal> getPortals(String location, String range) throws IOException
 	{
 		
-		String urlString = portalApi + "ll=" + URLEncoder.encode(location,"UTF-8") +"&rr="+URLEncoder.encode(range,"UTF-8");
+		String urlString = portalApi + "?ll=" + URLEncoder.encode(location,"UTF-8") +"&rr="+URLEncoder.encode(range,"UTF-8");
 		
 		// System.out.println(urlString);
 		
@@ -230,7 +230,7 @@ public class PortalFactory {
 	public Portal getPortal(String location) throws IOException
 	{
 		
-		String urlString = portalApi + "ll=" + URLEncoder.encode(location,"UTF-8") ;
+		String urlString = portalApi + "?ll=" + URLEncoder.encode(location,"UTF-8") ;
 		
 		// System.out.println(urlString);
 		
@@ -393,7 +393,7 @@ public class PortalFactory {
 
 		
 		url = new URL(urlString);
-		//System.out.println("query: " +url.getQuery());
+		System.out.println("urlstring: " + urlString + " query: " +url.getQuery());
 
 		
 		//conn = (HttpURLConnection) url.openConnection();
