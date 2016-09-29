@@ -6,6 +6,10 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.*;
+import java.io.*;
+
+
 public class megaplan {
 
 
@@ -50,18 +54,19 @@ public class megaplan {
 	}
 
 	
-	private static Double sizeFields(List<Field> fa)
+	private static Double sizeFields(List<Field> fa) throws ParserConfigurationException, IOException
 	{
 		Double area = 0.0;
 		
 		for (Field fi: fa)
 		{
-			area += fi.getGeoArea();
+			//area += fi.getGeoArea();
+			area += fi.getEstMu();
 		}
 		return area;
 	}
 
-        private static int iterSearchFields (DrawTools dt, Object[] fields,boolean touch)
+        private static int iterSearchFields (DrawTools dt, Object[] fields,boolean touch) throws ParserConfigurationException, IOException
         {
 
                 int mostFields = 0;
@@ -118,7 +123,7 @@ public class megaplan {
 
 
 	
-	private static Double searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth,DrawTools dt,boolean touch)
+	private static Double searchFields (ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth,DrawTools dt,boolean touch) throws ParserConfigurationException, IOException
 	{
 			if (list.size() > 0) {
 				
