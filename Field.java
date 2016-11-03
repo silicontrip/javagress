@@ -125,12 +125,12 @@ public class Field {
         return 		getLine(0).getGeoDistance() + getLine(1).getGeoDistance() +getLine(2).getGeoDistance();
     }
 	
+	// returns the line (link) for the index
 	public Line getLine(int index) {
-		
 			
-			if (index == 0) {
-				return new Line (getLat(0),getLng(0),getLat(1),getLng(1));
-			}
+		if (index == 0) {
+			return new Line (getLat(0),getLng(0),getLat(1),getLng(1));
+		}
 		if (index == 1)
 		{
 			return new Line (getLat(1),getLng(1),getLat(2),getLng(2));
@@ -199,6 +199,7 @@ public class Field {
 		
 	}
 	
+	// not true geo inside
 	public boolean inside (Point p)
 	{
 		//boolean b1 = sign (p.getLat(),p.getLng(),lat[0],lng[0],lat[1],lng[1]) <= 0.0;
@@ -211,6 +212,25 @@ public class Field {
 		return (b1 == b2) && (b2 == b3);
 		
 	}
+	
+	Public Field getInverseCornerField(int corner)
+	{
+		//throw error or return null
+
+		int alt1, alt2;
+		
+		if (corner<0 || corner>2)
+			return null;
+		
+		if (corner == 0) { alt1=1; alt2=2; }
+		if (corner == 1) { alt1=0; alt2=2; }
+		if (corner == 2) { alt1=0; alt2=1; }
+		
+		
+		return new Field(points[corner],points[alt1].inverse(),points[alt2].inverse());
+		
+	}
+	
 	public ArrayList<Portal> getNextPortalLink (ArrayList<Portal> p) { return getPortalLinkInc(p,1); }
 	public ArrayList<Portal> getPrevPortalLink (ArrayList<Portal> p) { return getPortalLinkInc(p,-1); }
 	public ArrayList<Point> getNextLink (ArrayList<Point> p) { return getLinkInc(p,1); }
@@ -251,6 +271,7 @@ public class Field {
 
 	}
 
+	// determine which anchor equals the supplied point
 	public int getPointIndex (Point p)
 	{
 		if (p.equals(points[0])) return 0;
@@ -259,6 +280,8 @@ public class Field {
 		return -1;
 	}
 	
+	
+	// compare two fields have the same anchor points
 	public boolean equals(Field f) 
 	{
 	
