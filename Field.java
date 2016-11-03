@@ -186,6 +186,17 @@ public class Field {
 		
 	}
 
+	public teamCount countIntersects(Collection<Link> links)
+	{
+		ArrayList<Link> blocks = getIntersects(links);
+                teamCount block = new teamCount();
+
+                for (Link li: blocks)
+                        block.incTeamEnum(li.getTeamEnum());
+
+                return block;
+        }
+
 	public ArrayList<Link> getIntersects (Collection<Link> links)
 	{
 		ArrayList<Link> allLinks = new ArrayList<Link>();
