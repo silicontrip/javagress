@@ -263,72 +263,72 @@ public static void printMap(Map mp) {
 		long endTime;
 		int calc=0;
 		
-        Arguments ag = new Arguments(args);
+		Arguments ag = new Arguments(args);
 
-        //System.out.println ("Arguments: " + ag );
+		//System.out.println ("Arguments: " + ag );
 
-        teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+		teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
         
-        DrawTools dt = new DrawTools(); 
-        if (ag.hasOption("C"))
-                dt.setDefaultColour(ag.getOptionForKey("C"));
-        else
-                dt.setDefaultColour("#a24ac3");
+		DrawTools dt = new DrawTools(); 
+		if (ag.hasOption("C"))
+			dt.setDefaultColour(ag.getOptionForKey("C"));
+		else
+			dt.setDefaultColour("#a24ac3");
 
-        if (ag.hasOption("L"))
-                dt.setFieldsAsPolyline();
-        else
-                dt.setFieldsAsPolygon();
+		if (ag.hasOption("L"))
+			dt.setFieldsAsPolyline();
+		else
+			dt.setFieldsAsPolygon();
 
-	// mu calculation
-	if (ag.hasOption("M"))
-		calc=1;
+		// mu calculation
+		if (ag.hasOption("M"))
+			calc=1;
 
-	try {
-		PortalFactory pf = PortalFactory.getInstance();
+		try {
+			PortalFactory pf = PortalFactory.getInstance();
 			
-		System.err.println("== Reading portals ==");
+			System.err.println("== Reading portals ==");
 			
-		startTime = System.nanoTime();
-		runTime = startTime;
-			
-		// System.err.println("== " + args.length + " ==");
-			
-		HashMap<String,Link> allLinks = pf.getLinks();
-			
-		List<Portal> allPortals = new ArrayList<Portal>();
-			
-		ArrayList<String> areaOut;
-			
-	// ag.getArgumentAt
-		ArrayList<Field> allfields;
-		if (ag.getArguments().size() == 1) {
-				
-		// get all 3 points from one cluster 
-				
-			HashMap<String,Portal> portals = new HashMap<String,Portal>();
-				
-			portals = pf.portalClusterFromString(ag.getArgumentAt(0));
-				
-			endTime = System.nanoTime();
-			elapsedTime = (endTime - startTime)/nanoPerSec;
-			System.err.println("==  portals read " + elapsedTime+ " ==");
-			System.err.println("== Reading links ==");
 			startTime = System.nanoTime();
+			runTime = startTime;
+			
+			// System.err.println("== " + args.length + " ==");
+			
+			HashMap<String,Link> allLinks = pf.getLinks();
+			
+			List<Portal> allPortals = new ArrayList<Portal>();
+			
+			ArrayList<String> areaOut;
+			
+		// ag.getArgumentAt
+			ArrayList<Field> allfields;
+			if (ag.getArguments().size() == 1) {
+				
+			// get all 3 points from one cluster 
+				
+				HashMap<String,Portal> portals = new HashMap<String,Portal>();
+				
+				portals = pf.portalClusterFromString(ag.getArgumentAt(0));
+				
+				endTime = System.nanoTime();
+				elapsedTime = (endTime - startTime)/nanoPerSec;
+				System.err.println("==  portals read " + elapsedTime+ " ==");
+				System.err.println("== Reading links ==");
+				startTime = System.nanoTime();
 
 				
-			ArrayList<Link> links = purgeLinks(portals.values(),allLinks.values());
+				ArrayList<Link> links = purgeLinks(portals.values(),allLinks.values());
 				
-			endTime = System.nanoTime();
-			elapsedTime = (endTime - startTime)/nanoPerSec;
-			System.err.println("==  links read " + elapsedTime+ " ==");
-			System.err.println("== Generating fields ==");
-			startTime = System.nanoTime();
+				endTime = System.nanoTime();
+				elapsedTime = (endTime - startTime)/nanoPerSec;
+				System.err.println("==  links read " + elapsedTime+ " ==");
+				System.err.println("== Generating fields ==");
+				startTime = System.nanoTime();
 				
 				
-			allfields = singleCluster(portals);
+				allfields = singleCluster(portals);
 				
-		} else if (ag.getArguments().size() == 2) { 
+			} else if (ag.getArguments().size() == 2) { 
 				// one point from one cluster
 				// and the other two points from the other cluster
 				
@@ -423,6 +423,8 @@ public static void printMap(Map mp) {
 
 			for (Field fi: allfields) 
 			{
+				System.out.print (fi.getGeoArea());
+				System.out.print (" / ");
 				System.out.println(fi);
 			}
 			
