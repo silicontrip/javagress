@@ -1,4 +1,5 @@
 import java.util.ArrayList; 
+import java.util.Collection;
 import com.google.common.geometry.*;
 
 import javax.xml.parsers.*;
@@ -184,7 +185,43 @@ public class Field {
 
 		
 	}
+
+	public teamCount countIntersects(Collection<Link> links)
+	{
+		ArrayList<Link> blocks = getIntersects(links);
+                teamCount block = new teamCount();
+
+                for (Link li: blocks)
+                        block.incTeamEnum(li.getTeamEnum());
+
+                return block;
+        }
+
+	public ArrayList<Link> getIntersects (Collection<Link> links)
+	{
+		ArrayList<Link> allLinks = new ArrayList<Link>();
+		Line l1 = getLine(0);
+		Line l2 = getLine(1);
+		Line l3 = getLine(2);
+
+		for (Link li: links)
+		{
+			Line ll = li.getLine();
+
+			if (l1.intersects(ll)) { 
+				allLinks.add(li); 
+			} else if (l2.intersects(ll)) { 
+				allLinks.add(li); 
+			} else if (l3.intersects(ll)) { 
+				allLinks.add(li); 
+			}
+		}
+
 	
+		return allLinks;	
+		
+	
+	}
     
 	protected double sign (Point p1, Point p2, Point p3) 
 	{
@@ -279,6 +316,29 @@ public class Field {
 		if (p.equals(points[2])) return 2;
 		return -1;
 	}
+
+	public Double difference (Field f)
+	{
+
+		Double total = 0.0;
+		Double least;
+
+		for (int f1 =0; f1 < 3; f1++)
+		{
+			least = 9999.9; // max link is 6881km
+			for (int f2=0; f2<3; f2++)
+			{
+				Double ff = this.getPoint(f1).getGeoDistance(f.getPoint(f2));
+				if (ff < least)
+					least = ff;
+			}
+			total += least;
+		}	
+
+		return total;
+
+	}
+
 	
 	
 	// compare two fields have the same anchor points
