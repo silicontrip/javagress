@@ -1,9 +1,9 @@
-
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -23,6 +23,28 @@ public class layerlinker {
 + " Value : " + entry.getValue());
         }
     }
+
+
+	private static int findField(Object[] fields, int start, Field current,ArrayList<Field> exist) 
+	{
+		int best=-1;
+		Double closest = 9999.0;
+		for (int n =start; n < fields.length; n++)
+		{
+			if (!((Field)fields[n]).intersects(exist))
+			{
+				Double diff = current.difference((Field)fields[n]);
+// need to make configurable threshold
+				if (diff < 0.3  && diff < closest)
+					{
+						closest = diff;
+						best = n;
+					}
+
+			}
+		}
+		return best;
+	}
 
 	
 // create all fields from 3 portal clusters
@@ -412,7 +434,7 @@ public class layerlinker {
 			
 			// start searching for fields.
 
-			Map<Double,Field> blockField = new HashMap<Double,Field>();
+			Map<Double,Field> blockField = new TreeMap<Double,Field>(Collections.reverseOrder());
 			for (Field fi: allfields) 
 			{
 				teamCount block =  fi.countIntersects(links);
@@ -428,30 +450,43 @@ public class layerlinker {
 			System.err.println("== show matches ==");
 			startTime = System.nanoTime();
 
-			Map<Double,Field> sortField = new TreeMap<Double,Field>(blockField);
-			printMap(sortField);
+			Map<Double,Field> simField = new TreeMap<Double,Field>(Collections.reverseOrder());
 
+			Object[] bf = blockField.values().toArray();
 
-/*
-			for (Field f1: blockField) 
-				for (Field f2: blockField)
-				{
-					if (!f1.intersects(f2)) {
-						Double dff = f1.difference(f2);
-						if (dff < 0.5 && dff > 0.0) {
-							Double aa = f1.getGeoArea() + f2.getGeoArea();	
-							System.out.print (dff);
-							System.out.print (" / ");
-							System.out.print (aa);
-								System.out.print (" / ");
-			
-							dt.erase();
-							dt.addField(f1); dt.addField(f2);
-							System.out.println(dt.out());	
-						}
-					}
+			Map<Double,String> plan = new TreeMap<Double,String>(Collections.reverseOrder());
+
+			Double bestbest = 0.0;
+				
+			for (int i =0; i< bf.length;i++ )  {
+				Double at = 0.0;
+				at += ((Field)bf[i]).getGeoArea();
+				ArrayList<Field> fc = new ArrayList<Field>();
+				dt.erase();
+				fc.add((Field)bf[i]);
+				dt.addField((Field)bf[i]);
+				int best = findField(bf,i+1,(Field)bf[i],fc);
+				while (best != -1) {
+					at += ((Field)bf[best]).getGeoArea();
+					dt.addField((Field)bf[best]);
+					fc.add((Field)bf[best]);
+					best = findField(bf,best+1,(Field)bf[best],fc);
 				}
-*/	
+				// calc area, layers 
+				// print
+				plan.put(at,dt.out());
+				if (at>bestbest) {
+					bestbest = at;
+					System.out.println("" + at + " / " + dt.out());
+				}
+			}
+
+			for (Map.Entry<Double, String> entry : plan.entrySet()) 
+			{
+				System.out.println(""  + entry.getKey() + " / " + entry.getValue());
+				System.out.println("");
+			}
+
 			endTime = System.nanoTime();
 			elapsedTime = (endTime - startTime)/nanoPerSec;
 			totalTime = (endTime - runTime)/nanoPerSec;
