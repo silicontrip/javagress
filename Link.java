@@ -56,6 +56,19 @@ public class Link {
 		return ((l.getdLat() == getdLat()) && (l.getoLat() == getoLat()) && (l.getdLng() == getdLng()) && (l.getoLng() == getoLng()) ||
 				(l.getdLat() == getoLat()) && (l.getoLat() == getdLat()) && (l.getdLng() == getoLng()) && (l.getoLng() == getdLng()));
 	}
+
+	public ArrayList<Link> getIntersects(Link[] links)
+	{
+		ArrayList<Link> allLinks = new ArrayList<Link>();
+		Line l = getLine();
+		for (Link link : links)
+		{
+			if (l.intersects(link.getLine())) { allLinks.add(link); }
+		}
+		return allLinks;
+	}
+		
+		
 	
 	public boolean intersects (Link[] links)
 	{
