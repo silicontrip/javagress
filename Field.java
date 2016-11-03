@@ -159,6 +159,15 @@ public class Field {
 			f.getPortal(2) == this.getPortal(2)) ;
 
 	}
+
+	public boolean intersects(ArrayList<Field> f) 
+	{
+	
+		for (Field fi: f)
+			if (this.intersects(fi))
+				return true;
+		return false;
+	}
 	
 	public boolean intersects(Field f)
 	{
@@ -250,11 +259,11 @@ public class Field {
 		
 	}
 	
-	Public Field getInverseCornerField(int corner)
+	public Field getInverseCornerField(int corner)
 	{
 		//throw error or return null
 
-		int alt1, alt2;
+		int alt1=1, alt2=2;
 		
 		if (corner<0 || corner>2)
 			return null;
@@ -262,7 +271,6 @@ public class Field {
 		if (corner == 0) { alt1=1; alt2=2; }
 		if (corner == 1) { alt1=0; alt2=2; }
 		if (corner == 2) { alt1=0; alt2=1; }
-		
 		
 		return new Field(points[corner],points[alt1].inverse(),points[alt2].inverse());
 		
