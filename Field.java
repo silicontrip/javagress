@@ -1,4 +1,5 @@
 import java.util.ArrayList; 
+import java.util.Collection;
 import com.google.common.geometry.*;
 
 import javax.xml.parsers.*;
@@ -184,7 +185,32 @@ public class Field {
 
 		
 	}
+
+	public ArrayList<Link> getIntersects (Collection<Link> links)
+	{
+		ArrayList<Link> allLinks = new ArrayList<Link>();
+		Line l1 = getLine(0);
+		Line l2 = getLine(1);
+		Line l3 = getLine(2);
+
+		for (Link li: links)
+		{
+			Line ll = li.getLine();
+
+			if (l1.intersects(ll)) { 
+				allLinks.add(li); 
+			} else if (l2.intersects(ll)) { 
+				allLinks.add(li); 
+			} else if (l3.intersects(ll)) { 
+				allLinks.add(li); 
+			}
+		}
+
 	
+		return allLinks;	
+		
+	
+	}
     
 	protected double sign (Point p1, Point p2, Point p3) 
 	{
