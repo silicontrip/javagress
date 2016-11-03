@@ -258,6 +258,29 @@ public class Field {
 		if (p.equals(points[2])) return 2;
 		return -1;
 	}
+
+	public Double difference (Field f)
+	{
+
+		Double total = 0;
+		Double least;
+
+		for (f1 =0; f1 < 3; f1++)
+		{
+			least = 9999; // max link is 6881km
+			for (f2=0; f2<3; f2++)
+			{
+				Double ff = this.getPoint(f1).getGeoDistance(f.getPoint(f2));
+				if (ff < least)
+					least = ff;
+			}
+			total += least;
+		}	
+
+		return total;
+
+	}
+
 	
 	public boolean equals(Field f) 
 	{
