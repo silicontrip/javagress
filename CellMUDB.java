@@ -101,8 +101,8 @@ public class CellMUDB {
 			String s2tok = s2id.toToken();
 			System.out.print(s2tok + " ");
 			printCell(new S2Cell(s2id));
-			mudb.put(s2tok,0.0);
-			return 0;
+			mudb.put(s2tok,1.0);
+			return 1.0;
 		}
 			
 
