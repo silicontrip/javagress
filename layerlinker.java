@@ -1,5 +1,6 @@
 
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Collection;
@@ -16,28 +17,13 @@ public class layerlinker {
 	
 	private static final Double nanoPerSec = 1000000000.0;
 
-public static void printMap(Map mp) {
-    Iterator it = mp.entrySet().iterator();
-    while (it.hasNext()) {
-        Map.Entry pair = (Map.Entry)it.next();
-        System.out.println(pair.getKey() + " = " + pair.getValue());
-        it.remove(); // avoids a ConcurrentModificationException
+    public static <K, V> void printMap(Map<K, V> map) {
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            System.out.println("Key : " + entry.getKey()
++ " Value : " + entry.getValue());
+        }
     }
-}
-	
-	private static teamCount getBlocks (Portal pki, Portal pkj, Portal pkk,HashMap<String,teamCount> blocksPerLink)
-	{
-		teamCount block = new teamCount();
 
-		teamCount ij = blocksPerLink.get(pki.getGuid() + pkj.getGuid());
-		teamCount jk = blocksPerLink.get(pkj.getGuid() + pkk.getGuid());
-		teamCount ik = blocksPerLink.get(pki.getGuid() + pkk.getGuid());
-		
-		block.setResistance (ij.getResistanceAsInt() + jk.getResistanceAsInt() + ik.getResistanceAsInt());
-		block.setEnlightened (ij.getEnlightenedAsInt() + jk.getEnlightenedAsInt() + ik.getEnlightenedAsInt());
-		
-		return block;
-	}
 	
 // create all fields from 3 portal clusters
 	private static ArrayList<Field> tripleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2,HashMap<String,Portal> p3)
@@ -284,6 +270,7 @@ public static void printMap(Map mp) {
 		if (ag.hasOption("M"))
 			calc=1;
 
+
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
 			
@@ -299,6 +286,7 @@ public static void printMap(Map mp) {
 			List<Portal> allPortals = new ArrayList<Portal>();
 			
 			ArrayList<String> areaOut;
+			ArrayList<Link> links;
 			
 		// ag.getArgumentAt
 			ArrayList<Field> allfields;
@@ -317,7 +305,7 @@ public static void printMap(Map mp) {
 				startTime = System.nanoTime();
 
 				
-				ArrayList<Link> links = purgeLinks(portals.values(),allLinks.values());
+				links = purgeLinks(portals.values(),allLinks.values());
 				
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
@@ -355,7 +343,7 @@ public static void printMap(Map mp) {
 				
 				
 				
-				ArrayList<Link> links = purgeLinks(new ArrayList<Portal>(allPortals),allLinks.values());
+				links = purgeLinks(new ArrayList<Portal>(allPortals),allLinks.values());
 
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
@@ -395,7 +383,7 @@ public static void printMap(Map mp) {
 				startTime = System.nanoTime();
 				
 				
-				ArrayList<Link> links = purgeLinks(new ArrayList<Portal>(allPortals),allLinks.values());
+				links = purgeLinks(new ArrayList<Portal>(allPortals),allLinks.values());
 				
 				// create link blockers 1-2, 2-3 and 3-1 
 
@@ -417,17 +405,57 @@ public static void printMap(Map mp) {
 			endTime = System.nanoTime();
 			elapsedTime = (endTime - startTime)/nanoPerSec;
 			totalTime = (endTime - runTime)/nanoPerSec;
-			System.err.println("== Finished. " + elapsedTime + " elapsed time. " + totalTime + " total time.");
+			System.err.println("==  fields generated " + elapsedTime+ " ==");
+				System.err.println("== purge fields ==");
+				startTime = System.nanoTime();
+				
 			
 			// start searching for fields.
 
+			Map<Double,Field> blockField = new HashMap<Double,Field>();
 			for (Field fi: allfields) 
 			{
-				System.out.print (fi.getGeoArea());
-				System.out.print (" / ");
-				System.out.println(fi);
+				teamCount block =  fi.countIntersects(links);
+				if (!block.moreThan(maxBl)) {
+					blockField.put(fi.getGeoArea(),fi);
+				}
+				
 			}
+			endTime = System.nanoTime();
+			elapsedTime = (endTime - startTime)/nanoPerSec;
+			totalTime = (endTime - runTime)/nanoPerSec;
+			System.err.println("==  fields filtered " + elapsedTime+ " ==");
+			System.err.println("== show matches ==");
+			startTime = System.nanoTime();
+
+			Map<Double,Field> sortField = new TreeMap<Double,Field>(blockField);
+			printMap(sortField);
+
+
+/*
+			for (Field f1: blockField) 
+				for (Field f2: blockField)
+				{
+					if (!f1.intersects(f2)) {
+						Double dff = f1.difference(f2);
+						if (dff < 0.5 && dff > 0.0) {
+							Double aa = f1.getGeoArea() + f2.getGeoArea();	
+							System.out.print (dff);
+							System.out.print (" / ");
+							System.out.print (aa);
+								System.out.print (" / ");
 			
+							dt.erase();
+							dt.addField(f1); dt.addField(f2);
+							System.out.println(dt.out());	
+						}
+					}
+				}
+*/	
+			endTime = System.nanoTime();
+			elapsedTime = (endTime - startTime)/nanoPerSec;
+			totalTime = (endTime - runTime)/nanoPerSec;
+			System.err.println("== Finished. " + elapsedTime + " elapsed time. " + totalTime + " total time.");
 			
 		} catch (Exception e) {
 			
