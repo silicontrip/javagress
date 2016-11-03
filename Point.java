@@ -1,6 +1,7 @@
 
 public class Point {
 
+	public static Double earthRadius = 6371.0;
 	protected Long lat;
 	protected Long lng;
 
@@ -56,8 +57,8 @@ public class Point {
 
                 Double oLat = this.getLat()/1000000.0;
                 Double oLng = this.getLng()/1000000.0;
-                Double dLat = p.getdLat()/1000000.0;
-                Double dLng = p.getdLng()/1000000.0;
+                Double dLat = p.getLat()/1000000.0;
+                Double dLng = p.getLng()/1000000.0;
 
 //System.err.println("point: " + dLat + "," + dLng + " - " + oLat + "," + oLng);
 
