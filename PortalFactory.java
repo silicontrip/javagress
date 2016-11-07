@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.type.TypeReference;  
 import java.util.*;
 
-
-
-
 public class PortalFactory {
 	
 	protected String portalApi;
@@ -20,7 +17,7 @@ public class PortalFactory {
 		return instance;
 	}
 	// from http://stackoverflow.com/questions/13592236/parse-the-uri-string-into-name-value-collection-in-java	
-	public static Map<String, List<String>> splitQuery(URL url) throws UnsupportedEncodingException {
+	protected static Map<String, List<String>> splitQuery(URL url) throws UnsupportedEncodingException {
 		final Map<String, List<String>> query_pairs = new LinkedHashMap<String, List<String>>();
 		final String[] pairs = url.getQuery().split("&");
 		for (String pair : pairs) {
@@ -551,6 +548,42 @@ public class PortalFactory {
 		
 	}
 	
+	public static ArrayList<Link> makeLinksFromSingleCluster(ArrayList<Portal> portals)
+	{
+		ArrayList<Link> la = new ArrayList<Link>();
+
+		Object[] portalKeys = portals.toArray();
+		
+		for (int i =0; i<portalKeys.length; i++)
+		{
+			Portal pki = (Portal)portalKeys[i];
+			
+			for (int j=i+1; j<portalKeys.length; j++)
+			{
+				Portal pkj = (Portal)portalKeys[j];
+				Link li = new Link (pki.getPoint(),pkj.getPoint());
+				la.add(li);
+			}
+		}
+		return la;
+	}
+
+	public static ArrayList<Link> makeLinksFromDoubleCluster(ArrayList<Portal> portals1,ArrayList<Portal> portals2)
+	{
+		ArrayList<Link> la = new ArrayList<Link>();
+		
+		for (Portal pki: portals1)
+		{
+			
+			for (Portal pkj: portals2)
+			{
+				Link li = new Link (pki.getPoint(),pkj.getPoint());
+				la.add(li);
+			}
+		}
+		return la;
+	}
+
 	
 }
 
