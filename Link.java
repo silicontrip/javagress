@@ -1,7 +1,7 @@
 import java.util.HashMap;
 import java.util.ArrayList;
 
-public class Link {
+public class Link extends Line {
 
 	
 	public static final int NEUTRAL = 0;
@@ -10,25 +10,25 @@ public class Link {
 	
 	
 	protected String guid;
-	protected Long dLat;
-	protected Long dLng;
+//	protected Long dLat;
+//	protected Long dLng;
 	protected String dGuid;
 	
-	protected Long oLat;
-	protected Long oLng;
+//	protected Long oLat;
+//	protected Long oLng;
 	protected String oGuid;
 	protected String team;
 	protected int teamEnum;
 
-	public Long getdLat() { return dLat; }
-	public Long getdLng() { return dLng; }
-	public void setdLat(Long l) { dLat=l; }
-	public void setdLng(Long l) { dLng=l; }
+//	public Long getdLat() { return dLat; }
+//	public Long getdLng() { return dLng; }
+//	public void setdLat(Long l) { dLat=l; }
+//	public void setdLng(Long l) { dLng=l; }
 
-	public Long getoLat() { return oLat; }
-	public Long getoLng() { return oLng; }
-	public void setoLat(Long l) { oLat=l; }
-	public void setoLng(Long l) { oLng=l; }
+//	public Long getoLat() { return oLat; }
+//	public Long getoLng() { return oLng; }
+//	public void setoLat(Long l) { oLat=l; }
+//	public void setoLng(Long l) { oLng=l; }
 
 	public String getGuid() { return guid; }
 	public void setGuid(String g) { guid = g; }
@@ -39,15 +39,16 @@ public class Link {
 	public String getoGuid() { return oGuid; }
 	public void setoGuid(String g) { oGuid = g; }
 	
-	public void setdLocation(Point lo) { setdLat(lo.getLat()); setdLng(lo.getLng()); }
-	public void setoLocation(Point lo) { setoLat(lo.getLat()); setoLng(lo.getLng()); }
+	public void setdLocation(Point lo) { setdLat(lo.getLatE6()); setdLng(lo.getLngE6()); }
+	public void setoLocation(Point lo) { setoLat(lo.getLatE6()); setoLng(lo.getLngE6()); }
 
 	public Point getdLocation() { return new Point(getdLat(),getdLng()); }
 	public Point getoLocation() { return new Point(getoLat(),getoLng()); }
 	
 	public int getTeamEnum() { return teamEnum; }
 	public String getTeam() { return team; }
-	
+
+	/*
 	public boolean equals(Link l) 
 	{
 		
@@ -57,20 +58,19 @@ public class Link {
 		return ((l.getdLat() == getdLat()) && (l.getoLat() == getoLat()) && (l.getdLng() == getdLng()) && (l.getoLng() == getoLng()) ||
 				(l.getdLat() == getoLat()) && (l.getoLat() == getdLat()) && (l.getdLng() == getoLng()) && (l.getoLng() == getdLng()));
 	}
-
+	*/
 	public ArrayList<Link> getIntersects(Link[] links)
 	{
 		ArrayList<Link> allLinks = new ArrayList<Link>();
-		Line l = getLine();
 		for (Link link : links)
 		{
-			if (l.intersects(link.getLine())) { allLinks.add(link); }
+			if (this.intersects(link)) { allLinks.add(link); }
 		}
 		return allLinks;
 	}
 		
 		
-	
+	/*
 	public boolean intersects (Link[] links)
 	{
 		Line l = getLine();
@@ -82,7 +82,8 @@ public class Link {
 		
 		return false;
 	}
-	
+	*/
+	/*
 	public boolean intersectsOrEqual (Link[] links)
 	{
 		Line l = getLine();
@@ -94,7 +95,7 @@ public class Link {
 		
 		return false;
 	}
-	
+	*/
 	
 	public void setTeam(String t) { 
 		team = t;
@@ -108,7 +109,7 @@ public class Link {
 		 
 	}
 
-	public Line getLine() { return new Line (this.getoLat(),this.getoLng(), this.getdLat(), this.getdLng()); } 
+	// public Line getLine() { return new Line (this.getoLat(),this.getoLng(), this.getdLat(), this.getdLng()); }
 	
 	public Link (HashMap<String,Object> pt) 
 	{
@@ -124,29 +125,31 @@ public class Link {
 	
 	public Link (String g, String dg, Integer dla,Integer dlo, String og, Integer ola,Integer olo,String team)
 	{
+		super(new Long(dla),new Long(dlo),new Long(ola),new Long(olo));
 		setGuid(g);
 		setdGuid(dg);
-		setdLat(new Long(dla));
-		setdLng(new Long(dlo));
+		//setdLat(new Long(dla));
+		//setdLng(new Long(dlo));
 		setoGuid(og);
-		setoLat(new Long(ola));
-		setoLng(new Long(olo));
+		//setoLat(new Long(ola));
+		//setoLng(new Long(olo));
 		setTeam(team);
 	}
 	
 	
 	public Link (String g, String dg, Long dla,Long dlo, String og, Long ola,Long olo,String team)
 	{
+		super(dla,dlo,ola,olo);
 		setGuid(g);
 		setdGuid(dg);
-		setdLat(dla);
-		setdLng(dlo);
+		//setdLat(dla);
+		//setdLng(dlo);
 		setoGuid(og);
-		setoLat(ola);
-		setoLng(olo);
+		//setoLat(ola);
+		//setoLng(olo);
 		setTeam(team);
 	}
-	
+	/*
 	public String toString() { 
 		
 		return this.getLine().toString();
@@ -154,5 +157,6 @@ public class Link {
 		// return new String ( getoGuid() + " - " + getdGuid() + " : " + getTeam() );
 		
 	}
+	 */
 	
 }

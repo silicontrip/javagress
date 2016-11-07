@@ -44,19 +44,20 @@ public class Line {
 	public Line (Point d, Point o) 
 	{
 	
-		setdLat(d.getLat());
-		setdLng(d.getLng());
+		setdLat(d.getLatE6());
+		setdLng(d.getLngE6());
 
-		setoLat(o.getLat());
-		setoLng(o.getLng());
+		setoLat(o.getLatE6());
+		setoLng(o.getLngE6());
 
 		
 	}
-	
+
+	/*
 	public Line (Portal d, Portal o) {
-		this(d.getPoint(), o.getPoint());
+		this(d.getPointE6(), o.getPointE6());
 	}
-	
+	*/
 	public Line (Long dla,Long dlo, Long ola,Long olo)
 	{
 		setdLat(dla);
@@ -73,11 +74,11 @@ public class Line {
 		
 	}
 	
-	public boolean equals(Link[] links)
+	public boolean equals(Line[] lines)
 	{
-		for (Link link : links)
+		for (Line line : lines)
 		{
-			if (equals(link.getLine())) { return true; }
+			if (equals(line)) { return true; }
 		}
 		
 		return false;
@@ -156,7 +157,7 @@ public class Line {
 		return 2;
 
 	}
-
+/*
 	private int intersectType(Line l)
 	{
 		//  System.out.println ( this.getoLat() + "," + this.getoLng() + " - " + this.getdLat() + "," + this.getdLng());
@@ -183,10 +184,10 @@ public class Line {
 
 		return 2; // no intersection
 	}
-		
+	*/
 	public Boolean intersects(Line l) { 
 
-		DrawTools dt = new DrawTools();
+		// DrawTools dt = new DrawTools();
 		//dt.addLine(this);
 		//dt.addLine(l);
 
@@ -205,26 +206,28 @@ public class Line {
 		// really would like some unit tests now.
 		return (gi == 1);
 	}
-	public Boolean intersectsOrEqual(Line l) { return (intersectType(l) != 2);	}
-    public Boolean equalLine(Line l) { return (intersectType(l) == 0);	}
+	public Boolean intersectsOrEqual(Line l) { return (greaterCircleIntersectType(l) != 2);	}
+    public Boolean equalLine(Line l) { return (greaterCircleIntersectType(l) == 0);	}
 
-    
-	public boolean intersects (Link[] links)
+	
+	
+
+	public boolean intersects (Line[] lines)
 	{
 		
-		for (Link link : links)
+		for (Line line : lines)
 		{
-			if (intersects(link.getLine())) { return true; }
+			if (intersects(line)) { return true; }
 		}
 		
 		return false;
 	}
 	
-	public boolean intersectsOrEquals (Link[] links)
+	public boolean intersectsOrEquals (Line[] lines)
 	{		
-		for (Link link : links)
+		for (Line line : lines)
 		{
-			if (intersectsOrEqual(link.getLine())) { return true; }
+			if (intersectsOrEqual(line)) { return true; }
 		}
 		
 		return false;
