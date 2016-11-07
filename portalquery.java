@@ -66,7 +66,7 @@ public class portalquery {
 				Portal pt = (Portal)pair.getValue();
 				System.out.println(pair.getKey() + ":" + pair.getValue() + ((Portal)pair.getValue()).getUrl());
 
-				dt.addMarker(pt.getPoint().getLat()/1000000.0, (pt.getPoint().getLng()/1000000.0));
+				dt.addMarker(pt.getLat(), (pt.getLng()));
 				it.remove(); // avoids a ConcurrentModificationException
 			}
 

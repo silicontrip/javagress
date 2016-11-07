@@ -10,18 +10,18 @@ public class PortalSelectionBoxStrategy extends PortalSelectionStrategy  {
 	public PortalSelectionBoxStrategy (Point l1, Point l2)
 	{
 
-		minlat = l1.getLat();
-		if (minlat > l2.getLat()) minlat = l2.getLat();
+		minlat = l1.getLatE6();
+		if (minlat > l2.getLatE6()) minlat = l2.getLatE6();
 		
-		maxlat = l1.getLat();
-		if (maxlat < l2.getLat()) maxlat = l2.getLat();
+		maxlat = l1.getLatE6();
+		if (maxlat < l2.getLatE6()) maxlat = l2.getLatE6();
 		
 		
-		minlng = l1.getLng();
-		if (minlng > l2.getLng()) minlng = l2.getLng();
+		minlng = l1.getLngE6();
+		if (minlng > l2.getLngE6()) minlng = l2.getLngE6();
 
-		maxlng = l1.getLng();
-		if (maxlng < l2.getLng()) maxlng = l2.getLng();
+		maxlng = l1.getLngE6();
+		if (maxlng < l2.getLngE6()) maxlng = l2.getLngE6();
 
 		
 	}

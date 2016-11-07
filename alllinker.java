@@ -60,7 +60,7 @@ public static void printMap(Map mp) {
 				for (Portal pkk: p3.values())
 				{
 					
-					Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+					Field fi = new Field (pki,pkj,pkk);
 					
 					Double area;	
 					if (calc==0)
@@ -122,7 +122,7 @@ public static void printMap(Map mp) {
 					for (int k=j+1; k<portalKeys.length; k++)
 					{
 						Portal pkk = (Portal)portalKeys[k];
-						Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+						Field fi = new Field (pki,pkj,pkk);
 						
 						Double area;
 						if (calc==0)
@@ -191,7 +191,7 @@ public static void printMap(Map mp) {
 					for (int k=j+1; k<portalKeys.length; k++)
 					{
 						Portal pkk = (Portal)portalKeys[k];
-						Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+						Field fi = new Field (pki,pkj,pkk);
 						
 						Double area;
 						if (calc==0)
@@ -251,13 +251,13 @@ public static void printMap(Map mp) {
 				
 				//	System.out.println(guidKey);
 				
-				Line l =  new Line (pi.getPoint(), pj.getPoint());
+				Line l =  new Line (pi, pj);
 				
 				teamCount bb = new teamCount();
 				
 				for (Link link: links) {
 					
-					if (l.intersects(link.getLine())) {
+					if (l.intersects(link)) {
 						bb.incTeamEnum(link.getTeamEnum());  // change to enum
 					}
 				}
@@ -287,13 +287,13 @@ public static void printMap(Map mp) {
 				
 				//	System.out.println(guidKey);
 				
-				Line l =  new Line (pi.getPoint(), pj.getPoint());
+				Line l =  new Line (pi, pj);
 				
 				teamCount bb = new teamCount();
 				
 				for (Link link: links) {
 					
-					if (l.intersects(link.getLine())) {
+					if (l.intersects(link)) {
 						bb.incTeamEnum(link.getTeamEnum());  // change to enum
 					}
 				}
@@ -349,13 +349,13 @@ public static void printMap(Map mp) {
 		
 		for (Link link: links) {
 			
-			Line linkLine = link.getLine();
+			//Line linkLine = link.getLine();
 			
 			// if link intesects or is contained in bounding box
-			if ((line0.intersects(linkLine) ||
-				 line1.intersects(linkLine) ||
-				 line2.intersects(linkLine) ||
-				 line3.intersects(linkLine) ) ||
+			if ((line0.intersects(link) ||
+				 line1.intersects(link) ||
+				 line2.intersects(link) ||
+				 line3.intersects(link) ) ||
 				(link.getoLat() >= minLat && link.getoLat() <= maxLat &&
 				 link.getoLng() >= minLng && link.getoLng() <= maxLng)
 				)

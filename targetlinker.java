@@ -107,7 +107,7 @@ public class targetlinker {
 			    for (int lk = lj+1; lk < portals.size(); lk++)
 			    {
 				Portal pkk = portals.get(portalKeys[lk]);
-                                Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+                                Field fi = new Field (pki,pkj,pkk);
 				
 				boolean inside = true;
 				// check if field is over point.

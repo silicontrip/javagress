@@ -114,7 +114,7 @@ public class multilinker2 {
 			if (!(anchorSearch.getGuid().equals(anchor1.getGuid()) || 
 				  anchorSearch.getGuid().equals(anchor2.getGuid()) || 
 				  anchorSearch.getGuid().equals(anchor3.getGuid())) &&
-				bounds.inside(anchorSearch.getPoint())) {
+				bounds.inside(anchorSearch)) {
 				
 				
 				//				Portal pkk = (Portal)portalKeys[k];
@@ -236,13 +236,13 @@ public class multilinker2 {
 				
 				//	System.out.println(guidKey);
 				
-				Line l =  new Line (pi.getPoint(), pj.getPoint());
+				Line l =  new Line (pi, pj);
 				
 				teamCount bb = new teamCount();
 				
 				for (Link link: links) {
 					
-					if (l.intersects(link.getLine())) {
+					if (l.intersects(link)) {
 						bb.incTeamEnum(link.getTeamEnum());  // change to enum
 					}
 				}

@@ -172,15 +172,15 @@ public class maxfields {
                 
                 //	System.out.println(guidKey);
                 
-                Line l =  new Line (pi.getPoint(), pj.getPoint());
+                Line l =  new Line (pi, pj);
                 
                 teamCount bb = new teamCount();
                 blocksPerLink.put(pi,pj,bb);
                 for (Link link: links) {
-                    if (l.intersects(link.getLine())) {
+                    if (l.intersects(link)) {
                       //  System.out.println("< " + pi  + ":" + pj +  " link: " + blocksPerLink.get(pi,pj));
                         blocksPerLink.incTeamEnum(pi,pj,link.getTeamEnum());
-                    } else if (l.equalLine(link.getLine())) {
+                    } else if (l.equalLine(link)) {
                         blocksPerLink.setExists(pi,pj,true);
                     }
                 }
@@ -281,7 +281,7 @@ public static void main(String[] args) {
                             if (!(bl.getExists(pki,pkj) && bl.getExists(pkk,pkj) && bl.getExists(pkk,pki))) {
                             
                             
-                                Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+                                Field fi = new Field (pki,pkj,pkk);
 								
 								fiList.add(fi);
                             }

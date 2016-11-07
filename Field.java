@@ -37,8 +37,8 @@ public class Field {
 	}
 	
 	public Field (Portal p0, Portal p1, Portal p2) {
-		this(p0.getPoint(),p1.getPoint(),p2.getPoint());
-		if (sign(p0.getPoint(),p1.getPoint(),p2.getPoint()) > 0) { 
+		this((Point)p0,(Point)p1,(Point)p2);
+		if (sign(p0,p1,p2) > 0) {
 			portals[0] = p0;
 			portals[1] = p1;
 			portals[2] = p2;
@@ -82,7 +82,7 @@ public class Field {
 		if (index >=0 && index <= 2) 
 		{
 			//return lat[index];
-			return points[index].getLat();
+			return points[index].getLatE6();
 		}
 		return 0L;
 	}
@@ -92,7 +92,7 @@ public class Field {
 		if (index >=0 && index <= 2) 
 		{
 			//return lng[index];
-			return points[index].getLng();
+			return points[index].getLngE6();
 		}
 		return 0L;
 	}
@@ -215,13 +215,13 @@ public class Field {
 
 		for (Link li: links)
 		{
-			Line ll = li.getLine();
+			// Line ll = li.getLine();
 
-			if (l1.intersects(ll)) { 
+			if (l1.intersects(li)) {
 				allLinks.add(li); 
-			} else if (l2.intersects(ll)) { 
+			} else if (l2.intersects(li)) {
 				allLinks.add(li); 
-			} else if (l3.intersects(ll)) { 
+			} else if (l3.intersects(li)) {
 				allLinks.add(li); 
 			}
 		}
@@ -300,8 +300,8 @@ public class Field {
 	}
 	public ArrayList<Portal> getPortalLinkInc (ArrayList<Portal> p,int inc)
 	{
-		int i1 = getPointIndex(p.get(0).getPoint());
-		int i2 = getPointIndex(p.get(1).getPoint());
+		int i1 = getPointIndex(p.get(0));
+		int i2 = getPointIndex(p.get(1));
 		ArrayList<Portal> next = new ArrayList<Portal>();
 
 		i1 = (i1 + inc) % 3;

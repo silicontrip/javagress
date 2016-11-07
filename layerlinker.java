@@ -25,7 +25,7 @@ public class layerlinker {
     }
 
 
-	private static int findField(Object[] fields, int start, Field current,ArrayList<Field> exist) 
+	private static int findField(Object[] fields, int start, Field current,ArrayList<Field> exist, Double threshold)
 	{
 		int best=-1;
 		Double closest = 9999.0;
@@ -35,7 +35,7 @@ public class layerlinker {
 			{
 				Double diff = current.difference((Field)fields[n]);
 // need to make configurable threshold
-				if (diff < 0.3  && diff < closest)
+				if (diff < threshold  && diff < closest)
 					{
 						closest = diff;
 						best = n;
@@ -61,7 +61,7 @@ public class layerlinker {
 				for (Portal pkk: p3.values())
 				{
 					
-					Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+					Field fi = new Field (pki,pkj,pkk);
 					fa.add(fi);		
 				}
 			}
@@ -84,7 +84,7 @@ public class layerlinker {
 				for (int k=j+1; k<portalKeys.length; k++)
 				{
 					Portal pkk = (Portal)portalKeys[k];
-					Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+					Field fi = new Field (pki,pkj,pkk);
 					fa.add(fi);
 						
 				}
@@ -115,7 +115,7 @@ public class layerlinker {
 					for (int k=j+1; k<portalKeys.length; k++)
 					{
 						Portal pkk = (Portal)portalKeys[k];
-						Field fi = new Field (pki.getPoint(),pkj.getPoint(),pkk.getPoint());
+						Field fi = new Field (pki,pkj,pkk);
 						fa.add(fi);	
 					}
 					
@@ -144,13 +144,13 @@ public class layerlinker {
 				
 				//	System.out.println(guidKey);
 				
-				Line l =  new Line (pi.getPoint(), pj.getPoint());
+				Line l =  new Line (pi, pj);
 				
 				teamCount bb = new teamCount();
 				
 				for (Link link: links) {
 					
-					if (l.intersects(link.getLine())) {
+					if (l.intersects(link)) {
 						bb.incTeamEnum(link.getTeamEnum());  // change to enum
 					}
 				}
@@ -180,13 +180,13 @@ public class layerlinker {
 				
 				//	System.out.println(guidKey);
 				
-				Line l =  new Line (pi.getPoint(), pj.getPoint());
+				Line l =  new Line (pi, pj);
 				
 				teamCount bb = new teamCount();
 				
 				for (Link link: links) {
 					
-					if (l.intersects(link.getLine())) {
+					if (l.intersects(link)) {
 						bb.incTeamEnum(link.getTeamEnum());  // change to enum
 					}
 				}
@@ -242,13 +242,13 @@ public class layerlinker {
 		
 		for (Link link: links) {
 			
-			Line linkLine = link.getLine();
+			// Line linkLine = link.getLine();
 			
 			// if link intesects or is contained in bounding box
-			if ((line0.intersects(linkLine) ||
-				 line1.intersects(linkLine) ||
-				 line2.intersects(linkLine) ||
-				 line3.intersects(linkLine) ) ||
+			if ((line0.intersects(link) ||
+				 line1.intersects(link) ||
+				 line2.intersects(link) ||
+				 line3.intersects(link) ) ||
 				(link.getoLat() >= minLat && link.getoLat() <= maxLat &&
 				 link.getoLng() >= minLng && link.getoLng() <= maxLng)
 				)
@@ -332,6 +332,13 @@ public class layerlinker {
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
 				System.err.println("==  links read " + elapsedTime+ " ==");
+				System.err.println("== test generating links ==");
+				startTime = System.nanoTime();
+				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
+				endTime = System.nanoTime();
+				elapsedTime = (endTime - startTime)/nanoPerSec;
+				System.err.println("==  links generated " + elapsedTime+ " ==");
+
 				System.err.println("== Generating fields ==");
 				startTime = System.nanoTime();
 				
@@ -470,7 +477,7 @@ public class layerlinker {
 				dt.erase();
 				fc.add(tfi);
 				dt.addField(tfi);
-				int best = findField(bf,i+1,tfi,fc);
+				int best = findField(bf,i+1,tfi,fc,0.3); // make threshold configurable
 				while (best != -1) {
 
 					tfi = (Field)bf[best];
@@ -481,7 +488,7 @@ public class layerlinker {
 						at  += tfi.getEstMu();
 					dt.addField(tfi);
 					fc.add(tfi);
-					best = findField(bf,best+1,tfi,fc);
+					best = findField(bf,best+1,tfi,fc,0.3); // make threshold configurable
 				}
 				// calc area, layers 
 				// print

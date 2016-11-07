@@ -71,7 +71,7 @@ public class multilinker {
 				
 				
 				//				Portal pkk = (Portal)portalKeys[k];
-				Field fi = new Field (anchor1.getPoint(),anchor2.getPoint(),anchor3.getPoint());
+				Field fi = new Field (anchor1,anchor2,anchor3);
 				
 				
 				Double area = fi.getGeoArea();
@@ -200,13 +200,13 @@ public class multilinker {
 				
 				//	System.out.println(guidKey);
 				
-				Line l =  new Line (pi.getPoint(), pj.getPoint());
+				Line l =  new Line (pi, pj);
 				
 				teamCount bb = new teamCount();
 				
 				for (Link link: links) {
 					
-					if (l.intersects(link.getLine())) {
+					if (l.intersects(link)) {
 						bb.incTeamEnum(link.getTeamEnum());  // change to enum
 					}
 				}
