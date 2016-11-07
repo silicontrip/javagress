@@ -481,15 +481,15 @@ public class PortalFactory {
 		
 		for (Link link: links.values()) {
 			
-			Line linkLine = link.getLine();
+			// Line linkLine = link.getLine();
 
 		//	System.out.println("link: " + link);
 			
 			// if link intesects or is contained in bounding box
-			if ((line0.intersects(linkLine) ||
-				 line1.intersects(linkLine) ||
-				 line2.intersects(linkLine) ||
-				 line3.intersects(linkLine) ) ||
+			if ((line0.intersects(link) ||
+				 line1.intersects(link) ||
+				 line2.intersects(link) ||
+				 line3.intersects(link) ) ||
 				(link.getoLat() >= minLat && link.getoLat() <= maxLat &&
 				 link.getoLng() >= minLng && link.getoLng() <= maxLng)
 				)
@@ -548,9 +548,9 @@ public class PortalFactory {
 		
 	}
 	
-	public static ArrayList<Link> makeLinksFromSingleCluster(ArrayList<Portal> portals)
+	public static ArrayList<Line> makeLinksFromSingleCluster(Collection<Portal> portals)
 	{
-		ArrayList<Link> la = new ArrayList<Link>();
+		ArrayList<Line> la = new ArrayList<Line>();
 
 		Object[] portalKeys = portals.toArray();
 		
@@ -561,23 +561,23 @@ public class PortalFactory {
 			for (int j=i+1; j<portalKeys.length; j++)
 			{
 				Portal pkj = (Portal)portalKeys[j];
-				Link li = new Link (pki.getPoint(),pkj.getPoint());
+				Line li = new Line (pki,pkj);
 				la.add(li);
 			}
 		}
 		return la;
 	}
 
-	public static ArrayList<Link> makeLinksFromDoubleCluster(ArrayList<Portal> portals1,ArrayList<Portal> portals2)
+	public static ArrayList<Line> makeLinksFromDoubleCluster(Collection<Portal> portals1,Collection<Portal> portals2)
 	{
-		ArrayList<Link> la = new ArrayList<Link>();
+		ArrayList<Line> la = new ArrayList<Line>();
 		
 		for (Portal pki: portals1)
 		{
 			
 			for (Portal pkj: portals2)
 			{
-				Link li = new Link (pki.getPoint(),pkj.getPoint());
+				Line li = new Line (pki,pkj);
 				la.add(li);
 			}
 		}
