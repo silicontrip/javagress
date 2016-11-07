@@ -5,10 +5,12 @@ public class Point {
 	protected Long lat;
 	protected Long lng;
 
-	public Long getLat() { return lat; }
-	public Long getLng() { return lng; }
+	public Long getLatE6() { return lat; }
+	public Long getLngE6() { return lng; }
 	public Double getLatAsDouble() { return new Double(lat); }
 	public Double getLngAsDouble() { return new Double(lng); }
+	public Double getLat() { return lat/1000000.0; }
+	public Double getLng() { return lng/1000000.0; }
 
 	
 	// Greater Circle maths functions
@@ -24,7 +26,7 @@ public class Point {
 
 	public boolean equals(Point p) 
 	{
-		return (getLat().equals(p.getLat()) && getLng().equals(p.getLng()));
+		return (getLatE6().equals(p.getLatE6()) && getLngE6().equals(p.getLngE6()));
 	}
 	
 	public Point (java.lang.Long la, java.lang.Long ln) {
@@ -40,8 +42,8 @@ public class Point {
 	}
 
 	public Point(Point p) {
-		setLat(p.getLat());
-		setLng(p.getLng());
+		setLat(p.getLatE6());
+		setLng(p.getLngE6());
 	}
 
 
@@ -50,15 +52,15 @@ public class Point {
 	}
 
 	public Point inverse() {
-		return new Point(-this.getLat(),180000000 - this.getLng());
+		return new Point(-this.getLatE6(),180000000 - this.getLngE6());
 	}
 
 	public Double getGeoDistance(Point p) {
 
-                Double oLat = this.getLat()/1000000.0;
-                Double oLng = this.getLng()/1000000.0;
-                Double dLat = p.getLat()/1000000.0;
-                Double dLng = p.getLng()/1000000.0;
+                Double oLat = this.getLat();
+                Double oLng = this.getLng();
+                Double dLat = p.getLat();
+                Double dLng = p.getLng();
 
 //System.err.println("point: " + dLat + "," + dLng + " - " + oLat + "," + oLng);
 

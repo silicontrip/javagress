@@ -2,7 +2,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 
-public class Portal {
+public class Portal extends Point {
 
 	protected String guid;
 	protected String title;
@@ -10,16 +10,16 @@ public class Portal {
 	protected Integer resCount;
 	protected String team;
 	protected Integer level;
-	protected Long lat;
-	protected Long lng;
+	// protected Long lat;
+	// protected Long lng;
 
 	public String getGuid() { return guid; }
 	
-	public Long getLatE6() { return lat; }
-	public Long getLngE6() { return lng; }
+//	public Long getLatE6() { return lat; }
+//	public Long getLngE6() { return lng; }
 	
-	public Double getLat() { return lat/1000000.0; }
-	public Double getLng() { return lng/1000000.0; }
+//	public Double getLat() { return lat/1000000.0; }
+//	public Double getLng() { return lng/1000000.0; }
 	
 	public String getTitle() { return title; }
 	public Integer getLevel() { return level; }
@@ -37,7 +37,7 @@ public class Portal {
 		return "";
 	}
 		
-	public Point getPoint() { return new Point(getLatE6(),getLngE6()); }
+//	public Point getPoint() { return new Point(getLatE6(),getLngE6()); }
 	
 	
 	public void setGuid(String g) { guid = g; }
@@ -46,9 +46,9 @@ public class Portal {
 	public void setResCount(Integer r) { resCount = r; }
 	public void setTeam(String t) { team = t; }
 	public void setLevel(Integer l) { level = l; }
-	public void setPoint(Point lo) { setLat(lo.getLat()); setLng(lo.getLng()); }
-	public void setLat(Long l) { lat = l; }
-	public void setLng(Long l) { lng = l; }
+//	public void setPoint(Point lo) { setLat(lo.getLat()); setLng(lo.getLng()); }
+//	public void setLat(Long l) { lat = l; }
+//	public void setLng(Long l) { lng = l; }
 	
 	public boolean isEnlightened() { return (team.startsWith("E")); }
 	public boolean isResistance() { return (team.startsWith("R")); }
@@ -58,8 +58,8 @@ public class Portal {
 		int count  = 0;
 		for (Link l: links)
 		{
-			if (l.getdLocation().equals(getPoint()) ||
-				l.getoLocation().equals(getPoint()))
+			if (l.getdLocation().equals(this) ||
+				l.getoLocation().equals(this))
 			{
 				count++;
 			}
@@ -73,7 +73,7 @@ public class Portal {
 		int count  = 0;
 		for (Link l: links)
 		{
-			if (l.getdLocation().equals(getPoint()))
+			if (l.getdLocation().equals(this))
 			{
 				count++;
 			}
@@ -87,7 +87,7 @@ public class Portal {
 		int count  = 0;
 		for (Link l: links)
 		{
-			if (l.getoLocation().equals(getPoint()))
+			if (l.getoLocation().equals(this))
 			{
 				count++;
 			}
@@ -103,7 +103,7 @@ public class Portal {
 		for (Link l: links)
 		{
 			String guid;
-			if (l.getoLocation().equals(getPoint()))
+			if (l.getoLocation().equals(this))
 			{
 				// add portal
 				Portal p = portals.get(l.getdGuid());
@@ -111,7 +111,7 @@ public class Portal {
 					connectedPortals.add(p);
 				}
 			}
-			if (l.getdLocation().equals(getPoint()))
+			if (l.getdLocation().equals(this))
 			{
 				Portal p = portals.get(l.getoGuid());
 				if (p != null) {
@@ -139,28 +139,26 @@ public class Portal {
 	
 	public Portal ( String g, String ti, Integer h, Integer r, String te, Integer le, Integer la, Integer lo) 
 	{
+		super(new Long(la),new Long(lo));
 		setGuid(g);
 		setTitle(ti);
 		setHealth(h);
 		setResCount(r);
 		setTeam(te);
 		setLevel(le);
-		setLat(new Long(la));
-		setLng(new Long(lo));
 		
 	}
 	
 	
 	public Portal ( String g, String ti, Integer h, Integer r, String te, Integer le, Long la, Long lo) 
 	{
+		super(la,lo);
 		setGuid(g);
 		setTitle(ti);
 		setHealth(h);
 		setResCount(r);
 		setTeam(te);
 		setLevel(le);
-		setLat(la);
-		setLng(lo);
 
 	}
 	
