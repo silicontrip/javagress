@@ -73,6 +73,8 @@ public class maxfields {
 
 		while (sStack.size() > 0) {
 
+			System.out.println ("size: " + sStack.size());
+
 			ArrayList<Field> list = fStack.remove(fStack.size()-1);
 			Integer start = sStack.remove(sStack.size()-1);
 			if (list.size() > 0) {
@@ -295,8 +297,8 @@ public static void main(String[] args) {
 
 			// sort through colliding fields.
 		
-		iterSearchFields(dt,  fiList.toArray());
-		//searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
+		// iterSearchFields(dt,  fiList.toArray());
+		searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
 		
       //  System.out.println("]");
 
