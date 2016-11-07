@@ -1,10 +1,14 @@
 import javax.vecmath.Vector3d;
 public class Line {
 
+	/*
 	Long oLat;
 	Long dLat;
 	Long oLng;
 	Long dLng;
+	*/
+	Point o;
+	Point d;
 	
 	public static Double earthRadius = 6371.0;
 	
@@ -12,45 +16,41 @@ public class Line {
 	final static  double eps = 1E-10;
 
 
-	public Long getdLat() { return dLat; }
-	public Long getdLng() { return dLng; }
-	public void setdLat(Long l) { dLat=l; }
-	public void setdLng(Long l) { dLng=l; }
+	public Long getdLat() { return d.getLatE6(); }
+	public Long getdLng() { return d.getLngE6(); }
+	public void setdLat(Long l) { d.setLat(l); }
+	public void setdLng(Long l) { d.setLng(l); }
 
-	public Long getoLat() { return oLat; }
-	public Long getoLng() { return oLng; }
+	public Long getoLat() { return o.getLatE6(); }
+	public Long getoLng() { return o.getLngE6(); }
 	
-	public Double getoLatAsDouble() { return new Double(oLat); }
-	public Double getoLngAsDouble() { return new Double(oLng); }
-	public Double getdLatAsDouble() { return new Double(dLat); }
-	public Double getdLngAsDouble() { return new Double(dLng); }
+	public Double getoLatAsDouble() { return new Double(o.getLatE6()); }
+	public Double getoLngAsDouble() { return new Double(o.getLngE6()); }
+	public Double getdLatAsDouble() { return new Double(d.getLatE6()); }
+	public Double getdLngAsDouble() { return new Double(d.getLngE6()); }
 
 	public Vector3d getoVect() { return new Vector3d(getoX(),getoY(),getoZ()); }
 	public Vector3d getdVect() { return new Vector3d(getdX(),getdY(),getdZ()); }
 	
-	public double getoX() { return Math.cos(Math.toRadians(oLat/1000000.0)) * Math.cos(Math.toRadians(oLng/1000000.0)); }
-	public double getoY() { return Math.cos(Math.toRadians(oLat/1000000.0)) * Math.sin(Math.toRadians(oLng/1000000.0)); }
-	public double getoZ() { return Math.sin(Math.toRadians(oLat/1000000.0)); }
+	public double getoX() { return Math.cos(Math.toRadians(o.getLat())) * Math.cos(Math.toRadians(o.getLng())); }
+	public double getoY() { return Math.cos(Math.toRadians(o.getLat())) * Math.sin(Math.toRadians(o.getLng())); }
+	public double getoZ() { return Math.sin(Math.toRadians(o.getLat())); }
 
-	public double getdX() { return Math.cos(Math.toRadians(dLat/1000000.0)) * Math.cos(Math.toRadians(dLng/1000000.0)); }
-	public double getdY() { return Math.cos(Math.toRadians(dLat/1000000.0)) * Math.sin(Math.toRadians(dLng/1000000.0)); }
-	public double getdZ() { return Math.sin(Math.toRadians(dLat/1000000.0)); }
-
-	
-	public void setoLat(Long l) { oLat=l; }
-	public void setoLng(Long l) { oLng=l; }
+	public double getdX() { return Math.cos(Math.toRadians(d.getLat())) * Math.cos(Math.toRadians(d.getLng())); }
+	public double getdY() { return Math.cos(Math.toRadians(d.getLat())) * Math.sin(Math.toRadians(d.getLng())); }
+	public double getdZ() { return Math.sin(Math.toRadians(d.getLat())); }
 
 	
+	public void setoLat(Long l) { o.setLat(l); }
+	public void setoLng(Long l) { o.setLng(l); }
+
+	public Point getD() { return d; }
+	public Point getO() { return o; }
+
 	public Line (Point d, Point o) 
 	{
-	
-		setdLat(d.getLatE6());
-		setdLng(d.getLngE6());
-
-		setoLat(o.getLatE6());
-		setoLng(o.getLngE6());
-
-		
+		this.d = new Point(d);
+		this.o = new Point(o);
 	}
 
 	/*
@@ -60,18 +60,18 @@ public class Line {
 	*/
 	public Line (Long dla,Long dlo, Long ola,Long olo)
 	{
-		setdLat(dla);
-		setdLng(dlo);
-		setoLat(ola);
-		setoLng(olo);
+		this.d = new Point(dla,dlo);
+		this.o = new Point(ola,olo);
 	}
 	
 	public boolean equals(Line l) 
 	{
 	
+		return (this.getO().equals(l.getO()) && this.getD().equals(l.getD())) || (this.getO().equals(l.getD()) && this.getD().equals(l.getO()));
+/*
 		return ((l.getdLat().equals(getdLat())) && (l.getoLat().equals(getoLat())) && (l.getdLng().equals(getdLng())) && (l.getoLng().equals(getoLng())) ||
 				(l.getdLat().equals(getoLat())) && (l.getoLat().equals(getdLat())) && (l.getdLng().equals(getoLng())) && (l.getoLng().equals(getdLng())));
-		
+*/
 	}
 	
 	public boolean equals(Line[] lines)
@@ -235,33 +235,7 @@ public class Line {
 	
 	
 	public Double getGeoDistance() {
-	
-		Double oLat = this.getoLat()/1000000.0;
-		Double oLng = this.getoLng()/1000000.0;
-		Double dLat = this.getdLat()/1000000.0;
-		Double dLng = this.getdLng()/1000000.0;
-		
-//System.err.println("point: " + dLat + "," + dLng + " - " + oLat + "," + oLng); 
-		
-		Double lat = Math.toRadians(dLat - oLat);
-		Double lng = Math.toRadians(dLng - oLng);
-		
-		Double a = (Math.sin(lat / 2.0) * Math.sin(lat / 2.0)) +
-		Math.cos(Math.toRadians(oLat)) * Math.cos(Math.toRadians(dLat)) *
-		Math.sin(lng / 2.0) * Math.sin(lng/2.0);
-		
-		
-		
-		Double c = 2.0 * Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-		
-		Double len = earthRadius * c;
-		
-	//	System.err.println("point: " + dLat + "," + dLng + " - " + oLat + "," + oLng + " = " + len + " A: " + a); 
-
-		
-		return len;
-		
-		
+		return this.getO().getGeoDistance(this.getD());
 	}
 	
 	public String toString() {
