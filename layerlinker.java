@@ -459,18 +459,29 @@ public class layerlinker {
 			Double bestbest = 0.0;
 				
 			for (int i =0; i< bf.length;i++ )  {
+				Field tfi = (Field)bf[i];
 				Double at = 0.0;
-				at += ((Field)bf[i]).getGeoArea();
+				if (calc==0)
+					at  += tfi.getGeoArea();
+				else
+					at  += tfi.getEstMu();
+
 				ArrayList<Field> fc = new ArrayList<Field>();
 				dt.erase();
-				fc.add((Field)bf[i]);
-				dt.addField((Field)bf[i]);
-				int best = findField(bf,i+1,(Field)bf[i],fc);
+				fc.add(tfi);
+				dt.addField(tfi);
+				int best = findField(bf,i+1,tfi,fc);
 				while (best != -1) {
-					at += ((Field)bf[best]).getGeoArea();
-					dt.addField((Field)bf[best]);
-					fc.add((Field)bf[best]);
-					best = findField(bf,best+1,(Field)bf[best],fc);
+
+					tfi = (Field)bf[best];
+
+					if (calc==0)
+						at  += tfi.getGeoArea();
+					else
+						at  += tfi.getEstMu();
+					dt.addField(tfi);
+					fc.add(tfi);
+					best = findField(bf,best+1,tfi,fc);
 				}
 				// calc area, layers 
 				// print
@@ -481,11 +492,13 @@ public class layerlinker {
 				}
 			}
 
+/*
 			for (Map.Entry<Double, String> entry : plan.entrySet()) 
 			{
 				System.out.println(""  + entry.getKey() + " / " + entry.getValue());
 				System.out.println("");
 			}
+*/
 
 			endTime = System.nanoTime();
 			elapsedTime = (endTime - startTime)/nanoPerSec;
