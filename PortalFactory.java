@@ -584,6 +584,86 @@ public class PortalFactory {
 		return la;
 	}
 
+	public static ArrayList<Line> filterLinks(Collection<Line>lines, Collection<Link> links, teamCount max)
+	{
+		
+		ArrayList<Line> la = new ArrayList<Line>();
+	
+		for (Line l: lines) {
+				
+			teamCount bb = new teamCount();
+			for (Link link: links) {
+				if (l.intersects(link)) {
+					// System.out.println("< " + pi  + ":" + pj +  " link: " + blocksPerLink.get(pi,pj));
+					bb.incTeamEnum(link.getTeamEnum());
+				}
+				if (bb.moreThan(max))
+					break;
+			}
+			if (!bb.moreThan(max))
+				la.add(l);
+		}
+	
+		return la;
+	}
+
+	public static ArrayList<Field> makeFieldsFromSingleLinks(Collection<Line>lines)
+	{
+		Object[] lk = lines.toArray();
+		ArrayList<Field> fa = new ArrayList<Field>();
+		for (int i =0; i<lk.length; i++)
+		{
+			Line l1 = (Line)lk[i];
+			for (int j=i+1; j<lk.length; j++)
+			{
+				Line l2 = (Line)lk[j];
+				
+				// point l1.o == point l2.o
+				if (l1.getO().equals(l2.getO())) {
+
+				//	System.err.println("l1.o == l2.o");
+					
+					for (int k=j+1; k<lk.length; k++)
+					{
+						Line l3 = (Line)lk[k];
+
+						System.out.println("" + l2.getD() + " == (" + l3.getO() + " / " + l3.getD() + ") == " + l1.getD());
+						
+						// ( l2.d ==  l3.o && l3.d == l1.d ) || (l2.d==l3.d && l3.o == l1.d)
+						if (
+							(l2.getD().equals(l3.getO()) && l3.getD().equals(l1.getD())) ||
+							(l2.getD().equals(l3.getD()) && l3.getO().equals(l1.getD()))
+						   ) {
+								fa.add(new Field(l1.getD(),l1.getO(),l2.getD()));
+							// add Field
+						}
+				
+					}
+				} else if (l1.getO().equals(l2.getD())) {
+				//	System.err.println("l1.o == l2.d");
+
+								//   if (l1.getoLat() == l2.getdLat() && l1.getoLng() == l2.getdLng()) {
+
+				// point l1.o == point l2.d
+					for (int k=j+1; k<lk.length; k++)
+					{
+						Line l3 = (Line)lk[k];
+
+						System.out.println("" + l2.getO() + " == (" + l3.getO() + " / " + l3.getD() + ") == " + l1.getD());
+						
+						// ( l2.o ==  l3.o && l3.d == l1.d ) || (l2.o==l3.d && l3.o == l1.d)
+						if ((l2.getO().equals(l3.getO()) && l3.getD().equals(l1.getD())) ||
+							(l2.getO().equals(l3.getD()) && l3.getO().equals(l1.getD()))) {
+							fa.add(new Field(l1.getD(),l1.getO(),l2.getO()));
+							// add Field
+						}
+					}
+
+				}
+			}
+		}
+		return fa;
+	}
 	
 }
 

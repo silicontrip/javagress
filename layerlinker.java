@@ -335,6 +335,17 @@ public class layerlinker {
 				System.err.println("== test generating links ==");
 				startTime = System.nanoTime();
 				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
+				System.err.println("all links: " + li.size());
+				ArrayList<Line> l2 = pf.filterLinks(li,links,maxBl);
+				
+				/*
+				for (Line l: l2)
+					dt.addLine(l);
+				
+				System.out.println(dt.out());
+				*/
+				System.err.println("purged links: " + l2.size());
+
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
 				System.err.println("==  links generated " + elapsedTime+ " ==");
@@ -342,8 +353,10 @@ public class layerlinker {
 				System.err.println("== Generating fields ==");
 				startTime = System.nanoTime();
 				
-				
-				allfields = singleCluster(portals);
+				allfields = pf.makeFieldsFromSingleLinks(l2);
+				System.err.println("fields: " + allfields.size());
+
+				// allfields = singleCluster(portals);
 				
 			} else if (ag.getArguments().size() == 2) { 
 				// one point from one cluster
