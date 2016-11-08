@@ -34,7 +34,8 @@ public class layerlinker {
 			if (!((Field)fields[n]).intersects(exist))
 			{
 				Double diff = current.difference((Field)fields[n]);
-// need to make configurable threshold
+			// want to make a field selection strategy, for different fielding plans.
+			// need to make configurable threshold
 				if (diff < threshold  && diff < closest)
 					{
 						closest = diff;
@@ -96,71 +97,6 @@ public class layerlinker {
 		
 	}
 	
-// method to return all fields from a single cluster of portals.	
-// this should become a factory class
-	private static  ArrayList<Field> singleCluster(HashMap<String,Portal> portals) {
-		
-		ArrayList<Field> fa = new ArrayList<Field>();
-		Object[] portalKeys = portals.values().toArray();
-		
-		for (int i =0; i<portalKeys.length; i++) 
-		{
-			Portal pki = (Portal)portalKeys[i];
-			
-			for (int j=i+1; j<portalKeys.length; j++)
-			{
-				Portal pkj = (Portal)portalKeys[j];
-				
-				
-					for (int k=j+1; k<portalKeys.length; k++)
-					{
-						Portal pkk = (Portal)portalKeys[k];
-						Field fi = new Field (pki,pkj,pkk);
-						fa.add(fi);	
-					}
-					
-			}
-		}
-		return fa;
-	}
-	
-	
-	private static HashMap<String,teamCount> getLinkBlockersSingle(Object[] portalKeys, Collection<Link> links)
-	{
-		
-		HashMap<String,teamCount> blocksPerLink =  new HashMap<String,teamCount>();
-		
-		
-		// Object[] portalKeys = portals.values().toArray();
-		
-		for (int i=0; i < portalKeys.length; i++) {
-			
-			for (int j = i+1; j < portalKeys.length; j++) {
-				
-				Portal pi = (Portal)portalKeys[i];
-				Portal pj = (Portal)portalKeys[j];
-				
-				//	String guidKey = new String (pi.getGuid()+pj.getGuid());
-				
-				//	System.out.println(guidKey);
-				
-				Line l =  new Line (pi, pj);
-				
-				teamCount bb = new teamCount();
-				
-				for (Link link: links) {
-					
-					if (l.intersects(link)) {
-						bb.incTeamEnum(link.getTeamEnum());  // change to enum
-					}
-				}
-				
-				blocksPerLink.put( pi.getGuid()+pj.getGuid(), bb);
-				
-			}
-		}
-		return blocksPerLink;
-	}
 	
 	private static HashMap<String,teamCount> getLinkBlockersDouble(Object[] portalKeys, Object[] portal2Keys , Collection<Link> links)
 	{
@@ -199,7 +135,7 @@ public class layerlinker {
 	}
 	
 	
-	
+// this should move into the PortalFactory class	
 	private static ArrayList<Link> purgeLinks (Collection<Portal> portals, Collection<Link> links) {
 		
 		boolean first = true;
@@ -325,7 +261,6 @@ public class layerlinker {
 				System.err.println("==  portals read " + elapsedTime+ " ==");
 				System.err.println("== Reading links ==");
 				startTime = System.nanoTime();
-
 				
 				links = purgeLinks(portals.values(),allLinks.values());
 				
@@ -338,12 +273,6 @@ public class layerlinker {
 				System.err.println("all links: " + li.size());
 				ArrayList<Line> l2 = pf.filterLinks(li,links,maxBl);
 				
-				/*
-				for (Line l: l2)
-					dt.addLine(l);
-				
-				System.out.println(dt.out());
-				*/
 				System.err.println("purged links: " + l2.size());
 
 				endTime = System.nanoTime();
@@ -382,7 +311,6 @@ public class layerlinker {
 								
 				allPortals.addAll(portals1.values());
 				allPortals.addAll(portals2.values());
-				
 				
 				
 				links = purgeLinks(new ArrayList<Portal>(allPortals),allLinks.values());
@@ -455,14 +383,7 @@ public class layerlinker {
 			// start searching for fields.
 
 			Map<Double,Field> blockField = new TreeMap<Double,Field>(Collections.reverseOrder());
-			for (Field fi: allfields) 
-			{
-				teamCount block =  fi.countIntersects(links);
-				if (!block.moreThan(maxBl)) {
-					blockField.put(fi.getGeoArea(),fi);
-				}
-				
-			}
+			for (Field fi: allfields) { blockField.put(fi.getGeoArea(),fi); }
 			endTime = System.nanoTime();
 			elapsedTime = (endTime - startTime)/nanoPerSec;
 			totalTime = (endTime - runTime)/nanoPerSec;
@@ -470,11 +391,11 @@ public class layerlinker {
 			System.err.println("== show matches ==");
 			startTime = System.nanoTime();
 
-			Map<Double,Field> simField = new TreeMap<Double,Field>(Collections.reverseOrder());
+		// 	Map<Double,Field> simField = new TreeMap<Double,Field>(Collections.reverseOrder());
 
 			Object[] bf = blockField.values().toArray();
 
-			Map<Double,String> plan = new TreeMap<Double,String>(Collections.reverseOrder());
+			Map<Double,String> plan = new TreeMap<Double,String>();
 
 			Double bestbest = 0.0;
 				
@@ -511,14 +432,20 @@ public class layerlinker {
 					System.out.println("" + at + " / " + dt.out());
 				}
 			}
+			endTime = System.nanoTime();
+			elapsedTime = (endTime - startTime)/nanoPerSec;
+			totalTime = (endTime - runTime)/nanoPerSec;
+			System.err.println("==  plans searched " + elapsedTime + " ==");
+			System.err.println("== show all plans ==");
+			startTime = System.nanoTime();
 
-/*
+
 			for (Map.Entry<Double, String> entry : plan.entrySet()) 
 			{
 				System.out.println(""  + entry.getKey() + " / " + entry.getValue());
 				System.out.println("");
 			}
-*/
+
 
 			endTime = System.nanoTime();
 			elapsedTime = (endTime - startTime)/nanoPerSec;
