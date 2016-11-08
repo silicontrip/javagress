@@ -607,6 +607,22 @@ public class PortalFactory {
 		return la;
 	}
 
+	private static boolean linkExists (Object[] lk, int j, Point p1, Point p2)
+	{
+		
+		for (int k=j+1; k<lk.length; k++)
+		{
+			Line l3 = (Line)lk[k];
+			if (
+				(p1.equals(l3.getO()) && p2.equals(l3.getD())) ||
+				(p1.equals(l3.getD()) && p2.equals(l3.getO()))
+			) { 
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static ArrayList<Field> makeFieldsFromSingleLinks(Collection<Line>lines)
 	{
 		Object[] lk = lines.toArray();
@@ -620,45 +636,17 @@ public class PortalFactory {
 				
 				// point l1.o == point l2.o
 				if (l1.getO().equals(l2.getO())) {
-
-				//	System.err.println("l1.o == l2.o");
-					
-					for (int k=j+1; k<lk.length; k++)
-					{
-						Line l3 = (Line)lk[k];
-
-						System.out.println("" + l2.getD() + " == (" + l3.getO() + " / " + l3.getD() + ") == " + l1.getD());
-						
-						// ( l2.d ==  l3.o && l3.d == l1.d ) || (l2.d==l3.d && l3.o == l1.d)
-						if (
-							(l2.getD().equals(l3.getO()) && l3.getD().equals(l1.getD())) ||
-							(l2.getD().equals(l3.getD()) && l3.getO().equals(l1.getD()))
-						   ) {
-								fa.add(new Field(l1.getD(),l1.getO(),l2.getD()));
-							// add Field
-						}
-				
-					}
+					if (linkExists(lk,j,l1.getD(),l2.getD()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getD()));
 				} else if (l1.getO().equals(l2.getD())) {
-				//	System.err.println("l1.o == l2.d");
-
-								//   if (l1.getoLat() == l2.getdLat() && l1.getoLng() == l2.getdLng()) {
-
-				// point l1.o == point l2.d
-					for (int k=j+1; k<lk.length; k++)
-					{
-						Line l3 = (Line)lk[k];
-
-						System.out.println("" + l2.getO() + " == (" + l3.getO() + " / " + l3.getD() + ") == " + l1.getD());
-						
-						// ( l2.o ==  l3.o && l3.d == l1.d ) || (l2.o==l3.d && l3.o == l1.d)
-						if ((l2.getO().equals(l3.getO()) && l3.getD().equals(l1.getD())) ||
-							(l2.getO().equals(l3.getD()) && l3.getO().equals(l1.getD()))) {
-							fa.add(new Field(l1.getD(),l1.getO(),l2.getO()));
-							// add Field
-						}
-					}
-
+					if (linkExists(lk,j,l1.getD(),l2.getO()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getO()));
+				} else if (l1.getD().equals(l2.getO())) {
+					if (linkExists(lk,j,l1.getO(),l2.getD()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getD()));
+				} else if (l1.getD().equals(l2.getD())) {
+					if (linkExists(lk,j,l1.getO(),l2.getO()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getO()));
 				}
 			}
 		}
