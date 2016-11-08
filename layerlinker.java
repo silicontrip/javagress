@@ -376,9 +376,8 @@ public class layerlinker {
 			elapsedTime = (endTime - startTime)/nanoPerSec;
 			totalTime = (endTime - runTime)/nanoPerSec;
 			System.err.println("==  fields generated " + elapsedTime+ " ==");
-				System.err.println("== purge fields ==");
-				startTime = System.nanoTime();
-				
+			System.err.println("== purge fields ==");
+			startTime = System.nanoTime();
 			
 			// start searching for fields.
 
@@ -429,7 +428,7 @@ public class layerlinker {
 				plan.put(at,dt.out());
 				if (at>bestbest) {
 					bestbest = at;
-					System.out.println("" + at + " / " + dt.out());
+					System.out.println("" + at + " ("+fc.size()+ ") / " + dt.out());
 				}
 			}
 			endTime = System.nanoTime();
