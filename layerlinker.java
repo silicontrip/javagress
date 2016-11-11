@@ -47,7 +47,7 @@ public class layerlinker {
 		return best;
 	}
 
-	
+	/*
 // create all fields from 3 portal clusters
 	private static ArrayList<Field> tripleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2,HashMap<String,Portal> p3)
 	{
@@ -133,7 +133,7 @@ public class layerlinker {
 		}
 		return blocksPerLink;
 	}
-	
+	*/
 	
 // this should move into the PortalFactory class	
 	private static ArrayList<Link> purgeLinks (Collection<Portal> portals, Collection<Link> links) {
@@ -232,7 +232,7 @@ public class layerlinker {
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
 			
-			System.err.println("== Reading portals ==");
+			System.err.println("== Reading links and portals ==");
 			
 			startTime = System.nanoTime();
 			runTime = startTime;
@@ -259,7 +259,7 @@ public class layerlinker {
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
 				System.err.println("==  portals read " + elapsedTime+ " ==");
-				System.err.println("== Reading links ==");
+				System.err.println("== purging links ==");
 				startTime = System.nanoTime();
 				
 				links = purgeLinks(portals.values(),allLinks.values());
@@ -321,10 +321,17 @@ public class layerlinker {
 				System.err.println("== Generating fields ==");
 				startTime = System.nanoTime();
 				
+				ArrayList<Line> li1 = pf.makeLinksFromSingleCluster(portals1.values());
+				ArrayList<Line> lf1 = pf.filterLinks(li1,links,maxBl);
+
+				ArrayList<Line> li2 = pf.makeLinksFromDoubleCluster(portals1.values(),portals2.values());
+				ArrayList<Line> lf2 = pf.filterLinks(li2,links,maxBl);
+
+				allfields = pf.makeFieldsFromDoubleLinks(lf1,lf2);
 				
 				// portals1 and and portals2 is crucial ordering.
 				// two portals from portals1 and 1 from portals2
-				allfields = doubleCluster(portals1,portals2);
+				//allfields = doubleCluster(portals1,portals2);
 				
 
 			} else if (ag.getArguments().size() == 3) { 
@@ -357,7 +364,7 @@ public class layerlinker {
 				
 				// create link blockers 1-2, 2-3 and 3-1 
 
-				HashMap<String,teamCount> bpl = new HashMap<String,teamCount>();
+				// HashMap<String,teamCount> bpl = new HashMap<String,teamCount>();
 				
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
@@ -365,8 +372,20 @@ public class layerlinker {
 				System.err.println("== Generating fields ==");
 				startTime = System.nanoTime();
 				
+				ArrayList<Line> li1 = pf.makeLinksFromDoubleCluster(portals1.values(),portals2.values());
+				ArrayList<Line> lf1 = pf.filterLinks(li1,links,maxBl);
+
+				ArrayList<Line> li2 = pf.makeLinksFromDoubleCluster(portals2.values(),portals3.values());
+				ArrayList<Line> lf2 = pf.filterLinks(li2,links,maxBl);
+
+				ArrayList<Line> li3 = pf.makeLinksFromDoubleCluster(portals3.values(),portals1.values());
+				ArrayList<Line> lf3 = pf.filterLinks(li3,links,maxBl);
+
+				allfields = pf.makeFieldsFromTripleLinks(lf1,lf2,lf3);
+
 				
-				allfields = tripleCluster(portals1,portals2,portals3);
+				
+//				allfields = tripleCluster(portals1,portals2,portals3);
 				
 			} else {
 				throw new RuntimeException("Invalid command line arguments");

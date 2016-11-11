@@ -652,6 +652,73 @@ public class PortalFactory {
 		}
 		return fa;
 	}
-	
+
+	// the argument order is important.
+	// two from lines1 and 1 from lines2
+	public static ArrayList<Field> makeFieldsFromDoubleLinks(Collection<Line>lines1, Collection<Line>lines2)
+	{
+		Object[] lk1 = lines1.toArray();
+		Object[] lk2 = lines2.toArray();
+
+		ArrayList<Field> fa = new ArrayList<Field>();
+		for (int i =0; i<lk1.length; i++)
+		{
+			Line l1 = (Line)lk1[i];
+			for (int j=i+1; j<lk1.length; j++)
+			{
+				Line l2 = (Line)lk1[j];
+				
+				// point l1.o == point l2.o
+				if (l1.getO().equals(l2.getO())) {
+					if (linkExists(lk2,-1,l1.getD(),l2.getD()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getD()));
+				} else if (l1.getO().equals(l2.getD())) {
+					if (linkExists(lk2,-1,l1.getD(),l2.getO()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getO()));
+				} else if (l1.getD().equals(l2.getO())) {
+					if (linkExists(lk2,-1,l1.getO(),l2.getD()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getD()));
+				} else if (l1.getD().equals(l2.getD())) {
+					if (linkExists(lk2,-1,l1.getO(),l2.getO()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getO()));
+				}
+			}
+		}
+		return fa;
+	}
+
+	public static ArrayList<Field> makeFieldsFromTripleLinks(Collection<Line>lines1, Collection<Line>lines2,Collection<Line>lines3)
+	{
+		Object[] lk1 = lines1.toArray();
+		Object[] lk2 = lines2.toArray();
+		Object[] lk3 = lines3.toArray();
+
+		ArrayList<Field> fa = new ArrayList<Field>();
+		for (int i =0; i<lk1.length; i++)
+		{
+			Line l1 = (Line)lk1[i];
+			for (int j=0; j<lk2.length; j++)
+			{
+				Line l2 = (Line)lk2[j];
+				
+				// point l1.o == point l2.o
+				if (l1.getO().equals(l2.getO())) {
+					if (linkExists(lk3,-1,l1.getD(),l2.getD()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getD()));
+				} else if (l1.getO().equals(l2.getD())) {
+					if (linkExists(lk3,-1,l1.getD(),l2.getO()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getO()));
+				} else if (l1.getD().equals(l2.getO())) {
+					if (linkExists(lk3,-1,l1.getO(),l2.getD()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getD()));
+				} else if (l1.getD().equals(l2.getD())) {
+					if (linkExists(lk3,-1,l1.getO(),l2.getO()))
+						fa.add(new Field(l1.getO(),l1.getD(),l2.getO()));
+				}
+			}
+		}
+		return fa;
+	}
+
 }
 
