@@ -151,12 +151,12 @@ public class PortalFactory {
 			int rangeSize = ranges.length;
 			
 			String range = new String("0");
-			
+			/*
 			if (rangeSize == 1) 
 			{
 				range = new String("0");
 			}
-			else if (rangeSize == 2) 
+			else */ if (rangeSize == 2)
 			{
 				range = ranges[1];
 			}
@@ -312,7 +312,7 @@ public class PortalFactory {
 		for (Map.Entry<String, HashMap<String,Object>> entry : portalMap.entrySet()) {
 			HashMap<String, Object> portalEntry = entry.getValue();
 			String portalSearch = (String)portalEntry.get(search);
-			if (locationDesc.equals(portalSearch)) {
+			if (locationDesc.equalsIgnoreCase(portalSearch)) {
 				return new Point (((Integer)portalEntry.get("lat")).longValue(),((Integer)portalEntry.get("lng")).longValue());
 			}
 		}
