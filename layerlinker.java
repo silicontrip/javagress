@@ -323,12 +323,30 @@ public class layerlinker {
 				
 				ArrayList<Line> li1 = pf.makeLinksFromSingleCluster(portals1.values());
 				ArrayList<Line> lf1 = pf.filterLinks(li1,links,maxBl);
-
+				System.err.println("== cluster 1 links:  " + lf1.size() + " ==");
+				/*
+				DrawTools dl = new DrawTools();
+				dl.setDefaultColour("#c00000");
+				for (Line l: lf1)
+					dl.addLine(l);
+				
+				System.out.println(dl.out());
+				*/
 				ArrayList<Line> li2 = pf.makeLinksFromDoubleCluster(portals1.values(),portals2.values());
 				ArrayList<Line> lf2 = pf.filterLinks(li2,links,maxBl);
+				System.err.println("== cluster 2 links:  " + lf2.size() + " ==");
 
-				allfields = pf.makeFieldsFromDoubleLinks(lf1,lf2);
-				
+				/*
+				dl.erase();
+				dl.setDefaultColour("#c0c000");
+				for (Line l: lf2)
+					dl.addLine(l);
+
+				System.out.println(dl.out());
+				*/
+				allfields = pf.makeFieldsFromDoubleLinks(lf2,lf1);
+				System.err.println("== Fields:  " + allfields.size() + " ==");
+
 				// portals1 and and portals2 is crucial ordering.
 				// two portals from portals1 and 1 from portals2
 				//allfields = doubleCluster(portals1,portals2);
