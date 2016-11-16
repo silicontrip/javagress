@@ -42,7 +42,7 @@ public class Point {
 
 	public Point (String ld)
 	{
-	
+
 		String[] coord = ld.split(",");
 		setLat(coord[0]);
 		setLng(coord[1]);
