@@ -462,7 +462,7 @@ public class layerlinker {
 				}
 				// calc area, layers 
 				// print
-				plan.put(at,dt.out());
+				plan.put(at," ("+ fc.size()+") / " + dt.out());
 				if (at>bestbest) {
 					bestbest = at;
 					System.out.println("" + at + " ("+fc.size()+ ") / " + dt.out());
@@ -478,7 +478,7 @@ public class layerlinker {
 
 			for (Map.Entry<Double, String> entry : plan.entrySet()) 
 			{
-				System.out.println(""  + entry.getKey() + " / " + entry.getValue());
+				System.out.println(""  + entry.getKey() +  entry.getValue());
 				System.out.println("");
 			}
 
