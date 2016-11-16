@@ -206,6 +206,7 @@ public class layerlinker {
 		double totalTime;
 		long endTime;
 		int calc=0;
+		Point target=null;
 		
 		Arguments ag = new Arguments(args);
 
@@ -228,6 +229,8 @@ public class layerlinker {
 		if (ag.hasOption("M"))
 			calc=1;
 
+		if (ag.hasOption("T"))
+			target = new Point(ag.getOptionForKey("T"));
 
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
@@ -373,8 +376,8 @@ public class layerlinker {
 
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  portals read " + elapsedTime+ " ==");
-				System.err.println("== Reading links ==");
+				System.err.println("==  portals and links read " + elapsedTime+ " ==");
+				System.err.println("== purging links ==");
 				startTime = System.nanoTime();
 				
 				
@@ -387,7 +390,7 @@ public class layerlinker {
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
 				System.err.println("==  links read " + elapsedTime+ " ==");
-				System.err.println("== Generating fields ==");
+				System.err.println("== Generating possible fields ==");
 				startTime = System.nanoTime();
 				
 				ArrayList<Line> li1 = pf.makeLinksFromDoubleCluster(portals1.values(),portals2.values());
@@ -401,10 +404,6 @@ public class layerlinker {
 
 				allfields = pf.makeFieldsFromTripleLinks(lf1,lf2,lf3);
 
-				
-				
-//				allfields = tripleCluster(portals1,portals2,portals3);
-				
 			} else {
 				throw new RuntimeException("Invalid command line arguments");
 			}
@@ -419,7 +418,10 @@ public class layerlinker {
 			// start searching for fields.
 
 			Map<Double,Field> blockField = new TreeMap<Double,Field>(Collections.reverseOrder());
-			for (Field fi: allfields) { blockField.put(fi.getGeoArea(),fi); }
+			for (Field fi: allfields) {
+				if (target==null || fi.inside(target))
+					blockField.put(fi.getGeoArea(),fi);
+			}
 			endTime = System.nanoTime();
 			elapsedTime = (endTime - startTime)/nanoPerSec;
 			totalTime = (endTime - runTime)/nanoPerSec;
