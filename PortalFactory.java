@@ -302,7 +302,7 @@ public class PortalFactory {
 		
 		if (latlng.length == 2)
 		{
-			return new Point(Float.valueOf(latlng[0]),Float.valueOf(latlng[1]));
+			return new Point(Double.valueOf(latlng[0]),Double.valueOf(latlng[1]));
 		} else if (guid) {
 			search ="guid";
 		} else {
