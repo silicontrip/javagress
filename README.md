@@ -1,15 +1,32 @@
 # javagress
 ## tools to help create different styles of fielding.
-These tools talk to a db backend (via a web api) without the web api these tools do nothing.
+These tools talk to a db backend (via a web api) without the web api these tools do nothing.  Although they can now work from a file:// url for offline operation. 
 These tools also require the Jackson Library to perform json parsing. https://github.com/FasterXML/jackson
 
+## common arguments.
+
+All tools should accept the following arguments:
+
+`-E n specify the maximum number of ENL blocking links. 0 to cross no ENL link, do not specify to allow any number.`
+`-R n specify the maximum number of RES blocking links. 0 to cross no RES link, do not specify to allow any number.`
+`-C #rrggbb specify colour for drawtools output.` 
+`-L output drawtools plan as polylines.`
+
+the following arguments work in some tools:
+
+`-M print field MU rather than area.  this requires the MU database.`
+`-T lat,lng use only fields covering this point`
+
+
 ### alllinker 
-Tool to find the largest field with the fewest blocking links.
+Tool to find the largest field with the fewest blocking links.  (replaced by layerlinker)
 
 `alllinker.sh [-E <max number of ENL blocks>] [-R <max number of RES blocks>] <portal range> [<portal_range>] [<portal_range>]`
 
+For portal range see below
+
 ### multilinker2
-Tool to create multiple layers from a source field.
+Tool to create multiple layers from a source field. This is an early version of megaplan.
 
 `multilinker2  <3 point portal range> <number of layers>`
 
@@ -28,9 +45,12 @@ Generates the maximum possible fields in an area. (used for chasing mind control
 `maxfields <portal_range>`
 
 ### targetlinker
-Generates the most layers over a single target. 
+Generates the most layers over a single target.   Also creates cyclone plans.  Target functionality is being added to other tools.
 
-`targetlinker <lat> <lng> <portal_range>`
+`targetlinker [-c cadence] [-r] <lat> <lng> <portal_range>`
+
+cadence is a number between 0 and 2
+-r is for reverse direction.  You may need to try all 6 combinations of reverse and cadence to find the best number of fields.
 
 ## Portal range 
 The portal range is a descriptive argument to describe a range of portals.
