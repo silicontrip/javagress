@@ -62,9 +62,9 @@ public class CellMUDB {
 
 
 		rc = new S2RegionCoverer();
-                rc.setMaxLevel(maxLevel);
-                rc.setMinLevel(minLevel);
-                rc.setMaxCells(maxCells);
+		rc.setMaxLevel(maxLevel);
+		rc.setMinLevel(minLevel);
+		rc.setMaxCells(maxCells);
 		rc.setLevelMod(levelMod);
 
 
@@ -99,8 +99,14 @@ public class CellMUDB {
 
 			}
 			String s2tok = s2id.toToken();
-			System.out.print(s2tok + " ");
-			printCell(new S2Cell(s2id));
+			S2Cell s2cel = new S2Cell(s2id);
+			MutableInteger i = new MutableInteger(0);
+			MutableInteger j = new MutableInteger(0);
+			int o = 0;
+			o = s2id.toFaceIJOrientation(i,j,null);
+			System.out.print(s2tok +   " ");
+			System.out.print("F"+o+"ij["+(i.intValue()/131072)+","+(j.intValue()/131072)+"]@13 ");
+			printCell(s2cel);
 			mudb.put(s2tok,1.0);
 			return 1.0;
 		}
