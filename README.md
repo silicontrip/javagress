@@ -7,22 +7,22 @@ These tools also require the Jackson Library to perform json parsing. https://gi
 
 All tools should accept the following arguments:
 
-`-E n specify the maximum number of ENL blocking links. 0 to cross no ENL link, do not specify to allow any number.`
-`-R n specify the maximum number of RES blocking links. 0 to cross no RES link, do not specify to allow any number.`
-`-C #rrggbb specify colour for drawtools output.` 
-`-L output drawtools plan as polylines.`
+* `-E n specify the maximum number of ENL blocking links. 0 to cross no ENL link, do not specify to allow any number.`
+* `-R n specify the maximum number of RES blocking links. 0 to cross no RES link, do not specify to allow any number.`
+* `-C #rrggbb specify colour for drawtools output.` 
+* `-L output drawtools plan as polylines.`
 
 the following arguments work in some tools:
 
-`-M print field MU rather than area.  this requires the MU database.`
-`-T lat,lng use only fields covering this point. due to a bug in the Arguments parser any argument beginning with - is treated as an option.  so coordinates such as -37.2,145.3 must begin with a space eg. -T ' -37.2,145.3' `
+* `-M print field MU rather than area.  this requires the MU database.`
+* `-T lat,lng use only fields covering this point. due to a bug in the Arguments parser any argument beginning with - is treated as an option.  so coordinates such as -37.2,145.3 must begin with a space eg. -T ' -37.2,145.3' `
 
 Due to a perculiarity of the argument parser any single option (that has no argument, such as -M or -L) must be first in the arguments list or be followed by a --
 
 eg:
-`linktool.sh -L -E 0 -R 0 'The Portal:2'` is valid
-`linktool.sh -E 0 -R 0 -L -- 'The Portal:2'` is valid
-`linktool.sh -E 0 -R 0 -L 'The Portal:2'` is invalid
+* `linktool.sh -L -E 0 -R 0 'The Portal:2'` is valid
+* `linktool.sh -E 0 -R 0 -L -- 'The Portal:2'` is valid
+* `linktool.sh -E 0 -R 0 -L 'The Portal:2'` is invalid
 
 
 ### alllinker 
