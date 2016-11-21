@@ -8,6 +8,11 @@ Tool to find the largest field with the fewest blocking links.
 
 `alllinker.sh [-E <max number of ENL blocks>] [-R <max number of RES blocks>] <portal range> [<portal_range>] [<portal_range>]`
 
+### layerlinker
+Tool to find the most MU (and layers) with "similar" fields.
+
+`layerlinker.sh [-E <max number of ENL blocks>] [-R <max number of RES blocks>] <portal range> [<portal_range>] [<portal_range>]`
+
 ### multilinker2
 Tool to create multiple layers from a source field.
 
@@ -26,6 +31,10 @@ the second range is usually a keylist.
 Generates the maximum possible fields in an area. (used for chasing mind controller badge)
 
 `maxfields <portal_range>`
+
+### megaplan
+Create the most MU (and layers) with 3 anchor clusters.
+
 
 ### targetlinker
 Generates the most layers over a single target. 
