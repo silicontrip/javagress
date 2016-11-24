@@ -340,7 +340,9 @@ public class Field {
 				if (ff < least)
 					least = ff;
 			}
-			total += least;
+			if (least > total)
+				total = least;
+			//total += least;
 		}	
 
 		return total;
