@@ -93,6 +93,16 @@ get portals bounded by the triangle defined by the 3 portals
 `[{drawtools description}]`
 returns all portals within a 3 point polygon.  Will only handle a 3 point polygon (not a polyline or a different number of points)
 
+## portalfactory.properties
+looks like this;
+`portalurl: file://path/to/your/portals.json
+linkurl: file://path/to/your/links.json
+mudburl: file://path/to/cell/mu/db.xml
+maxlevel: smallest cell to search (0-32)
+minlevel: largest cell to search (0-32)
+maxcells: maximum number of cells per field (1-100)
+levelmod: modulus for cell level merging (1-100)`
+
 ## backend api
 
 the backend provides 2 api calls. getportals and getlinks.
@@ -114,3 +124,12 @@ it returns a json string
 getlinks simply returns the links without parameters. 
 
 `[{"guid":"38902c27142d41af9543bccc5e35b92e.9","dguid":"74a77bbb02e042cea4097069be9b05c4.16","dlat":-37652568,"dlng":145516969,"oguid":"e407aef6dd61448c885ca7e4f04ad2c0.16","olat":-37207996,"olng":145429963,"team":"E"},{"guid":"09aa5481b22141bfb5b0c2381e35dd8b.b_b","dguid":"47d3c4b53725438da0c42496501cea84.16","dlat":-37511943,"dlng":145120831,"oguid":"e8679a16658444c0bd3c9097f3395fc9.16","olat":-37511696,"olng":145120909,"team":"R"},{"guid":"f269aece351743418be19136f2a4aef7.9","dguid":"609593d1de734438aa5a11fa2fb58e40.16","dlat":-37686553,"dlng":143362732,"oguid":"f3b8b3073ef4411b8978da0d21be256d.16","olat":-38386340,"olng":142518279,"team":"R"}]`
+
+## IITC Exporter
+
+The included IITC script will allow export of portals and links.
+For portals zoom into your desired area (at Zoom=15) click the export link in the toolbox. Copy the data from the top textarea, and paste it into your portals file.   You may need to perform this on more than one area and merge the resulting JSON by hand.  
+
+
+For links, Zoom into your desired area (at Zoom=13) click the export link and copy the data from the bottom textarea and paste it into your links file.
+
