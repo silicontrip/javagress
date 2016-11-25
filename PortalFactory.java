@@ -295,8 +295,9 @@ public class PortalFactory {
 		// check for lat/lng
 		String latlng[] = locationDesc.split(",");
 		// check for guid
-		boolean guid = locationDesc.matches("/^[0-9a-fA-F]{32}.1[16]$/");
+		boolean guid = locationDesc.matches("^[0-9a-fA-F]{32}.1[16]$");
 		// check for title
+
 
 		String search;
 		
@@ -390,16 +391,11 @@ public class PortalFactory {
 
 		
 		url = new URL(urlString);
-		System.out.println("urlstring: " + urlString + " query: " +url.getQuery());
+		//System.out.println("urlstring: " + urlString + " query: " +url.getQuery());
+		System.out.println("Query: " +url.getQuery());
 
-		
-		//conn = (HttpURLConnection) url.openConnection();
-		//conn.setRequestMethod("GET");
-		//rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		rd = new BufferedReader(new InputStreamReader(url.openStream()));
-		while ((line = rd.readLine()) != null) {
-			result += line;
-		}
+		while ((line = rd.readLine()) != null) { result += line; }
 		rd.close();
 		
 		ObjectMapper mapper = new ObjectMapper();
