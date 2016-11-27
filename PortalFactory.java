@@ -43,15 +43,6 @@ public class PortalFactory {
                         linkApi = fileProperties.getProperty("linkurl");
                         portalApi = fileProperties.getProperty("portalurl");
 
-
-		//System.out.println("link: " + linkApi);
-		//System.out.println("portal: " + portalApi);
-	}
-	
-	public HashMap<String,Portal> portalsFromString (String portalDescription) throws IOException
-	{
-		
-		return null;
 	}
 	
 	public String[] getCornerPortalsFromJSON(String clusterDescription) throws IOException
@@ -151,16 +142,11 @@ public class PortalFactory {
 			int rangeSize = ranges.length;
 			
 			String range = new String("0");
-			/*
-			if (rangeSize == 1) 
-			{
-				range = new String("0");
-			}
-			else */ if (rangeSize == 2)
+			if (rangeSize == 2)
 			{
 				range = ranges[1];
 			}
-			else 
+			else if (rangeSize>2)
 			{
 				// throw parsing error
 				throw new RuntimeException("Invalid Portal description");
@@ -205,8 +191,6 @@ public class PortalFactory {
 		
 		String urlString = portalApi + "?ll=" + URLEncoder.encode(loc1,"UTF-8") +"&l2="+URLEncoder.encode(loc2,"UTF-8") + "&l3=" + URLEncoder.encode(loc3,"UTF-8");
 		
-		// System.out.println(urlString);
-		
 		return readPortalsFromUrl(urlString);
 		
 		
@@ -216,9 +200,6 @@ public class PortalFactory {
 	{
 		
 		String urlString = portalApi + "?ll=" + URLEncoder.encode(location,"UTF-8") +"&rr="+URLEncoder.encode(range,"UTF-8");
-		
-		// System.out.println(urlString);
-		
 		return readPortalsFromUrl(urlString);
 		
 	}
@@ -228,9 +209,6 @@ public class PortalFactory {
 	{
 		
 		String urlString = portalApi + "?ll=" + URLEncoder.encode(location,"UTF-8") ;
-		
-		// System.out.println(urlString);
-		
 		HashMap <String,Portal> pts = readPortalsFromUrl(urlString);
 		
 		return (Portal)(pts.values().toArray()[0]);
@@ -251,6 +229,7 @@ public class PortalFactory {
 		
 		// not sure if it would be better to read all portals and then filter
 		// or query each line.
+		// portal db is now larger than the java heap can manage
 		
 		while ((line = br.readLine()) != null) {
 			
