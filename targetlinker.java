@@ -188,22 +188,22 @@ public static void main(String[] args) {
 	Point target ;
 	ArrayList <Field> fieldList = new ArrayList<Field>();
 	int cyclone_cadence =-1; // set by command line
-        Arguments ag = new Arguments(args);
+	Arguments ag = new Arguments(args);
 
-        System.out.println ("Arguments: " + ag );
+	System.out.println ("Arguments: " + ag );
 
-        teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+	teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
 
-        DrawTools dt = new DrawTools();
-        if (ag.hasOption("C"))
-                dt.setDefaultColour(ag.getOptionForKey("C"));
-        else
-                dt.setDefaultColour("#a24ac3");
+	DrawTools dt = new DrawTools();
+	if (ag.hasOption("C"))
+		dt.setDefaultColour(ag.getOptionForKey("C"));
+	else
+		dt.setDefaultColour("#a24ac3");
 
-        if (ag.hasOption("L"))
-                dt.setFieldsAsPolyline();
-        else
-                dt.setFieldsAsPolygon();
+	if (ag.hasOption("L"))
+		dt.setFieldsAsPolyline();
+	else
+		dt.setFieldsAsPolygon();
 
 	if (ag.hasOption("c"))
 		cyclone_cadence = new Integer(ag.getOptionForKey("c")).intValue();
@@ -222,81 +222,79 @@ public static void main(String[] args) {
         
         HashMap<String,Portal> portals = pf.portalClusterFromString(ag.getArgumentAt(2));
         System.err.println("== calculating all fields ==");
-	ArrayList<Field> validFields = getFieldsOverPoint(target,portals);
+		ArrayList<Field> validFields = getFieldsOverPoint(target,portals);
 
-	System.err.println("Found " + validFields.size() + " fields");
+		System.err.println("Found " + validFields.size() + " fields");
 
 	// find smallest that doesn't intersect field list
         
-        System.err.println("== searching fields ==");
-	Double max = 0.0;
-	Field thisField=null;
-	ArrayList<Portal> cadencePortals = null;
-	while (max != 10000) 
-	{
-		max = 10000.0;
-		for (Field fi: validFields) {
-			if (!newFieldIntersect(fieldList,fi))
-			{
+		System.err.println("== searching fields ==");
+		Double max = 0.0;
+		Field thisField=null;
+		ArrayList<Portal> cadencePortals = null;
+		while (max != 10000)
+		{
+			max = 10000.0;
+			for (Field fi: validFields) {
+				if (!newFieldIntersect(fieldList,fi))
+				{
 			// and portals match cadence
-				if (cyclone_cadence >= 0) {
+					if (cyclone_cadence >= 0) {
 					// get cadence portals
 					// check field matches cadence
-					if (matchPortals(cadencePortals,fi)) {
-						if (fi.getGeoPerimeter() < max) 
-						{
-							max=fi.getGeoPerimeter();
-							thisField = fi;
-						}
-					}
-				} else {
-					if (ag.hasOption("r")) 
-					{
-						if (notMatchPortals(cadencePortals,fi)) {
-							if (fi.getGeoPerimeter() < max) 
+						if (matchPortals(cadencePortals,fi)) {
+							if (fi.getGeoPerimeter() < max)
 							{
 								max=fi.getGeoPerimeter();
 								thisField = fi;
 							}
 						}
 					} else {
-						if (fi.getGeoPerimeter() < max) 
+						if (ag.hasOption("r"))
 						{
-							max=fi.getGeoPerimeter();
-							thisField = fi;
+							if (notMatchPortals(cadencePortals,fi)) {
+								if (fi.getGeoPerimeter() < max)
+								{
+									max=fi.getGeoPerimeter();
+									thisField = fi;
+								}
+							}
+						} else {
+							if (fi.getGeoPerimeter() < max)
+							{
+								max=fi.getGeoPerimeter();
+								thisField = fi;
+							}
 						}
 					}
 				}
 			}
-
-		}
         // System.err.println(thisField.getDraw());
-		if (max != 10000) {
-			fieldList.add(thisField);
-			dt.addField(thisField);	
-			validFields = removeIntersecting(validFields,thisField);
+			if (max != 10000) {
+				fieldList.add(thisField);
+				dt.addField(thisField);
+				validFields = removeIntersecting(validFields,thisField);
 	
-			if (cyclone_cadence >= 0) {
-				if (cadencePortals == null)  {
-					cadencePortals = getCadencePortals(cyclone_cadence,thisField);
-					System.err.println("Cadence: " + cadencePortals);
-				} else {
-					System.err.print("Cadence before: " + cadencePortals);
-					if (ag.hasOption("r"))
-						cadencePortals = thisField.getPrevPortalLink(cadencePortals);
-					else
-						cadencePortals = thisField.getNextPortalLink(cadencePortals);
-					System.err.println("  after: " + cadencePortals);
+				if (cyclone_cadence >= 0) {
+					if (cadencePortals == null)  {
+						cadencePortals = getCadencePortals(cyclone_cadence,thisField);
+						System.err.println("Cadence: " + cadencePortals);
+					} else {
+						System.err.print("Cadence before: " + cadencePortals);
+						if (ag.hasOption("r"))
+							cadencePortals = thisField.getPrevPortalLink(cadencePortals);
+						else
+							cadencePortals = thisField.getNextPortalLink(cadencePortals);
+						System.err.println("  after: " + cadencePortals);
+					}
 				}
 			}
 		}
-	}
 	
 // print plan
 	
-	System.out.println("Layers: " + dt.size());
-
-        System.out.println(dt.out());
+		System.out.println("Layers: " + dt.size());
+		System.out.println(dt.out());
 
         
     } catch (Exception e) {
