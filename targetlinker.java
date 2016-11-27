@@ -210,10 +210,12 @@ public static void main(String[] args) {
 
 	System.err.println("Cadence pattern: " + cyclone_cadence);
 
-	Float lat = Float.parseFloat(ag.getArgumentAt(0));
-	Float lng = Float.parseFloat(ag.getArgumentAt(1));
+
+	target = new Point(ag.getArgumentAt(0));
+
+
+	// make sure that there is a target...
     
-	target = new Point(lat,lng);
     try {
 	// get point
         PortalFactory pf = PortalFactory.getInstance();
