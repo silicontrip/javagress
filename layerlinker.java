@@ -17,13 +17,11 @@ public class layerlinker {
 	
 	private static final Double nanoPerSec = 1000000000.0;
 
-    public static <K, V> void printMap(Map<K, V> map) {
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            System.out.println("Key : " + entry.getKey()
-+ " Value : " + entry.getValue());
-        }
-    }
-
+	public static <K, V> void printMap(Map<K, V> map) {
+		for (Map.Entry<K, V> entry : map.entrySet()) {
+			System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+		} 
+	} 
 
 	private static int findField(Object[] fields, int start, Field current,ArrayList<Field> exist, Double threshold)
 	{
@@ -47,93 +45,6 @@ public class layerlinker {
 		return best;
 	}
 
-	/*
-// create all fields from 3 portal clusters
-	private static ArrayList<Field> tripleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2,HashMap<String,Portal> p3)
-	{
-		
-		ArrayList<Field> fa = new ArrayList<Field>();
-
-		for (Portal pki: p1.values())
-		{
-			for (Portal pkj: p2.values())
-			{
-
-				for (Portal pkk: p3.values())
-				{
-					
-					Field fi = new Field (pki,pkj,pkk);
-					fa.add(fi);		
-				}
-			}
-		}
-		return fa;
-	}
-
-	
-// make all fields from 2 portals from the first cluster and 1 portal from the second
-	private static ArrayList<Field> doubleCluster(HashMap<String,Portal> p1, HashMap<String,Portal> p2)
-	{
-		ArrayList<Field> fa = new ArrayList<Field>();
-		Object[] portalKeys = p1.values().toArray();
-
-		for (Portal pki: p2.values())
-		{
-			for (int j=0; j<portalKeys.length; j++)
-			{
-				Portal pkj = (Portal)portalKeys[j];
-				for (int k=j+1; k<portalKeys.length; k++)
-				{
-					Portal pkk = (Portal)portalKeys[k];
-					Field fi = new Field (pki,pkj,pkk);
-					fa.add(fi);
-						
-				}
-			}
-			
-		}
-		return fa;
-
-		
-	}
-	
-	
-	private static HashMap<String,teamCount> getLinkBlockersDouble(Object[] portalKeys, Object[] portal2Keys , Collection<Link> links)
-	{
-		
-		HashMap<String,teamCount> blocksPerLink =  new HashMap<String,teamCount>();
-		
-		// Object[] portalKeys = portals.values().toArray();
-		
-		for (int i=0; i < portalKeys.length; i++) {
-			
-			for (int j = 0; j < portal2Keys.length; j++) {
-				
-				Portal pi = (Portal)portalKeys[i];
-				Portal pj = (Portal)portal2Keys[j];
-				
-				//	String guidKey = new String (pi.getGuid()+pj.getGuid());
-				
-				//	System.out.println(guidKey);
-				
-				Line l =  new Line (pi, pj);
-				
-				teamCount bb = new teamCount();
-				
-				for (Link link: links) {
-					
-					if (l.intersects(link)) {
-						bb.incTeamEnum(link.getTeamEnum());  // change to enum
-					}
-				}
-				
-				blocksPerLink.put( pi.getGuid()+pj.getGuid(), bb);
-				
-			}
-		}
-		return blocksPerLink;
-	}
-	*/
 	
 // this should move into the PortalFactory class	
 	private static ArrayList<Link> purgeLinks (Collection<Portal> portals, Collection<Link> links) {
