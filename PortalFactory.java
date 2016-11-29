@@ -288,10 +288,13 @@ public class PortalFactory {
 		} else {
 			search = "title";
 		}
+
+		System.out.println("File searching on: " + search);
 		
 		for (Map.Entry<String, HashMap<String,Object>> entry : portalMap.entrySet()) {
 			HashMap<String, Object> portalEntry = entry.getValue();
 			String portalSearch = (String)portalEntry.get(search);
+		// System.out.println(portalSearch + " == " + locationDesc);
 			if (locationDesc.equalsIgnoreCase(portalSearch)) {
 				return new Point (((Integer)portalEntry.get("lat")).longValue(),((Integer)portalEntry.get("lng")).longValue());
 			}
