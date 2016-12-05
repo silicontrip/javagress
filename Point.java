@@ -95,5 +95,16 @@ public class Point {
 	public Double getGeoDistance(Point p) {
 		return earthRadius * getAngDistance(p);
 	}
+
+	// gets the angle centred on this point made by the lines to p1 and p2
+	public Double getAngle(Point p1, Point p2) {
+
+		Double a = p1.getAngDistance(p2);
+		Double b = this.getAngDistance(p1);
+		Double c = this.getAngDistance(p2);
+
+		return Math.acos((Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c)));
+	}
+	
 	
 }
