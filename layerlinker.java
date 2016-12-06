@@ -118,6 +118,7 @@ public class layerlinker {
 		double totalTime;
 		long endTime;
 		int calc=0;
+		Double threshold;
 		Point target=null;
 		
 		Arguments ag = new Arguments(args);
@@ -140,7 +141,13 @@ public class layerlinker {
 		// mu calculation
 		if (ag.hasOption("M"))
 			calc=1;
-
+		
+		
+		if (ag.hasOption("t"))
+			threshold = new Double(ag.getOptionForKey("T"));
+		else
+			threshold = new Double(0.3);
+		
 		if (ag.hasOption("T"))
 			target = new Point(ag.getOptionForKey("T"));
 
@@ -174,7 +181,7 @@ public class layerlinker {
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
 				System.err.println("==  portals read " + elapsedTime+ " ==");
-				System.err.println("== purging links ==");
+				System.err.println("== getting links ==");
 				startTime = System.nanoTime();
 				
 				links = pf.getPurgedLinks(portals.values());
@@ -182,7 +189,7 @@ public class layerlinker {
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
 				System.err.println("==  links read " + elapsedTime+ " ==");
-				System.err.println("== test generating links ==");
+				System.err.println("== generating potential links ==");
 				startTime = System.nanoTime();
 				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
 				System.err.println("all links: " + li.size());
@@ -289,7 +296,7 @@ public class layerlinker {
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
 				System.err.println("==  portals  read " + elapsedTime+ " ==");
-				System.err.println("== purging links ==");
+				System.err.println("== get links ==");
 				startTime = System.nanoTime();
 				
 				
@@ -360,7 +367,7 @@ public class layerlinker {
 				dt.erase();
 				fc.add(tfi);
 				dt.addField(tfi);
-				int best = findField(bf,i+1,tfi,fc,0.3); // make threshold configurable
+				int best = findField(bf,i+1,tfi,fc,threshold); // make threshold configurable
 				while (best != -1) {
 
 					tfi = (Field)bf[best];
@@ -371,7 +378,7 @@ public class layerlinker {
 						at  += tfi.getEstMu();
 					dt.addField(tfi);
 					fc.add(tfi);
-					best = findField(bf,best+1,tfi,fc,0.3); // make threshold configurable
+					best = findField(bf,best+1,tfi,fc,threshold); // make threshold configurable
 				}
 				// calc area, layers 
 				// print
