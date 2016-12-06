@@ -46,7 +46,8 @@ public class layerlinker {
 	}
 
 	
-// this should move into the PortalFactory class	
+// this should move into the PortalFactory class
+	/*
 	private static ArrayList<Link> purgeLinks (Collection<Portal> portals, Collection<Link> links) {
 		
 		boolean first = true;
@@ -107,7 +108,7 @@ public class layerlinker {
 		return purgeList;
 		
 	}
-	
+	*/
 	
 	public static void main(String[] args) {
 		
@@ -153,7 +154,7 @@ public class layerlinker {
 			
 			// System.err.println("== " + args.length + " ==");
 			
-			HashMap<String,Link> allLinks = pf.getLinks();
+			// HashMap<String,Link> allLinks = pf.getLinks();
 			
 			List<Portal> allPortals = new ArrayList<Portal>();
 			
@@ -176,7 +177,7 @@ public class layerlinker {
 				System.err.println("== purging links ==");
 				startTime = System.nanoTime();
 				
-				links = purgeLinks(portals.values(),allLinks.values());
+				links = pf.getPurgedLinks(portals.values());
 				
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
@@ -227,8 +228,8 @@ public class layerlinker {
 				allPortals.addAll(portals2.values());
 				
 				
-				links = purgeLinks(new ArrayList<Portal>(allPortals),allLinks.values());
-
+				links = pf.getPurgedLinks(new ArrayList<Portal>(allPortals));
+				
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
 				System.err.println("==  links read " + elapsedTime+ " ==");
@@ -287,13 +288,12 @@ public class layerlinker {
 
 				endTime = System.nanoTime();
 				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  portals and links read " + elapsedTime+ " ==");
+				System.err.println("==  portals  read " + elapsedTime+ " ==");
 				System.err.println("== purging links ==");
 				startTime = System.nanoTime();
 				
 				
-				links = purgeLinks(new ArrayList<Portal>(allPortals),allLinks.values());
-				
+				links = pf.getPurgedLinks(new ArrayList<Portal>(allPortals));
 				// create link blockers 1-2, 2-3 and 3-1 
 
 				// HashMap<String,teamCount> bpl = new HashMap<String,teamCount>();
