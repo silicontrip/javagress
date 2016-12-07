@@ -20,38 +20,6 @@ public class maxfields {
 		
 	}
 	
-	private static boolean newFieldIntersect (List<Field> fa,Field f)
-	{
-		for (Field fi: fa) {
-			if (fi.intersects(f)) { return true; }
-			if (fi.equals(f)) { return true; }
-			
-			//System.err.println("no intersect: [" + fi + "," + f + "]");
-			
-			
-		}
-		return false;
-	}
-	
-	
-	private static boolean fieldIntersect (List<Field> fa)
-	{
-		
-		for (Field fi: fa) {
-			for (Field fj: fa) {
-				
-				if (!fi.equals(fj)) {
-					if (fi.intersects(fj)) {
-						return true;
-					}
-				}
-				
-			}
-		}
-		return false;
-	}
-
-	
 	private static Double sizeFields(List<Field> fa)
 	{
 		Double area = 0.0;
@@ -90,7 +58,8 @@ public class maxfields {
 			for (int i =start; i<fields.length; i++)
 			{
 				Field thisField = (Field)fields[i];
-				if (!newFieldIntersect(list,thisField))
+				if (!thisField.intersects(list))
+//				if (!newFieldIntersect(list,thisField))
 				{
 					ArrayList<Field> newlist = new ArrayList<Field>(list);
 					newlist.add((Field)fields[i]);
@@ -129,8 +98,8 @@ public class maxfields {
 				Field thisField = (Field)fields[i];
 				
 				//	System.err.println(" - new Field Intersect - ");
-				
-				if (!newFieldIntersect(list,thisField))
+				if (!thisField.intersects(list))
+				// if (!newFieldIntersect(list,thisField))
 				{
 					//		System.err.println(" = END new Field Intersect = ");
 					
@@ -138,11 +107,12 @@ public class maxfields {
 					ArrayList<Field> newlist = new ArrayList<Field>(list);
 					newlist.add((Field)fields[i]);
 					
+					/* this was an integrity check and is redundant.
 					if (fieldIntersect(newlist)) {
 						throw new RuntimeException("Field Collision : " + drawFields(list,dt) + " / " + thisField );
 						
 					}
-					
+					*/
 					
 					maxArea = searchFields(dt,newlist,fields,i+1,maxArea,depth+1);
 				}
@@ -151,44 +121,6 @@ public class maxfields {
 		
 		return maxArea;
 	}
-
-	
-    private static BlockList getLinkBlockersSingle(Object[] portalKeys, Collection<Link> links)
-    {
-        
-        BlockList blocksPerLink = new BlockList();
-        
-        
-        // Object[] portalKeys = portals.values().toArray();
-        
-        for (int i=0; i < portalKeys.length; i++) {
-            
-            for (int j = i+1; j < portalKeys.length; j++) {
-                
-                Portal pi = (Portal)portalKeys[i];
-                Portal pj = (Portal)portalKeys[j];
-                
-                //	String guidKey = new String (pi.getGuid()+pj.getGuid());
-                
-                //	System.out.println(guidKey);
-                
-                Line l =  new Line (pi, pj);
-                
-                teamCount bb = new teamCount();
-                blocksPerLink.put(pi,pj,bb);
-                for (Link link: links) {
-                    if (l.intersects(link)) {
-                      //  System.out.println("< " + pi  + ":" + pj +  " link: " + blocksPerLink.get(pi,pj));
-                        blocksPerLink.incTeamEnum(pi,pj,link.getTeamEnum());
-                    } else if (l.equalLine(link)) {
-                        blocksPerLink.setExists(pi,pj,true);
-                    }
-                }
-            }
-        }
-        return blocksPerLink;
-    }
-
 
 public static void main(String[] args) {
 
@@ -224,6 +156,7 @@ public static void main(String[] args) {
         HashMap<String,Portal> portals = pf.portalClusterFromString(ag.getArgumentAt(0));
         ArrayList<Link> links = pf.getPurgedLinks(portals.values());
 		ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
+		// check that maxBl is set
 		ArrayList<Line> l2 = pf.filterLinks(li,links,maxBl);
 		ArrayList<Field> allfields = pf.makeFieldsFromSingleLinks(l2);
 
@@ -233,9 +166,6 @@ public static void main(String[] args) {
 			if (target==null || fi.inside(target))
 				fiList.add(fi);
 		}
-
-		
-		
 		
 		System.out.println("Total Fields: " + fiList.size());
 
@@ -253,7 +183,7 @@ public static void main(String[] args) {
         System.out.println(e.getMessage());
         e.printStackTrace();
     }
-    
+	
 }
 
 }
