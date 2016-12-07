@@ -192,7 +192,9 @@ public class maxfields {
 
 public static void main(String[] args) {
 
+	Point target=null;
 
+	
 	Arguments ag = new Arguments(args);
 
 	
@@ -208,90 +210,32 @@ public static void main(String[] args) {
 		dt.setFieldsAsPolyline();
 	else
 		dt.setFieldsAsPolygon();
+	
+	if (ag.hasOption("T"))
+		target = new Point(ag.getOptionForKey("T"));
+
+	
 
 	try {
         PortalFactory pf = PortalFactory.getInstance();
 		
         System.err.println("== Reading portals ==");
         
-        HashMap<String,Portal> portals;
-        
-        portals = pf.portalClusterFromString(ag.getArgumentAt(0));
+        HashMap<String,Portal> portals = pf.portalClusterFromString(ag.getArgumentAt(0));
         ArrayList<Link> links = pf.getPurgedLinks(portals.values());
+		ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
+		ArrayList<Line> l2 = pf.filterLinks(li,links,maxBl);
+		ArrayList<Field> allfields = pf.makeFieldsFromSingleLinks(l2);
 
-        BlockList bl = getLinkBlockersSingle(portals.values().toArray(), links);
-        
-        // remove proposed links that exceed our maximum blockers
-        
-        HashSet<String> purgeList = new HashSet<String>();
-        
-        System.out.println("Keys: " + bl.size());
-        
-        Iterator it = bl.entrySet().iterator();
-        
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            if (((teamCount)pair.getValue()).moreThan(maxBl)) {
-                //System.out.println(pair.getKey() + " = " + pair.getValue());
-                purgeList.add((String)pair.getKey());
-                it.remove(); // avoids a ConcurrentModificationException
-            }
-        }
-
-        it = purgeList.iterator();
-        while (it.hasNext()) {
-            String key = (String)it.next();
-            bl.remove(key);
-        }
-        
-        System.out.println("Keys: " + bl.size());
-
-        
-        String[] portalKeys = portals.keySet().toArray(new String[portals.size()]);
-        boolean first = true;
-     //   System.out.println("[");
-
-		
 		ArrayList<Field> fiList = new ArrayList<Field>();
 		
-        for (int li = 0; li < portals.size(); li++)
-        {
-         
-            Portal pki = portals.get(portalKeys[li]);
+		for (Field fi: allfields) {
+			if (target==null || fi.inside(target))
+				fiList.add(fi);
+		}
 
-            for (int lj = li+1; lj < portals.size(); lj++)
-            {
-                Portal pkj = portals.get(portalKeys[lj]);
-
-                if (bl.containsKey(pki,pkj)) {
-                
-                
-                    for (int lk = lj+1; lk < portals.size(); lk++)
-                    {
-                   
-                        Portal pkk = portals.get(portalKeys[lk]);
-
-                        
-                        if (bl.containsKey(pkk,pkj) &&
-                            bl.containsKey(pkk,pki)) {
-
-                            // found a winner.
-                            // remove fields that already exist.
-                            
-                            if (!(bl.getExists(pki,pkj) && bl.getExists(pkk,pkj) && bl.getExists(pkk,pki))) {
-                            
-                            
-                                Field fi = new Field (pki,pkj,pkk);
-								
-								fiList.add(fi);
-                            }
-                            
-                        }
-                    }
-                }
-                
-            }
-        }
+		
+		
 		
 		System.out.println("Total Fields: " + fiList.size());
 
