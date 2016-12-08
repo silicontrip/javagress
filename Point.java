@@ -105,6 +105,20 @@ public class Point {
 
 		return Math.acos((Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c)));
 	}
+	public Double getBearingTo(Point p)
+	{
+		Double oLat = this.getLatAsRad();
+		Double oLng = this.getLngAsRad();
+		Double dLat = p.getLatAsRad();
+		Double dLng = p.getLngAsRad();
+
+		Double ddLng = dLng - oLng;
+		
+		Double y = Math.sin(ddLng) * Math.cos(dLat);
+		Double x = Math.cos(oLat)*Math.sin(dLat) - Math.sin(oLat) * Math.cos(dLat) * Math.cos(ddLng);
+		return Math.toDegrees(Math.atan2(y,x));
+		
+	}
 	
 	
 }
