@@ -144,7 +144,7 @@ public class layerlinker {
 		
 		
 		if (ag.hasOption("t"))
-			threshold = new Double(ag.getOptionForKey("T"));
+			threshold = new Double(ag.getOptionForKey("t"));
 		else
 			threshold = new Double(0.3);
 		
