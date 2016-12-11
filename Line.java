@@ -1,12 +1,6 @@
 import javax.vecmath.Vector3d;
 public class Line {
 
-	/*
-	Long oLat;
-	Long dLat;
-	Long oLng;
-	Long dLng;
-	*/
 	Point o;
 	Point d;
 	
@@ -39,7 +33,6 @@ public class Line {
 	public double getdX() { return Math.cos(Math.toRadians(d.getLat())) * Math.cos(Math.toRadians(d.getLng())); }
 	public double getdY() { return Math.cos(Math.toRadians(d.getLat())) * Math.sin(Math.toRadians(d.getLng())); }
 	public double getdZ() { return Math.sin(Math.toRadians(d.getLat())); }
-
 	
 	public void setoLat(Long l) { o.setLat(l); }
 	public void setoLng(Long l) { o.setLng(l); }
@@ -53,11 +46,6 @@ public class Line {
 		this.o = new Point(o);
 	}
 
-	/*
-	public Line (Portal d, Portal o) {
-		this(d.getPointE6(), o.getPointE6());
-	}
-	*/
 	public Line (Long dla,Long dlo, Long ola,Long olo)
 	{
 		this.d = new Point(dla,dlo);
@@ -66,12 +54,7 @@ public class Line {
 	
 	public boolean equals(Line l) 
 	{
-	
 		return (this.getO().equals(l.getO()) && this.getD().equals(l.getD())) || (this.getO().equals(l.getD()) && this.getD().equals(l.getO()));
-/*
-		return ((l.getdLat().equals(getdLat())) && (l.getoLat().equals(getoLat())) && (l.getdLng().equals(getdLng())) && (l.getoLng().equals(getoLng())) ||
-				(l.getdLat().equals(getoLat())) && (l.getoLat().equals(getdLat())) && (l.getdLng().equals(getoLng())) && (l.getoLng().equals(getdLng())));
-*/
 	}
 	
 	public boolean equals(Line[] lines)
@@ -157,34 +140,6 @@ public class Line {
 		return 2;
 
 	}
-/*
-	private int intersectType(Line l)
-	{
-		//  System.out.println ( this.getoLat() + "," + this.getoLng() + " - " + this.getdLat() + "," + this.getdLng());
-		// System.out.println ( l.getoLat() + "," + l.getoLng() + " - " + l.getdLat() + "," + l.getdLng());
-		
-		Point s2 = new Point (this.getoLat() - this.getdLat(), this.getoLng() - this.getdLng());
-		Point s1 = new Point (l.getoLat() - l.getdLat(), l.getoLng() - l.getdLng());
-		
-		Long base = ((-s2.getLng().longValue()) * s1.getLat().longValue() + s1.getLng().longValue() * s2.getLat().longValue()) ;
-		
-		// i assume this means that the two lines are the same
-		// means that a link already exists.
-		
-		if (base == 0) { return 0; } // equal or paralell
-		
-		Double s = ((-s1.getLat().longValue()) * (this.getoLng().longValue() - l.getoLng().longValue()) + s1.getLng().longValue() * (this.getoLat().longValue() - l.getoLat().longValue())) / ( base * 1.0);
-		Double t = (s2.getLng().longValue() * (this.getoLat().longValue() -l.getoLat().longValue()) - s2.getLat().longValue() * (this.getoLng().longValue() -l.getoLng().longValue())) / ( base * 1.0);
-		
-		// System.out.println("Base:  " + base + " s:t " + s + " : " + t);
-		
-		// don't care if the end points touch
-		if (s > 0 && s < 1 && t > 0 && t < 1) { return 1; } // intersects without touching
-		if (s >= 0 && s <= 1 && t >= 0 && t <= 1) { return 3; } // intersects with touching
-
-		return 2; // no intersection
-	}
-	*/
 	public Boolean intersects(Line l) { 
 
 		// DrawTools dt = new DrawTools();
@@ -194,23 +149,11 @@ public class Line {
 		//int i = intersectType(l);
 		int gi = greaterCircleIntersectType(l);
 
-	/*
-		if ( i != gi ) {
-                        dt.addLine(this);
-                        dt.addLine(l);
-                        System.out.println (dt.out());
-
-			System.out.println ("linear intersect: " + intersectType(l) + " greater intersect: " + greaterCircleIntersectType(l));
-		}
-	*/
 		// really would like some unit tests now.
 		return (gi == 1);
 	}
 	public Boolean intersectsOrEqual(Line l) { return (greaterCircleIntersectType(l) != 2);	}
-    public Boolean equalLine(Line l) { return (greaterCircleIntersectType(l) == 0);	}
-
-	
-	
+	public Boolean equalLine(Line l) { return (greaterCircleIntersectType(l) == 0);	}
 
 	public boolean intersects (Line[] lines)
 	{
@@ -233,7 +176,6 @@ public class Line {
 		return false;
 	}
 	
-	
 	public Double getGeoDistance() {
 		return this.getO().getGeoDistance(this.getD());
 	}
@@ -249,5 +191,8 @@ public class Line {
 		// return new String ( getoLatAsDouble() + "," + getoLngAsDouble() + " - " + getdLatAsDouble() +","+ getdLngAsDouble());
 		
 	}
+
+	public Double getBearing() { return o.bearingTo(d); }
+	public Double getReverseBearing() { return d.bearingTo(o); }
 	
 }

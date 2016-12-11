@@ -415,6 +415,13 @@ public class PortalFactory {
 	
 	public ArrayList<Link> getPurgedLinks (Collection<Portal> portals) throws IOException {
 		
+		HashMap<String,Link> links = this.getLinks();
+		return purgeLinks(portals,links);
+		
+	}
+	
+	public static ArrayList<Link> purgeLinks (Collection<Portal> portals, HashMap<String,Link> links ) {
+	
 		Long minLng=0L;
 		Long minLat=0L;
 		Long maxLng=0L;
@@ -454,7 +461,6 @@ public class PortalFactory {
 		
 		//System.err.println("Bounds: Lat: " + minLat + " - " + maxLat + " Lng: " + minLng + " - " + maxLng);
 		
-		HashMap<String,Link> links = this.getLinks();
 		
 		
 		for (Link link: links.values()) {
