@@ -14,8 +14,6 @@ import java.io.*;
 
 
 public class layerlinker {
-	
-	private static final Double nanoPerSec = 1000000000.0;
 
 	public static <K, V> void printMap(Map<K, V> map) {
 		for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -112,15 +110,11 @@ public class layerlinker {
 	
 	public static void main(String[] args) {
 		
-		long startTime;
-		double elapsedTime;
-		long runTime;
-		double totalTime;
-		long endTime;
 		int calc=0;
 		Double threshold;
 		Point target=null;
 		
+		RunTimer rt;
 		Arguments ag = new Arguments(args);
 
 		//System.out.println ("Arguments: " + ag );
@@ -154,10 +148,10 @@ public class layerlinker {
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
 			
+			rt = new RunTimer();
 			System.err.println("== Reading links and portals ==");
+			rt.start();
 			
-			startTime = System.nanoTime();
-			runTime = startTime;
 			
 			// System.err.println("== " + args.length + " ==");
 			
@@ -178,31 +172,22 @@ public class layerlinker {
 				
 				portals = pf.portalClusterFromString(ag.getArgumentAt(0));
 				
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  portals read " + elapsedTime+ " ==");
+				System.err.println("==  portals read " + rt.split()+ " ==");
 				System.err.println("== getting links ==");
-				startTime = System.nanoTime();
 				
 				links = pf.getPurgedLinks(portals.values());
 				
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  links read " + elapsedTime+ " ==");
+				System.err.println("==  links read " + rt.split()+ " ==");
 				System.err.println("== generating potential links ==");
-				startTime = System.nanoTime();
+
 				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
 				System.err.println("all links: " + li.size());
 				ArrayList<Line> l2 = pf.filterLinks(li,links,maxBl);
 				
 				System.err.println("purged links: " + l2.size());
 
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  links generated " + elapsedTime+ " ==");
-
+				System.err.println("==  links generated " + rt.split()+ " ==");
 				System.err.println("== Generating fields ==");
-				startTime = System.nanoTime();
 				
 				allfields = pf.makeFieldsFromSingleLinks(l2);
 				System.err.println("fields: " + allfields.size());
@@ -222,11 +207,8 @@ public class layerlinker {
 				
 				
 				
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  portals read " + elapsedTime+ " ==");
+				System.err.println("==  portals read " + rt.split() + " ==");
 				System.err.println("== Reading links ==");
-				startTime = System.nanoTime();
 				
 				
 				allPortals = new ArrayList<Portal>();
@@ -237,11 +219,8 @@ public class layerlinker {
 				
 				links = pf.getPurgedLinks(new ArrayList<Portal>(allPortals));
 				
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  links read " + elapsedTime+ " ==");
+				System.err.println("==  links read " +rt.split()  + " ==");
 				System.err.println("== Generating fields ==");
-				startTime = System.nanoTime();
 				
 				ArrayList<Line> li1 = pf.makeLinksFromSingleCluster(portals1.values());
 				ArrayList<Line> lf1 = pf.filterLinks(li1,links,maxBl);
@@ -293,11 +272,8 @@ public class layerlinker {
 				allPortals.addAll(portals2.values());
 				allPortals.addAll(portals3.values());
 
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  portals  read " + elapsedTime+ " ==");
+				System.err.println("==  portals  read " + rt.split()+ " ==");
 				System.err.println("== get links ==");
-				startTime = System.nanoTime();
 				
 				
 				links = pf.getPurgedLinks(new ArrayList<Portal>(allPortals));
@@ -305,11 +281,8 @@ public class layerlinker {
 
 				// HashMap<String,teamCount> bpl = new HashMap<String,teamCount>();
 				
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  links read " + elapsedTime+ " ==");
+				System.err.println("==  links read " + rt.split()+ " ==");
 				System.err.println("== Generating possible fields ==");
-				startTime = System.nanoTime();
 				
 				ArrayList<Line> li1 = pf.makeLinksFromDoubleCluster(portals1.values(),portals2.values());
 				ArrayList<Line> lf1 = pf.filterLinks(li1,links,maxBl);
@@ -326,12 +299,8 @@ public class layerlinker {
 				throw new RuntimeException("Invalid command line arguments");
 			}
 			
-			endTime = System.nanoTime();
-			elapsedTime = (endTime - startTime)/nanoPerSec;
-			totalTime = (endTime - runTime)/nanoPerSec;
-			System.err.println("==  fields generated " + elapsedTime+ " ==");
+			System.err.println("==  fields generated " + rt.split() + " ==");
 			System.err.println("== purge fields ==");
-			startTime = System.nanoTime();
 			
 			// start searching for fields.
 
@@ -340,12 +309,8 @@ public class layerlinker {
 				if (target==null || fi.inside(target))
 					blockField.put(fi.getGeoArea(),fi);
 			}
-			endTime = System.nanoTime();
-			elapsedTime = (endTime - startTime)/nanoPerSec;
-			totalTime = (endTime - runTime)/nanoPerSec;
-			System.err.println("==  fields filtered " + elapsedTime+ " ==");
+			System.err.println("==  fields filtered " + rt.split() + " ==");
 			System.err.println("== show matches ==");
-			startTime = System.nanoTime();
 
 		// 	Map<Double,Field> simField = new TreeMap<Double,Field>(Collections.reverseOrder());
 
@@ -388,12 +353,8 @@ public class layerlinker {
 					System.out.println("" + at + " ("+fc.size()+ ") / " + dt.out());
 				}
 			}
-			endTime = System.nanoTime();
-			elapsedTime = (endTime - startTime)/nanoPerSec;
-			totalTime = (endTime - runTime)/nanoPerSec;
-			System.err.println("==  plans searched " + elapsedTime + " ==");
+			System.err.println("==  plans searched " + rt.split() + " ==");
 			System.err.println("== show all plans ==");
-			startTime = System.nanoTime();
 
 
 			for (Map.Entry<Double, String> entry : plan.entrySet()) 
@@ -403,10 +364,7 @@ public class layerlinker {
 			}
 
 
-			endTime = System.nanoTime();
-			elapsedTime = (endTime - startTime)/nanoPerSec;
-			totalTime = (endTime - runTime)/nanoPerSec;
-			System.err.println("== Finished. " + elapsedTime + " elapsed time. " + totalTime + " total time.");
+			System.err.println("== Finished. " + rt.split() + " elapsed time. " + rt.stop() + " total time.");
 			
 		} catch (Exception e) {
 			
