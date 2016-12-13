@@ -9,7 +9,6 @@ public class Line {
 	// close to zero threshold
 	final static  double eps = 1E-10;
 
-
 	public Long getdLat() { return d.getLatE6(); }
 	public Long getdLng() { return d.getLngE6(); }
 	public void setdLat(Long l) { d.setLat(l); }
@@ -42,8 +41,14 @@ public class Line {
 
 	public Line (Point d, Point o) 
 	{
-		this.d = new Point(d);
-		this.o = new Point(o);
+	//	this.d = new Point(d);
+	//	this.o = new Point(o);
+		
+		// not sure if this is wise.
+		
+		this.d = d;
+		this.o = o;
+
 	}
 
 	public Line (Long dla,Long dlo, Long ola,Long olo)
@@ -55,6 +60,11 @@ public class Line {
 	public boolean equals(Line l) 
 	{
 		return (this.getO().equals(l.getO()) && this.getD().equals(l.getD())) || (this.getO().equals(l.getD()) && this.getD().equals(l.getO()));
+	}
+	
+	public int hashCode()
+	{
+		return getO().hashCode()  | getD().hashCode();
 	}
 	
 	public boolean equals(Line[] lines)

@@ -34,6 +34,10 @@ public class Point {
 	{
 		return (getLatE6().equals(p.getLatE6()) && getLngE6().equals(p.getLngE6()));
 	}
+	public int hashCode()
+	{
+		return (getLatE6().hashCode() * 2  +1 )+ ( getLngE6().hashCode() * 2 );
+	}
 	
 	public Point (java.lang.Long la, java.lang.Long ln) {
 		setLat(la);
