@@ -41,9 +41,13 @@ public class spiner {
 	public static double getMaxAngle(ArrayList<Line> la) 
 	{
 
+	
 		double max = 0 ;
-	                Object[] lineKeys = la.toArray();
+		Object[] lineKeys = la.toArray();
 		DrawTools dt = new DrawTools();
+
+		if (lineKeys.length < 2)
+			return 0; // or some other form of undefined sentinel.
 
                 for (int i =0; i<lineKeys.length; i++)
                 {
@@ -55,13 +59,20 @@ public class spiner {
 				double b1 = pki.getBearing();
 				double b2 = pkj.getBearing();
 
+				if (b2 > 90) { b2 -= 180; }
+				if (b2 < -90) { b2 += 180; }
+				if (b1 > 90) { b1 -= 180; }
+				if (b1 < -90) { b1 += 180; }
+
+
 				// determine angle difference between lines.
 				double diff = b1 - b2;
 				//if ( diff > 180) { diff -= 180; }
 				//if ( diff < -180) { diff += 180; }
-				if ( diff > 90) { diff -= 180; }
-				if ( diff < -90) { diff += 180; }
+				//if ( diff > 90) { diff -= 180; }
+				//if ( diff < -90) { diff += 180; }
 				if ( diff < 0 )  { diff = - diff; }
+				if ( diff > 90) { diff = 180 - diff; }
 
 				if (diff > max) 
 				{
