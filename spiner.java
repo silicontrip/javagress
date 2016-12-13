@@ -15,25 +15,72 @@ import java.io.*;
 
 public class spiner {
 	
+	ArrayList<Double> bestAng;
+	ArrayList<ArrayList<Portal>> bestList;
 
 	public static <K, V> void printMap(Map<K, V> map) {
 		for (Map.Entry<K, V> entry : map.entrySet()) {
 			System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
 		} 
 	} 
+	public static void printAngle(ArrayList<Line> la) 
+	{
+		
+		Object[] lineKeys = la.toArray();
+
+                for (int i =0; i<lineKeys.length; i++)
+                {
+                        Line pki = (Line)lineKeys[i];
+
+			
+			System.out.println("" + pki + " : ["  + pki.getBearing() + ", " + pki.getReverseBearing() + "]");
+		}
+
+	}
+
+	public static double getMaxAngle(ArrayList<Line> la) 
+	{
+
+		double max = 0 ;
+	                Object[] lineKeys = la.toArray();
+		DrawTools dt = new DrawTools();
+
+                for (int i =0; i<lineKeys.length; i++)
+                {
+                        Line pki = (Line)lineKeys[i];
+
+                        for (int j=i+1; j<lineKeys.length; j++)
+                        {
+                                Line pkj = (Line)lineKeys[j];
+				double b1 = pki.getBearing();
+				double b2 = pkj.getBearing();
+
+				// determine angle difference between lines.
+				double diff = b1 - b2;
+				//if ( diff > 180) { diff -= 180; }
+				//if ( diff < -180) { diff += 180; }
+				if ( diff > 90) { diff -= 180; }
+				if ( diff < -90) { diff += 180; }
+				if ( diff < 0 )  { diff = - diff; }
+
+				if (diff > max) 
+				{
+					dt.erase();
+					dt.addLine(pkj);
+					dt.addLine(pki);
+					System.out.println("" + b1 + " - " + b2 + " = " + diff);	
+					System.out.println ("" + diff  + " " + dt.out());
+					max = diff;
+				}
+			
+			}
+		}	
+		return max;
+	}
 
 	public static void main(String[] args) {
 		
-		long startTime;
-		double elapsedTime;
-		long runTime;
-		double totalTime;
-		long endTime;
-		int calc=0;
-		Double threshold;
-		Point target=null;
-		RunTimer rt;
-		
+		RunTimer rt = new RunTimer();
 		Arguments ag = new Arguments(args);
 
 		//System.out.println ("Arguments: " + ag );
@@ -46,28 +93,9 @@ public class spiner {
 		else
 			dt.setDefaultColour("#a24ac3");
 
-		if (ag.hasOption("L"))
-			dt.setFieldsAsPolyline();
-		else
-			dt.setFieldsAsPolygon();
-
-		// mu calculation
-		if (ag.hasOption("M"))
-			calc=1;
-		
-		
-		if (ag.hasOption("t"))
-			threshold = new Double(ag.getOptionForKey("t"));
-		else
-			threshold = new Double(0.3);
-		
-		if (ag.hasOption("T"))
-			target = new Point(ag.getOptionForKey("T"));
-
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
 			
-			rt = new RunTimer();
 			System.err.println("== Reading portals ==");
 			rt.start();
 
@@ -81,10 +109,19 @@ public class spiner {
 				System.err.println("==  portals read " + rt.split()+ " ==");
 
 				// combinate through portals. (most first)
+				// for combinations
+				// gen links
+				// determine max angle
+				// if maxAngle < bestAngle[portals.size] 
+				//  bestAngle[portals.size] = maxAngle
+				//  bestList = portals;
 			
 
 				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
 				System.err.println("== potential links generated " + li.size() + " " + rt.split()+ "s ==");
+				//printAngle(li);
+				double ma = getMaxAngle(li);
+				System.out.println("Max: " + ma);
 
 				// determine bearing for each link.
 
