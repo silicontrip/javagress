@@ -15,15 +15,27 @@ import java.io.*;
 
 public class spiner {
 	
-	ArrayList<Double> bestAng;
-	ArrayList<ArrayList<Portal>> bestList;
 
 	public static <K, V> void printMap(Map<K, V> map) {
 		for (Map.Entry<K, V> entry : map.entrySet()) {
-			System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+			System.out.println("hash: " + entry.getKey().hashCode() + " Key : " + entry.getKey() + " Value : " + entry.getValue());
 		} 
-	} 
-	public static void printAngle(ArrayList<Line> la) 
+	}
+	public static void printList (double bestAng, ArrayList<Portal> bestList) throws IOException
+	{
+		
+		DrawTools dt = new DrawTools();
+		
+		ArrayList<Line> la = PortalFactory.getInstance().makeLinksFromSingleCluster(bestList);
+		
+		for (Line li: la) {
+			dt.addLine(li);
+		}
+		System.out.println ("" + bestAng + " ("+ bestList.size() + ") : " + dt.out());
+		System.out.println("");
+
+	}
+	public static void printAngle(ArrayList<Line> la)
 	{
 		
 		Object[] lineKeys = la.toArray();
@@ -37,28 +49,106 @@ public class spiner {
 		}
 
 	}
+	
+	public static void searchSpine(Object[] pt, HashMap<Line,Double>  allBearing, int start, ArrayList<Portal> current,ArrayList<Double> bestAng, ArrayList<ArrayList<Portal>> bestList) throws IOException
+	{
+		int cls =current.size();
+		
+		
+		if (cls > 0 ) {
+			
+			ArrayList<Line> cline = PortalFactory.getInstance().makeLinksFromSingleCluster(current);
+		
+			double mm = getMaxAngle(cline,allBearing);
 
-	public static double getMaxAngle(ArrayList<Line> la) 
+			if (mm < bestAng.get(cls) )
+			{
+				
+				System.out.println("size: " + cls + " / " + mm + " / " + start);
+
+				
+				bestAng.set(cls,mm);
+				
+				bestList.set(cls,new ArrayList<Portal>(current));
+				
+				// printList(mm,current);
+				
+			}
+		}
+		for (int i =start; i<pt.length; i++)
+		{
+			Portal thisPortal = (Portal)pt[i];
+			ArrayList<Portal> newList = new ArrayList<Portal>(current);
+			newList.add(thisPortal);
+			
+			searchSpine(pt, allBearing, i+1,  newList,bestAng,bestList);
+		}
+		
+		
+	}
+
+	public static double getMaxAngle(ArrayList<Line> la,HashMap<Line,Double>  allBearing)
 	{
 
 	
 		double max = 0 ;
 		Object[] lineKeys = la.toArray();
 		DrawTools dt = new DrawTools();
-
+		double[] dbearing = new double[lineKeys.length];
+		
 		if (lineKeys.length < 2)
 			return 0; // or some other form of undefined sentinel.
 
-                for (int i =0; i<lineKeys.length; i++)
-                {
-                        Line pki = (Line)lineKeys[i];
+		// System.out.println("all bearing size: " + allBearing.size());
+		
+		// printMap(allBearing);
+		
+		
+		for (int j=0; j<lineKeys.length; j++)
+		{
+			
+			Line l1 = (Line)lineKeys[j];
+			
+			Double br=null;
+			
+			for (Map.Entry<Line, Double> entry : allBearing.entrySet()) {
+				
+				if (entry.getKey().equals(l1)) {
+					
+					//System.out.println("hash: " + entry.getKey().hashCode() + " Key : " + entry.getKey() + " Value : " + entry.getValue());
 
-                        for (int j=i+1; j<lineKeys.length; j++)
-                        {
-                                Line pkj = (Line)lineKeys[j];
-				double b1 = pki.getBearing();
-				double b2 = pkj.getBearing();
+					
+					br = entry.getValue();
+				}
+			}
 
+			
+			//Double br = allBearing.get(l1);
+			
+			// System.out.println("" + l1.hashCode() + " : " + br + " : " + l1);
+
+			
+			//System.out.println("" + j  + " : " + pkj.hashCode() + " : " + br);
+
+			
+			dbearing[j] = br;
+			// dbearing[j] = allBearing.get(l1);
+
+		}
+		
+		for (int i =0; i<lineKeys.length; i++)
+		{
+			// Line pki = (Line)lineKeys[i];
+
+			for (int j=i+1; j<lineKeys.length; j++)
+			{
+				// Line pkj = (Line)lineKeys[j];
+				// double b1 = pki.getBearing();
+				// double b2 = pkj.getBearing();
+
+				double b1 = dbearing[i];
+				double b2 = dbearing[j];
+				
 				if (b2 > 90) { b2 -= 180; }
 				if (b2 < -90) { b2 += 180; }
 				if (b1 > 90) { b1 -= 180; }
@@ -67,20 +157,12 @@ public class spiner {
 
 				// determine angle difference between lines.
 				double diff = b1 - b2;
-				//if ( diff > 180) { diff -= 180; }
-				//if ( diff < -180) { diff += 180; }
-				//if ( diff > 90) { diff -= 180; }
-				//if ( diff < -90) { diff += 180; }
+
 				if ( diff < 0 )  { diff = - diff; }
 				if ( diff > 90) { diff = 180 - diff; }
 
 				if (diff > max) 
 				{
-					dt.erase();
-					dt.addLine(pkj);
-					dt.addLine(pki);
-					System.out.println("" + b1 + " - " + b2 + " = " + diff);	
-					System.out.println ("" + diff  + " " + dt.out());
 					max = diff;
 				}
 			
@@ -94,6 +176,10 @@ public class spiner {
 		RunTimer rt = new RunTimer();
 		Arguments ag = new Arguments(args);
 
+		ArrayList<Double> bestAng = new ArrayList<Double>();
+		ArrayList<ArrayList<Portal>> bestList = new ArrayList<ArrayList<Portal>>();
+
+		
 		//System.out.println ("Arguments: " + ag );
 
 		teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
@@ -119,6 +205,8 @@ public class spiner {
 				portals = pf.portalClusterFromString(ag.getArgumentAt(0));
 				System.err.println("==  portals read " + rt.split()+ " ==");
 
+				ArrayList<Portal> allPortal = new ArrayList<Portal>(portals.values());
+				
 				// combinate through portals. (most first)
 				// for combinations
 				// gen links
@@ -127,15 +215,65 @@ public class spiner {
 				//  bestAngle[portals.size] = maxAngle
 				//  bestList = portals;
 			
+				for (int i = 0; i <= portals.size(); i++)
+				{
+					bestAng.add(new Double(360.0));
+					bestList.add(new ArrayList<Portal>());
+				}
+				
+				HashMap<Line,Double>  allBearing = new HashMap<Line,Double>();
 
 				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
 				System.err.println("== potential links generated " + li.size() + " " + rt.split()+ "s ==");
-				//printAngle(li);
-				double ma = getMaxAngle(li);
-				System.out.println("Max: " + ma);
+				
+				for (int i = 0; i < portals.size()-1; i++) {
+					Portal pki = allPortal.get(i);
+
+					for (int j = i+1; j < portals.size(); j++) {
+						Portal pkj = allPortal.get(j);
+
+						Line l1 = new Line(pki,pkj);
+						
+						// if ( l1.hashCode() ==1465570781)
+						//System.out.println("" + l1.hashCode() + " : " + l1.getBearing() + " : " + l1);
+						
+						allBearing.put(l1,new Double(l1.getBearing()));
+						/*  for some reason the reverse hashCode is the same
+						Line l2 = new Line(pkj,pki);
+						System.out.println("" + l2.hashCode() + " : " + l2.getBearing());
+
+						allBearing.put(l2,l2.getBearing());
+						*/
+					}
+					
+				}
+				
+				System.out.println("all bearings: " + allBearing.size());
+				// printMap(allBearing);
+				/*
+				for (Line pki: li)
+				{
+					System.out.println("" + pki + "(" + pki.hashCode()  + ") : ["  + pki.getBearing() + "]");
+				}
+				*/
+				
+				searchSpine(allPortal.toArray(),allBearing,0,new ArrayList<Portal>(), bestAng,  bestList);
+
+				
+				// printAngle(li);
+				// double ma = getMaxAngle(li);
+				// System.out.println("Max: " + ma);
 
 				// determine bearing for each link.
 
+				int sz = bestAng.size();
+				for (int i = 0; i< sz; i  ++ )
+				{
+					
+					printList(bestAng.get(i),bestList.get(i));
+
+				}
+				
 				
 			} else {
 				throw new RuntimeException("Invalid command line arguments");
