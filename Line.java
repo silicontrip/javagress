@@ -192,7 +192,7 @@ public class Line {
 		
 	}
 
-	public Double getBearing() { return o.bearingTo(d); }
-	public Double getReverseBearing() { return d.bearingTo(o); }
+	public Double getBearing() { return o.getBearingTo(d); }
+	public Double getReverseBearing() { return d.getBearingTo(o); }
 	
 }
