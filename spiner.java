@@ -180,7 +180,7 @@ public class spiner {
 			if (ag.getArguments().size() == 1) {
 				HashMap<String,Portal> portals = new HashMap<String,Portal>();
 				portals = pf.portalClusterFromString(ag.getArgumentAt(0));
-				System.err.println("==  portals read " + rt.split()+ " ==");
+				System.err.println("== " + portals.size()+ " portals read " + rt.split()+ " ==");
 
 				ArrayList<Portal> allPortal = new ArrayList<Portal>(portals.values());
 				
@@ -237,6 +237,8 @@ public class spiner {
 				
 				searchSpine(allPortal.toArray(),allBearing,0,new ArrayList<Portal>(), bestAng,  bestList);
 
+				System.err.println("== search complete " + rt.split()+ " ==");
+
 				
 				// printAngle(li);
 				// double ma = getMaxAngle(li);
@@ -252,6 +254,8 @@ public class spiner {
 
 				}
 				
+				System.err.println("== done " + rt.stop()+ " ==");
+
 				
 			} else {
 				throw new RuntimeException("Invalid command line arguments");
