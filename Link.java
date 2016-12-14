@@ -31,16 +31,16 @@ public class Link extends Line {
 //	public void setoLng(Long l) { oLng=l; }
 
 	public String getGuid() { return guid; }
-	public void setGuid(String g) { guid = g; }
+	// public void setGuid(String g) { guid = g; }
 
 	public String getdGuid() { return dGuid; }
-	public void setdGuid(String g) { dGuid = g; }
+	// public void setdGuid(String g) { dGuid = g; }
 
 	public String getoGuid() { return oGuid; }
-	public void setoGuid(String g) { oGuid = g; }
+	// public void setoGuid(String g) { oGuid = g; }
 	
-	public void setdLocation(Point lo) { setdLat(lo.getLatE6()); setdLng(lo.getLngE6()); }
-	public void setoLocation(Point lo) { setoLat(lo.getLatE6()); setoLng(lo.getLngE6()); }
+	//public void setdLocation(Point lo) { setdLat(lo.getLatE6()); setdLng(lo.getLngE6()); }
+	//public void setoLocation(Point lo) { setoLat(lo.getLatE6()); setoLng(lo.getLngE6()); }
 
 	public Point getdLocation() { return new Point(getdLat(),getdLng()); }
 	public Point getoLocation() { return new Point(getoLat(),getoLng()); }
@@ -48,17 +48,6 @@ public class Link extends Line {
 	public int getTeamEnum() { return teamEnum; }
 	public String getTeam() { return team; }
 
-	/*
-	public boolean equals(Link l) 
-	{
-		
-		System.out.println( l.getoLat() + ", " + l.getoLng() + " - " + l.getdLat() + ", " + l.getdLng() + " == " +
-						   getoLat() + ", " + getoLng() + " - " + getdLat() + ", " + getdLng());
-		
-		return ((l.getdLat() == getdLat()) && (l.getoLat() == getoLat()) && (l.getdLng() == getdLng()) && (l.getoLng() == getoLng()) ||
-				(l.getdLat() == getoLat()) && (l.getoLat() == getdLat()) && (l.getdLng() == getoLng()) && (l.getoLng() == getdLng()));
-	}
-	*/
 	public ArrayList<Link> getIntersects(Link[] links)
 	{
 		ArrayList<Link> allLinks = new ArrayList<Link>();
@@ -123,31 +112,40 @@ public class Link extends Line {
 			  (String)pt.get("team"));
 	}
 	
-	public Link (String g, String dg, Integer dla,Integer dlo, String og, Integer ola,Integer olo,String team)
+	public Link (String g, String dg, Integer dla,Integer dlo, String og, Integer ola,Integer olo,String tt)
 	{
 		super(new Long(dla),new Long(dlo),new Long(ola),new Long(olo));
-		setGuid(g);
-		setdGuid(dg);
+		guid = g;
+		dGuid=dg;
+		oGuid=og;
+		team = tt;
+
+		//setGuid(g);
+		//setdGuid(dg);
 		//setdLat(new Long(dla));
 		//setdLng(new Long(dlo));
-		setoGuid(og);
+		//setoGuid(og);
 		//setoLat(new Long(ola));
 		//setoLng(new Long(olo));
-		setTeam(team);
+		//setTeam(team);
 	}
 	
 	
-	public Link (String g, String dg, Long dla,Long dlo, String og, Long ola,Long olo,String team)
+	public Link (String g, String dg, Long dla,Long dlo, String og, Long ola,Long olo,String tt)
 	{
 		super(dla,dlo,ola,olo);
-		setGuid(g);
-		setdGuid(dg);
+		guid = g;
+		dGuid=dg;
+		oGuid=og;
+		team = tt;
+		//setGuid(g);
+		//setdGuid(dg);
 		//setdLat(dla);
 		//setdLng(dlo);
-		setoGuid(og);
+		//setoGuid(og);
 		//setoLat(ola);
 		//setoLng(olo);
-		setTeam(team);
+		//setTeam(team);
 	}
 	/*
 	public String toString() { 
