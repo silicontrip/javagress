@@ -42,71 +42,6 @@ public class layerlinker {
 		}
 		return best;
 	}
-
-	
-// this should move into the PortalFactory class
-	/*
-	private static ArrayList<Link> purgeLinks (Collection<Portal> portals, Collection<Link> links) {
-		
-		boolean first = true;
-		Long minLng=0L;
-		Long minLat=0L;
-		Long maxLng=0L;
-		Long maxLat=0L;
-		
-		ArrayList<Link> purgeList = new ArrayList<Link>();
-		
-		// determine bounds
-		for (Portal portal : portals) {
-			
-			Long lat = portal.getLatE6();
-			Long lng = portal.getLngE6();
-			
-			if (first) {
-				minLng = lng;
-				maxLng = lng;
-				minLat = lat;
-				maxLat = lat;
-				first = false;
-			}
-			
-			if (lat > maxLat) { maxLat = lat; }
-			if (lng > maxLng) { maxLng = lng; }
-			if (lat < minLat) { minLat = lat; }
-			if (lng < minLng) { minLng = lng; }
-			
-		}
-		
-		// create bounding box
-		
-		Line line0 = new Line(minLat,minLng, minLat, maxLng);
-		Line line1 = new Line(minLat, maxLng,maxLat,maxLng);		
-		Line line2 = new Line(maxLat,maxLng, maxLat, minLng);
-		Line line3 = new Line(maxLat, minLng,minLat,minLng);
-		
-		// System.err.println("Bounds: Lat: " + minLat + " - " + maxLat + " Lng: " + minLng + " - " + maxLng);
-		
-		for (Link link: links) {
-			
-			// Line linkLine = link.getLine();
-			
-			// if link intesects or is contained in bounding box
-			if ((line0.intersects(link) ||
-				 line1.intersects(link) ||
-				 line2.intersects(link) ||
-				 line3.intersects(link) ) ||
-				(link.getoLat() >= minLat && link.getoLat() <= maxLat &&
-				 link.getoLng() >= minLng && link.getoLng() <= maxLng)
-				)
-			{
-				purgeList.add(link);
-			}
-		}
-		
-		return purgeList;
-		
-	}
-	*/
 	
 	public static void main(String[] args) {
 		
@@ -177,7 +112,9 @@ public class layerlinker {
 				
 				links = pf.getPurgedLinks(portals.values());
 				
-				System.err.println("==  links read " + rt.split()+ " ==");
+				System.err.println("== "+links.size()+" links read " + rt.split()+ " ==");
+				
+				
 				System.err.println("== generating potential links ==");
 
 				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
@@ -218,6 +155,13 @@ public class layerlinker {
 				
 				
 				links = pf.getPurgedLinks(new ArrayList<Portal>(allPortals));
+				
+				/*
+				dt.erase();
+				for (Line l: links)
+					dt.addLine(l);
+				System.out.println(dt.out());
+*/
 				
 				System.err.println("==  links read " +rt.split()  + " ==");
 				System.err.println("== Generating fields ==");
@@ -281,18 +225,49 @@ public class layerlinker {
 
 				// HashMap<String,teamCount> bpl = new HashMap<String,teamCount>();
 				
+				
 				System.err.println("==  links read " + rt.split()+ " ==");
 				System.err.println("== Generating possible fields ==");
 				
 				ArrayList<Line> li1 = pf.makeLinksFromDoubleCluster(portals1.values(),portals2.values());
+				
+				System.err.println("== "+li1.size()+" links generated " + rt.split()+ " ==");
+
+				
 				ArrayList<Line> lf1 = pf.filterLinks(li1,links,maxBl);
-
+				System.err.println("== "+lf1.size()+" links filtered " + rt.split()+ " ==");
+/*
+				dt.erase();
+				dt.setDefaultColour("#f0f000");
+				for (Line l: lf1)
+					dt.addLine(l);
+*/
+				
 				ArrayList<Line> li2 = pf.makeLinksFromDoubleCluster(portals2.values(),portals3.values());
+				System.err.println("== "+li2.size()+" links generated " + rt.split()+ " ==");
+
 				ArrayList<Line> lf2 = pf.filterLinks(li2,links,maxBl);
+				System.err.println("== "+lf2.size()+" links filtered " + rt.split()+ " ==");
 
+/*
+				dt.setDefaultColour("#f000f0");
+				for (Line l: lf2)
+					dt.addLine(l);
+*/
+				
 				ArrayList<Line> li3 = pf.makeLinksFromDoubleCluster(portals3.values(),portals1.values());
-				ArrayList<Line> lf3 = pf.filterLinks(li3,links,maxBl);
+				System.err.println("== "+li3.size()+" links generated " + rt.split()+ " ==");
 
+				ArrayList<Line> lf3 = pf.filterLinks(li3,links,maxBl);
+				System.err.println("== "+lf3.size()+" links filtered " + rt.split()+ " ==");
+
+/*
+				dt.setDefaultColour("#00f0f0");
+				for (Line l: lf3)
+					dt.addLine(l);
+
+				System.out.println(dt.out());
+*/
 				allfields = pf.makeFieldsFromTripleLinks(lf1,lf2,lf3);
 
 			} else {
