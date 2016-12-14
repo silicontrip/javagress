@@ -109,30 +109,7 @@ public class spiner {
 			
 			Line l1 = (Line)lineKeys[j];
 			
-			Double br=null;
-			
-			for (Map.Entry<Line, Double> entry : allBearing.entrySet()) {
-				
-				if (entry.getKey().equals(l1)) {
-					
-					//System.out.println("hash: " + entry.getKey().hashCode() + " Key : " + entry.getKey() + " Value : " + entry.getValue());
-
-					
-					br = entry.getValue();
-				}
-			}
-
-			
-			//Double br = allBearing.get(l1);
-			
-			// System.out.println("" + l1.hashCode() + " : " + br + " : " + l1);
-
-			
-			//System.out.println("" + j  + " : " + pkj.hashCode() + " : " + br);
-
-			
-			dbearing[j] = br;
-			// dbearing[j] = allBearing.get(l1);
+			dbearing[j] = allBearing.get(l1);;
 
 		}
 		
@@ -233,13 +210,14 @@ public class spiner {
 						Portal pkj = allPortal.get(j);
 
 						Line l1 = new Line(pki,pkj);
-						
-						// if ( l1.hashCode() ==1465570781)
-						//System.out.println("" + l1.hashCode() + " : " + l1.getBearing() + " : " + l1);
-						
 						allBearing.put(l1,new Double(l1.getBearing()));
+						
+						/*
+						Line l2 = new Line(pki,pkj);
+
+						System.out.println("ref: " + allBearing.get(l1) + " get: " + allBearing.get(l2) + " eq: " + l1.equals(l2) + " hasheq: "  + (l1.hashCode()==l2.hashCode()));
+						*/
 						/*  for some reason the reverse hashCode is the same
-						Line l2 = new Line(pkj,pki);
 						System.out.println("" + l2.hashCode() + " : " + l2.getBearing());
 
 						allBearing.put(l2,l2.getBearing());
