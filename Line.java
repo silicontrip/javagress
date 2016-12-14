@@ -92,6 +92,8 @@ public class Line {
 		Vector3d p2 = l.getoVect();
 		Vector3d p3 = l.getdVect();
 		
+		// System.out.println("["+p0 +" - "+p1+"] x [" + p2 + " - " + p3 + "]");
+		
 		Vector3d V = new Vector3d();
 		V.cross(p0,p1);
 		V.normalize();
@@ -145,18 +147,18 @@ public class Line {
 			count += Math.signum(s3);
 		
 		if (count == -4 || count == 4)
-			return 1;
+			return 1; // intersect
 		
 		if (zero==4)
-			return 0;
+			return 0; // equal
 		
 		if (zero > 0)
-			return 3;
+			return 3; // parallel?
 		
-		return 2;
+		return 2; // not intersect
 		
 	}
-	public Boolean intersects(Line l) {
+	public boolean intersects(Line l) {
 		
 		// DrawTools dt = new DrawTools();
 		//dt.addLine(this);
@@ -165,11 +167,13 @@ public class Line {
 		//int i = intersectType(l);
 		int gi = greaterCircleIntersectType(l);
 		
+	//	System.out.println(">>> Intersects: " + gi);
+		
 		// really would like some unit tests now.
 		return (gi == 1);
 	}
-	public Boolean intersectsOrEqual(Line l) { return (greaterCircleIntersectType(l) != 2);	}
-	public Boolean equalLine(Line l) { return (greaterCircleIntersectType(l) == 0);	}
+	public boolean intersectsOrEqual(Line l) { return (greaterCircleIntersectType(l) != 2);	}
+	public boolean equalLine(Line l) { return (greaterCircleIntersectType(l) == 0);	}
 	
 	public boolean intersects (Line[] lines)
 	{
