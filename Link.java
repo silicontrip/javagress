@@ -58,35 +58,7 @@ public class Link extends Line {
 		return allLinks;
 	}
 		
-		
-	/*
-	public boolean intersects (Link[] links)
-	{
-		Line l = getLine();
-		
-		for (Link link : links)
-		{
-			if (l.intersects(link.getLine())) { return true; }
-		}
-		
-		return false;
-	}
-	*/
-	/*
-	public boolean intersectsOrEqual (Link[] links)
-	{
-		Line l = getLine();
-		
-		for (Link link : links)
-		{
-			if (l.intersectsOrEqual(link.getLine())) { return true; }
-		}
-		
-		return false;
-	}
-	*/
-	
-	public void setTeam(String t) { 
+	private void setTeam(String t) {
 		team = t;
 		
 		if (team.startsWith("R")) {
@@ -115,10 +87,10 @@ public class Link extends Line {
 	public Link (String g, String dg, Integer dla,Integer dlo, String og, Integer ola,Integer olo,String tt)
 	{
 		super(new Long(dla),new Long(dlo),new Long(ola),new Long(olo));
-		guid = g;
-		dGuid=dg;
-		oGuid=og;
-		team = tt;
+		this.guid = g;
+		this.dGuid=dg;
+		this.oGuid=og;
+		setTeam(tt);
 
 		//setGuid(g);
 		//setdGuid(dg);
@@ -137,7 +109,7 @@ public class Link extends Line {
 		guid = g;
 		dGuid=dg;
 		oGuid=og;
-		team = tt;
+		setTeam(tt);
 		//setGuid(g);
 		//setdGuid(dg);
 		//setdLat(dla);
