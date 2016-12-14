@@ -30,8 +30,12 @@ public class Point {
 	public void setLat(String s) { setLat(Double.parseDouble(s)); }
 	public void setLng(String s) { setLng(Double.parseDouble(s)); }
 
-	public boolean equals(Point p) 
+	@Override
+	public final boolean equals(Object obj2)
 	{
+		if (obj2 == this) return true;
+		if (!(obj2 instanceof Point)) return false;
+		Point p = (Point) obj2;
 		return (getLatE6().equals(p.getLatE6()) && getLngE6().equals(p.getLngE6()));
 	}
 	public int hashCode()
