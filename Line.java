@@ -11,8 +11,8 @@ public class Line {
 
 	public Long getdLat() { return d.getLatE6(); }
 	public Long getdLng() { return d.getLngE6(); }
-	public void setdLat(Long l) { d.setLat(l); }
-	public void setdLng(Long l) { d.setLng(l); }
+	//public void setdLat(Long l) { d.setLat(l); }
+	//public void setdLng(Long l) { d.setLng(l); }
 
 	public Long getoLat() { return o.getLatE6(); }
 	public Long getoLng() { return o.getLngE6(); }
@@ -33,21 +33,21 @@ public class Line {
 	public double getdY() { return Math.cos(Math.toRadians(d.getLat())) * Math.sin(Math.toRadians(d.getLng())); }
 	public double getdZ() { return Math.sin(Math.toRadians(d.getLat())); }
 	
-	public void setoLat(Long l) { o.setLat(l); }
-	public void setoLng(Long l) { o.setLng(l); }
+	//public void setoLat(Long l) { o.setLat(l); }
+	//public void setoLng(Long l) { o.setLng(l); }
 
 	public Point getD() { return d; }
 	public Point getO() { return o; }
 
 	public Line (Point d, Point o) 
 	{
-	//	this.d = new Point(d);
-	//	this.o = new Point(o);
+		this.d = new Point(d);
+		this.o = new Point(o);
 		
 		// not sure if this is wise.
 		
-		this.d = d;
-		this.o = o;
+		//this.d = d;
+		//this.o = o;
 
 	}
 
@@ -57,14 +57,20 @@ public class Line {
 		this.o = new Point(ola,olo);
 	}
 	
-	public boolean equals(Line l) 
+	@Override
+	public final boolean equals(Object obj2)
 	{
+  if (obj2 == this) return true;
+  if (!(obj2 instanceof Line)) return false;
+  Line l = (Line) obj2;
+
 		return (this.getO().equals(l.getO()) && this.getD().equals(l.getD())) || (this.getO().equals(l.getD()) && this.getD().equals(l.getO()));
 	}
 	
+	@Override
 	public int hashCode()
 	{
-		return getO().hashCode()  | getD().hashCode();
+		return getO().hashCode() | getD().hashCode();
 	}
 	
 	public boolean equals(Line[] lines)
