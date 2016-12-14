@@ -38,6 +38,7 @@ public class Point {
 		Point p = (Point) obj2;
 		return (getLatE6().equals(p.getLatE6()) && getLngE6().equals(p.getLngE6()));
 	}
+	@Override
 	public int hashCode()
 	{
 		return (getLatE6().hashCode() * 2  +1 )+ ( getLngE6().hashCode() * 2 );

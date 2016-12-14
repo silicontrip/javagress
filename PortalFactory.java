@@ -573,12 +573,15 @@ public class PortalFactory {
 		
 		ArrayList<Line> la = new ArrayList<Line>();
 	
+		//System.out.println("" + links.size() + " links in play");
+		//System.out.println("" + max + " blocking limits");
+		
 		for (Line l: lines) {
 				
 			teamCount bb = new teamCount();
 			for (Link link: links) {
 				if (l.intersects(link)) {
-					// System.out.println("< " + pi  + ":" + pj +  " link: " + blocksPerLink.get(pi,pj));
+					//System.out.println("** intersect team: "+ link.getTeamEnum());
 					bb.incTeamEnum(link.getTeamEnum());
 				}
 				if (bb.moreThan(max))
