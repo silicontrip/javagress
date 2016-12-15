@@ -124,8 +124,8 @@ public class maxfields {
 
 public static void main(String[] args) {
 
-	Point target=null;
-
+	ArrayList<Point> target=null;
+	
 	
 	Arguments ag = new Arguments(args);
 
@@ -143,14 +143,16 @@ public static void main(String[] args) {
 	else
 		dt.setFieldsAsPolygon();
 	
-	if (ag.hasOption("T"))
-		target = new Point(ag.getOptionForKey("T"));
 
 	
 
 	try {
         PortalFactory pf = PortalFactory.getInstance();
 		
+		
+		if (ag.hasOption("T"))
+			target = pf.getPointsFromString(ag.getOptionForKey("T"));
+
         System.err.println("== Reading portals ==");
         
         HashMap<String,Portal> portals = pf.portalClusterFromString(ag.getArgumentAt(0));

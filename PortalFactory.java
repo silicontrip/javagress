@@ -706,6 +706,19 @@ public class PortalFactory {
 		}
 		return fa;
 	}
+	public static ArrayList<Point> getPointsFromString (String pointList)
+	{
+		
+		String[] pointDesc = pointList.split(",");
+		if (pointDesc.length % 2 == 1)
+			return null; // probably should throw an exception
+		
+		ArrayList<Point> pa = new ArrayList<Point>();
+		
+		for (int i =0; i < pointDesc.length; i += 2)
+			pa.add(new Point(pointDesc[i],pointDesc[i+1]));
+		return pa;
+	}
 
 }
 

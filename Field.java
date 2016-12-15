@@ -259,6 +259,16 @@ public class Field {
 		
 	}
 	
+	public boolean inside(ArrayList<Point> pa)
+	{
+		
+		for (Point pi: pa)
+			if (!this.inside(pi))
+				return false;
+		return true;
+		
+	}
+	
 	public Field getInverseCornerField(int corner)
 	{
 		//throw error or return null
