@@ -47,7 +47,7 @@ public class layerlinker {
 		
 		int calc=0;
 		Double threshold;
-		Point target=null;
+		ArrayList<Point> target=null;
 		
 		RunTimer rt;
 		Arguments ag = new Arguments(args);
@@ -77,11 +77,12 @@ public class layerlinker {
 		else
 			threshold = new Double(0.3);
 		
-		if (ag.hasOption("T"))
-			target = new Point(ag.getOptionForKey("T"));
-
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
+
+		if (ag.hasOption("T"))
+			target = pf.getPointsFromString(ag.getOptionForKey("T"));
+
 			
 			rt = new RunTimer();
 			System.err.println("== Reading links and portals ==");
