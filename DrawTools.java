@@ -37,11 +37,13 @@ public class DrawTools {
                 // System.out.println(tmpObj.latLngs);
                 
                 // there should be only 1 entry
+	/*
                 for (PolyObject entry : tmpObj) {
 
 			System.out.println("Type: " + entry.type);
 
                 }
+	*/
                 
                 
                 
@@ -66,29 +68,10 @@ public class DrawTools {
 	
 	public void addField (Field f) 
 	{
-		if (addFieldAsLine) 
-			addFieldAsPolyline(f);
-		else
-			addFieldAsPolygon(f);
-	}
-
-	protected void addFieldAsPolygon (Field f)
-	{	
 		Polygon pg = new Polygon();
 		pg.addPoint(new PolyPoint(f.getLat(0)/1000000.0,f.getLng(0)/1000000.0));
 		pg.addPoint(new PolyPoint(f.getLat(1)/1000000.0,f.getLng(1)/1000000.0));
 		pg.addPoint(new PolyPoint(f.getLat(2)/1000000.0,f.getLng(2)/1000000.0));
-		pg.setColour(colour);
-		entities.add(pg);
-	}	
-
-	protected void addFieldAsPolyline (Field f)
-	{	
-		Polyline pg = new Polyline();
-		pg.addPoint(new PolyPoint(f.getLat(0)/1000000.0,f.getLng(0)/1000000.0));
-		pg.addPoint(new PolyPoint(f.getLat(1)/1000000.0,f.getLng(1)/1000000.0));
-		pg.addPoint(new PolyPoint(f.getLat(2)/1000000.0,f.getLng(2)/1000000.0));
-		pg.addPoint(new PolyPoint(f.getLat(0)/1000000.0,f.getLng(0)/1000000.0));
 		pg.setColour(colour);
 		entities.add(pg);
 	}	
@@ -103,12 +86,57 @@ public class DrawTools {
 		Polyline pg = new Polyline();
 		pg.addPoint(p1);
 		pg.addPoint(p2);
+		pg.setColour(colour);
 		entities.add(pg);
 	}
+
+	public void toLines() {
+
+	//	System.out.println (">>> DrawTools::toLines");
+
+		ArrayList<PolyObject> oldent = entities;
+		entities = new ArrayList<PolyObject>();
+
+		//for (PolyObject po: entities)
+		for (int i=0; i < oldent.size(); i++)
+		{
+			PolyObject po = oldent.get(i);
+	//		System.out.println("Drawtools::toLines entity: " + i + " / " + po.EnumType());
+			if (po.EnumType() == PolyType.POLYGON)
+			{
+				System.out.println("Drawtools::toLines polygon");
+				// delete this and add line
+				// would like to check for duplicates
+				Polygon pog = (Polygon)po;
+				PolyPoint oldpoint = null;
+				PolyPoint firstpoint = null;
+				for (PolyPoint pp: pog.latLngs)
+				{
+					if (oldpoint != null)
+					{
+						addLine(oldpoint,pp);
+					} else {
+						firstpoint = pp;
+					}
+					oldpoint = pp;  
+					
+				}
+				addLine(oldpoint,firstpoint);
+				
+			} else {
+	//			System.out.println("Drawtools::toLines not polygon :"+po.type);
+				entities.add(po);
+			}
+		}
+
+	}
 		
+	public String toString() { return this.out(); }
 
 	public String out () 
 	{
+		if (addFieldAsLine)
+			toLines();
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			return mapper.writeValueAsString(entities);
@@ -124,9 +152,10 @@ public class DrawTools {
 }
 
 abstract class PolyObject {
-	public String type;
+	public final String type;
 	public String color = "#ffffff";
 
+	PolyObject (String t) { type = t; }	
 	public void setColour (String c) { color = c; }
 	public PolyType EnumType() { 
 		if ("polygon".equalsIgnoreCase(type)) { return PolyType.POLYGON; }
@@ -138,40 +167,37 @@ abstract class PolyObject {
 }
 
 class Polygon extends PolyObject {
-	public String type = "polygon";
 	public ArrayList<PolyPoint> latLngs;
-	
-	public Polygon () { latLngs = new ArrayList<PolyPoint>(); }
-	public Polygon(ArrayList<PolyPoint> pp) { latLngs = pp; }
+		
+	public Polygon () { super ("polygon"); latLngs = new ArrayList<PolyPoint>(); }
+	public Polygon(ArrayList<PolyPoint> pp) { super("polygon"); latLngs = pp; }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
+	public ArrayList<PolyPoint> getLatLngs() { return latLngs; }
 
 }
 
 class Polyline extends PolyObject {
-	public String type = "polyline";
 	public ArrayList<PolyPoint> latLngs;
 
-	public Polyline () { latLngs = new ArrayList<PolyPoint>(); type="polyline"; }
+	public Polyline () { super("polyline"); latLngs = new ArrayList<PolyPoint>(); }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 
 }
 
 class Marker extends PolyObject {
-	public String type = "marker";
 	public PolyPoint latLng;
 
-	public Marker(PolyPoint pp) { setPoint(pp); }
-	public Marker(PolyPoint pp,String c) { setPoint(pp); setColour(c); }
+	public Marker(PolyPoint pp) { super("marker"); setPoint(pp); }
+	public Marker(PolyPoint pp,String c) { super("marker"); setPoint(pp); setColour(c); }
 	public void setPoint (PolyPoint pp) { latLng = pp; }
 }
 
 class Circle extends PolyObject {
-	public String type = "circle";
 	public PolyPoint latLng;
 	public String radius;
 
-	public Circle (PolyPoint p, String r) { setPoint(p); setRadius(r); }
-	public Circle (PolyPoint p, String r, String c) { setPoint(p); setRadius(r); setColour(c); }
+	public Circle (PolyPoint p, String r) { super ("circle"); setPoint(p); setRadius(r); }
+	public Circle (PolyPoint p, String r, String c) { super ("circle"); setPoint(p); setRadius(r); setColour(c); }
 	public void setPoint (PolyPoint pp) { latLng = pp; }
 	public void setRadius (String r) { radius = r; }
 }
