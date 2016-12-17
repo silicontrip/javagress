@@ -127,7 +127,8 @@ public class layerlinker {
 				System.err.println("==  links generated " + rt.split()+ " ==");
 				System.err.println("== Generating fields ==");
 				
-				allfields = pf.makeFieldsFromSingleLinks(l2);
+				ArrayList<Field> af = pf.makeFieldsFromSingleLinks(l2);
+				allfields = pf.filterFields(af,links,maxBl);
 				System.err.println("fields: " + allfields.size());
 
 				// allfields = singleCluster(portals);
@@ -190,7 +191,8 @@ public class layerlinker {
 
 				System.out.println(dl.out());
 				*/
-				allfields = pf.makeFieldsFromDoubleLinks(lf2,lf1);
+				ArrayList<Field> af = pf.makeFieldsFromDoubleLinks(lf2,lf1);
+				allfields = pf.filterFields(af,links,maxBl);
 				System.err.println("== Fields:  " + allfields.size() + " ==");
 
 				// portals1 and and portals2 is crucial ordering.
@@ -269,7 +271,8 @@ public class layerlinker {
 
 				System.out.println(dt.out());
 */
-				allfields = pf.makeFieldsFromTripleLinks(lf1,lf2,lf3);
+				ArrayList<Field> af = pf.makeFieldsFromTripleLinks(lf1,lf2,lf3);
+				allfields = pf.filterFields(af,links,maxBl);
 
 			} else {
 				throw new RuntimeException("Invalid command line arguments");
