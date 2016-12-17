@@ -181,18 +181,14 @@ public class Field {
 		f.getLine(2).intersects(getLine(0)) ||
 		f.getLine(2).intersects(getLine(1)) ||
 		f.getLine(2).intersects(getLine(2));
-	
-		/*
-		if (!intersect)
-		{		
-			System.err.println("[" + getLine(0) + "," + getLine(1) + "," + getLine(2) + "," +
-								   f.getLine(0) + "," + f.getLine(1) + "," + f. getLine(2) + "]" );
-		}
-		*/
 		
 		return intersect;
 
-		
+	}
+
+	public boolean intersects(Line l)
+	{
+		return l.intersects(getLine(0)) || l.intersects(getLine(1)) || l.intersects(getLine(2));
 	}
 
 	public teamCount countIntersects(Collection<Link> links)

@@ -594,6 +594,28 @@ public class PortalFactory {
 		return la;
 	}
 
+	public static ArrayList<Field> filterFields(Collection<Field> fields, Collection<Link> links, teamCount max) 
+	{
+		ArrayList<Field> fa = new ArrayList<Field>();
+
+		for (Field fi: fields) {
+			teamCount bb = new teamCount();
+			for (Link link: links) {
+				if (fi.intersects(link)) {
+					//System.out.println("** intersect team: "+ link.getTeamEnum());
+					bb.incTeamEnum(link.getTeamEnum());
+				}
+				if (bb.moreThan(max))
+					break;
+			}
+			if (!bb.moreThan(max))
+				fa.add(fi);
+			
+		
+		}
+		return fa;
+	}
+
 	private static boolean linkExists (Object[] lk, int j, Point p1, Point p2)
 	{
 		
@@ -717,6 +739,9 @@ public class PortalFactory {
 		
 		for (int i =0; i < pointDesc.length; i += 2)
 			pa.add(new Point(pointDesc[i],pointDesc[i+1]));
+
+		System.out.println("Got " + pa.size() + " points.");
+
 		return pa;
 	}
 
