@@ -91,6 +91,66 @@ public class DrawTools {
 		entities.add(pg);
 	}
 
+	public void toFields() {
+		ArrayList<PolyObject> oldent = entities;
+		entities = new ArrayList<PolyObject>();
+		HashSet<PolyObject> ff = new HashSet<PolyObject>();
+		for (int l1 =0; l1< oldent.size(); l1++) {
+			PolyObject dto1 = oldent.get(l1);
+			int l3=0;
+			PolyObject dto3;
+			if (dto1.EnumType() == PolyType.POLYLINE) {
+				Polyline do1 = (Polyline)dto1;
+				for (int l2=0; l2 <oldent.size(); l2++) {
+
+					PolyObject dto2 = oldent.get(l2);
+					//var nff={};
+					if (dto2.EnumType() == PolyType.POLYLINE) {
+						Polyline do2 = (Polyline)dto2;
+						if (do1.latLngs.get(0).equals(do2.latLngs.get(0))) {
+							for ( l3=0; l3 <oldent.size(); l3++) {
+								dto3 = oldent.get(l3);
+								if (dto3.EnumType() == PolyType.POLYLINE) {
+									Polyline do3 = (Polyline)dto3;
+									if ((do1.latLngs.get(1).equals(do3.latLngs.get(0)) && do2.latLngs.get(1).equals(do3.latLngs.get(1))) || (do1.latLngs.get(1).equals(do3.latLngs.get(1)) && do2.latLngs.get(1).equals(do3.latLngs.get(0)) )) {
+										Polygon nff = new Polygon();
+										nff.addPoint(do1.latLngs.get(0));
+										nff.addPoint(do1.latLngs.get(1));
+										nff.addPoint(do2.latLngs.get(0));
+										nff.setColour(colour);
+										ff.add(nff);
+									}
+								}
+							}
+						}
+						if (do1.latLngs.get(0).equals(do2.latLngs.get(1))) {
+							for ( l3=0; l3 <oldent.size(); l3++) {
+								dto3 = oldent.get(l3);
+								if (dto3.EnumType() == PolyType.POLYLINE) {
+									Polyline do3 = (Polyline)dto3;
+									if ((do1.latLngs.get(1).equals(do3.latLngs.get(0)) && do2.latLngs.get(0).equals(do3.latLngs.get(1))) || (do1.latLngs.get(1).equals(do3.latLngs.get(1)) && do2.latLngs.get(0).equals(do3.latLngs.get(0)) )) {
+										Polygon nff = new Polygon();
+										nff.addPoint(do1.latLngs.get(0));
+										nff.addPoint(do1.latLngs.get(1));
+										nff.addPoint(do2.latLngs.get(0));
+										nff.setColour(colour);
+										ff.add(nff);
+
+									}
+								}
+							}
+						}
+					}
+				}
+			} else {
+				entities.add(dto1);
+			}
+
+		}
+		entities.addAll(ff);
+
+	}
+
 	public void toLines() {
 
 	//	System.out.println (">>> DrawTools::toLines");
@@ -152,8 +212,7 @@ public class DrawTools {
 
 	public String out () 
 	{
-		if (addFieldAsLine)
-			toLines();
+		if (addFieldAsLine) toLines();
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			return mapper.writeValueAsString(entities);
