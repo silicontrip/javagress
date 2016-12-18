@@ -3,6 +3,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Collection;
 import java.io.IOException;
 
@@ -142,6 +143,9 @@ public class DrawTools {
 			}
 		}
 
+		// add hashSet to arraylist
+		entities.addAll(lines);
+
 	}
 		
 	public String toString() { return this.out(); }
@@ -187,7 +191,7 @@ class Polygon extends PolyObject {
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 	public ArrayList<PolyPoint> getLatLngs() { return latLngs; }
 	@Override
-	public equals (Object o)
+	public boolean equals (Object o)
 	{
 		if (o == this) return true;
 		if (!(o instanceof Polygon)) return false;
@@ -221,7 +225,7 @@ class Polygon extends PolyObject {
 		
 	}
 	@Override
-	public HashCode()
+	public int hashCode()
 	{
 		// the cyclic order is important
 		// but can't work it out.
@@ -238,7 +242,7 @@ class Polyline extends PolyObject {
 	public Polyline () { super("polyline"); latLngs = new ArrayList<PolyPoint>(); }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 	@Override
-	public equals (Object o)
+	public boolean equals (Object o)
 	{
 		if (o == this) return true;
 		if (!(o instanceof Polyline)) return false;
@@ -253,16 +257,16 @@ class Polyline extends PolyObject {
 		return true;
 	}
 	@Override
-	public HashCode()
+	public int hashCode()
 	{
 		// honestly, who uses more than 2 points?
 		if (this.latLngs.size()==2)
-			return this.latLngs.get(0).hashCode() | this.latLngs.get(1);
+			return this.latLngs.get(0).hashCode() | this.latLngs.get(1).hashCode();
 		int hc=0;
 		for (int i =0; i < (this.latLngs.size()/2); i++)
 		{
 			hc *= 31;
-			hc += this.latLngs.get(i).hashCode() | this.latLngs.get(this.latLngs.size()-i-1);
+			hc += this.latLngs.get(i).hashCode() | this.latLngs.get(this.latLngs.size()-i-1).hashCode();
 		}
 		return hc;
 	}
@@ -295,7 +299,7 @@ class PolyPoint {
 	public PolyPoint(Double a, Double o) { this(String.valueOf(a),String.valueOf(o)); }
 
 	@Override
-	public equals (Object o)
+	public boolean equals (Object o)
 	{
 		if (o == this) return true;
 		if (!(o instanceof PolyPoint)) return false;
@@ -303,9 +307,10 @@ class PolyPoint {
 	
 		return (this.lat.equals(l.lat) && this.lng.equals(l.lng));
 	}
-	@Override hashCode ()
+	@Override 
+	public int hashCode ()
 	{
-		return this.lat.hashCode() * 2 + (this.lng.HashCode() * 2 + 1);
+		return this.lat.hashCode() * 2 + (this.lng.hashCode() * 2 + 1);
 	}
 	
 	public String toString () { return (lat + "," + lng); }
