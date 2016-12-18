@@ -96,6 +96,7 @@ public class DrawTools {
 
 		ArrayList<PolyObject> oldent = entities;
 		entities = new ArrayList<PolyObject>();
+		HashSet<PolyObject> lines = new HashSet<PolyObject>();
 
 		//for (PolyObject po: entities)
 		for (int i=0; i < oldent.size(); i++)
@@ -114,14 +115,26 @@ public class DrawTools {
 				{
 					if (oldpoint != null)
 					{
-						addLine(oldpoint,pp);
+						Polyline pg = new Polyline();
+						pg.addPoint(oldpoint);
+						pg.addPoint(pp);
+						pg.setColour(colour);
+						lines.add(pg);
+						
+						// addLine(oldpoint,pp);
 					} else {
 						firstpoint = pp;
 					}
 					oldpoint = pp;  
 					
 				}
-				addLine(oldpoint,firstpoint);
+				Polyline pg = new Polyline();
+				pg.addPoint(oldpoint);
+				pg.addPoint(firstpoint);
+				pg.setColour(colour);
+				lines.add(pg);
+
+				// addLine(oldpoint,firstpoint);
 				
 			} else {
 	//			System.out.println("Drawtools::toLines not polygon :"+po.type);
@@ -173,7 +186,50 @@ class Polygon extends PolyObject {
 	public Polygon(ArrayList<PolyPoint> pp) { super("polygon"); latLngs = pp; }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 	public ArrayList<PolyPoint> getLatLngs() { return latLngs; }
-
+	@Override
+	public equals (Object o)
+	{
+		if (o == this) return true;
+		if (!(o instanceof Polygon)) return false;
+		Polygon l = (Polygon) o;
+		if (l.latLngs.size() != this.latLngs.size()) return false;
+		
+		// can only work this out for 3 points
+		// only cyclic order is important
+		// direction is not important
+		// starting point is not important
+		
+		return ((this.latLngs.get(0).equals(l.latLngs.get(0)) &&
+			this.latLngs.get(1).equals(l.latLngs.get(1)) &&
+			this.latLngs.get(2).equals(l.latLngs.get(2)) ) ||
+			(this.latLngs.get(0).equals(l.latLngs.get(1)) &&
+			 this.latLngs.get(1).equals(l.latLngs.get(2)) &&
+			 this.latLngs.get(2).equals(l.latLngs.get(0)) ) ||
+			(this.latLngs.get(0).equals(l.latLngs.get(2)) &&
+			 this.latLngs.get(1).equals(l.latLngs.get(0)) &&
+			 this.latLngs.get(2).equals(l.latLngs.get(1)) ) ||
+			(this.latLngs.get(0).equals(l.latLngs.get(0)) &&
+			 this.latLngs.get(1).equals(l.latLngs.get(2)) &&
+			 this.latLngs.get(2).equals(l.latLngs.get(1)) ) ||
+			(this.latLngs.get(0).equals(l.latLngs.get(2)) &&
+			 this.latLngs.get(1).equals(l.latLngs.get(1)) &&
+			 this.latLngs.get(2).equals(l.latLngs.get(0)) ) ||
+			(this.latLngs.get(0).equals(l.latLngs.get(1)) &&
+			 this.latLngs.get(1).equals(l.latLngs.get(0)) &&
+			 this.latLngs.get(2).equals(l.latLngs.get(2)) ));
+		
+		
+	}
+	@Override
+	public HashCode()
+	{
+		// the cyclic order is important
+		// but can't work it out.
+		int hc=0;
+		for (int i =0; i < this.latLngs.size(); i++)
+			hc |= this.latLngs.get(i).hashCode();
+		return hc;
+	}
 }
 
 class Polyline extends PolyObject {
@@ -181,7 +237,36 @@ class Polyline extends PolyObject {
 
 	public Polyline () { super("polyline"); latLngs = new ArrayList<PolyPoint>(); }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
-
+	@Override
+	public equals (Object o)
+	{
+		if (o == this) return true;
+		if (!(o instanceof Polyline)) return false;
+		Polyline l = (Polyline) o;
+		if (l.latLngs.size() != this.latLngs.size()) return false;
+		boolean equal = true;
+		for (int i =0; i < this.latLngs.size(); i++)
+			if ((!this.latLngs.get(i).equals(l.latLngs.get(i))) &&
+			(!this.latLngs.get(i).equals(l.latLngs.get(this.latLngs.size()-i-1))))
+				return false;
+		
+		return true;
+	}
+	@Override
+	public HashCode()
+	{
+		// honestly, who uses more than 2 points?
+		if (this.latLngs.size()==2)
+			return this.latLngs.get(0).hashCode() | this.latLngs.get(1);
+		int hc=0;
+		for (int i =0; i < (this.latLngs.size()/2); i++)
+		{
+			hc *= 31;
+			hc += this.latLngs.get(i).hashCode() | this.latLngs.get(this.latLngs.size()-i-1);
+		}
+		return hc;
+	}
+	
 }
 
 class Marker extends PolyObject {
@@ -203,12 +288,26 @@ class Circle extends PolyObject {
 }
 
 class PolyPoint {
-	public String lat;
-	public String lng;
+	public final String lat;
+	public final String lng;
 	public PolyPoint() { lat = "0.0"; lng = "0.0"; }
 	public PolyPoint(String a, String o) { lat = a; lng = o; }
 	public PolyPoint(Double a, Double o) { this(String.valueOf(a),String.valueOf(o)); }
 
+	@Override
+	public equals (Object o)
+	{
+		if (o == this) return true;
+		if (!(o instanceof PolyPoint)) return false;
+		PolyPoint l = (PolyPoint) o;
+	
+		return (this.lat.equals(l.lat) && this.lng.equals(l.lng));
+	}
+	@Override hashCode ()
+	{
+		return this.lat.hashCode() * 2 + (this.lng.HashCode() * 2 + 1);
+	}
+	
 	public String toString () { return (lat + "," + lng); }
 }
 
