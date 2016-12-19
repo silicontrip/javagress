@@ -22,32 +22,69 @@ public class DrawTools {
 
 	public DrawTools(String clusterDescription) throws IOException
 	{
-		HashMap<String,HashMap<String,Object>> guidMap;
+		this();
                 ObjectMapper mapper = new ObjectMapper();
                 
-                ArrayList<PolyObject> tmpObj;
-                
-                // System.out.println(clusterDescription);
-                
-                try {
-                        tmpObj = mapper.readValue(clusterDescription,new TypeReference<Collection<PolyObject>>() {});
-                } catch (com.fasterxml.jackson.databind.JsonMappingException e) {
-                        throw new IOException("Invalid Drawtools: " + e);
-                }
-        
-                // System.out.println(tmpObj.latLngs);
-                
-                // there should be only 1 entry
-	/*
-                for (PolyObject entry : tmpObj) {
+		JsonNode dtObj = mapper.readTree(clusterDescription);
+		for (JsonNode node: dtObj)
+		{
+			String type = node.path("type").asText();
+			String colour = node.path("color").asText();
+			if ("polygon".equalsIgnoreCase(type)) 
+			{ 
+				ArrayList<PolyPoint> pp = makeLatLngs(node.path("latLngs"));
+				entities.add(new Polygon(pp,colour));
+			}
+			if ("polyline".equalsIgnoreCase(type)) { 
+				ArrayList<PolyPoint> pp = makeLatLngs(node.path("latLngs"));
+				entities.add(new Polyline(pp,colour));
+			}
+			if ("marker".equalsIgnoreCase(type)) { 
+				PolyPoint pp = new PolyPoint(node.path("latLng"));
+				entities.add(new Marker(pp,colour));
+			}
+			if ("circle".equalsIgnoreCase(type)) { 
+				PolyPoint pp = new PolyPoint(node.path("latLng"));
+				entities.add(new Circle(pp,node.path("radius").asText(),colour));
+			}
+		
+		}
 
-			System.out.println("Type: " + entry.type);
-
-                }
-	*/
+                
 		// should do some validity checking.
                 
 	
+	}
+
+	public void jsonNodeParser(String jsonDrawtools) throws IOException
+	{
+
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode dtObj = mapper.readTree(jsonDrawtools);
+		for (JsonNode node: dtObj)
+		{
+			String type = node.path("type").asText();
+			String colour = node.path("color").asText();
+			if ("polygon".equalsIgnoreCase(type)) 
+			{ 
+				ArrayList<PolyPoint> pp = makeLatLngs(node.path("latLngs"));
+				entities.add(new Polygon(pp,colour));
+			}
+			if ("polyline".equalsIgnoreCase(type)) { 
+				ArrayList<PolyPoint> pp = makeLatLngs(node.path("latLngs"));
+				entities.add(new Polyline(pp,colour));
+			}
+			if ("marker".equalsIgnoreCase(type)) { 
+				PolyPoint pp = new PolyPoint(node.path("latLng"));
+				entities.add(new Marker(pp,colour));
+			}
+			if ("circle".equalsIgnoreCase(type)) { 
+				PolyPoint pp = new PolyPoint(node.path("latLng"));
+				entities.add(new Circle(pp,node.path("radius").asText(),colour));
+			}
+		
+		}
+
 	}
 
 	public void erase() {entities = new ArrayList<PolyObject>(); }
@@ -99,13 +136,15 @@ public class DrawTools {
 		Double totmu = 0.0;
 		for (int l1 =0; l1< entities.size(); l1++) {
 			PolyObject po = entities.get(l1);
+			//System.out.println("Type: " + po.type + ", " + po.EnumType());
 			
-			if (po.EnumType() == PolyType.POLYLINE) {
+			if (po.EnumType() == PolyType.POLYGON) {
 				Polygon pg = (Polygon)po;
 				Point p0 = new Point(pg.latLngs.get(0).lat,pg.latLngs.get(0).lng);
 				Point p1 = new Point(pg.latLngs.get(1).lat,pg.latLngs.get(1).lng);
 				Point p2 = new Point(pg.latLngs.get(2).lat,pg.latLngs.get(2).lng);
 				Field fi = new Field(p0,p1,p2);
+			//	System.out.println("sz: " + fi.getGeoArea());
 				totmu += fi.getEstMu();
 			}
 		}
@@ -245,6 +284,16 @@ public class DrawTools {
 
 	public int size ()  { return entities.size(); }
 
+	private ArrayList<PolyPoint> makeLatLngs(JsonNode latLngs)
+	{
+		ArrayList<PolyPoint> pt = new ArrayList<PolyPoint>();
+		for (JsonNode jPoint: latLngs)
+			pt.add(new PolyPoint(jPoint));
+		return pt;
+	}
+			
+		
+
 
 }
 
@@ -268,6 +317,7 @@ class Polygon extends PolyObject {
 		
 	public Polygon () { super ("polygon"); latLngs = new ArrayList<PolyPoint>(); }
 	public Polygon(ArrayList<PolyPoint> pp) { super("polygon"); latLngs = pp; }
+	public Polygon(ArrayList<PolyPoint> pp, String c) { super("polygon"); latLngs = pp; setColour(c); }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 	public ArrayList<PolyPoint> getLatLngs() { return latLngs; }
 	@Override
@@ -320,6 +370,7 @@ class Polyline extends PolyObject {
 	public ArrayList<PolyPoint> latLngs;
 
 	public Polyline () { super("polyline"); latLngs = new ArrayList<PolyPoint>(); }
+	public Polyline(ArrayList<PolyPoint> pp, String c) { super("polyline"); latLngs = pp; setColour(c); }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 	@Override
 	public boolean equals (Object o)
@@ -377,6 +428,7 @@ class PolyPoint {
 	public PolyPoint() { lat = "0.0"; lng = "0.0"; }
 	public PolyPoint(String a, String o) { lat = a; lng = o; }
 	public PolyPoint(Double a, Double o) { this(String.valueOf(a),String.valueOf(o)); }
+	public PolyPoint(JsonNode jPoint) { this(jPoint.path("lat").asText(),jPoint.path("lng").asText()); }
 
 	@Override
 	public boolean equals (Object o)
