@@ -45,9 +45,7 @@ public class DrawTools {
 
                 }
 	*/
-                
-                
-                
+		// should do some validity checking.
                 
 	
 	}
@@ -89,6 +87,29 @@ public class DrawTools {
 		pg.addPoint(p2);
 		pg.setColour(colour);
 		entities.add(pg);
+	}
+
+	public Double getMu() throws javax.xml.parsers.ParserConfigurationException, java.io.IOException
+	{
+
+		// normalise plan
+		toLines();
+		toFields();
+
+		Double totmu = 0.0;
+		for (int l1 =0; l1< entities.size(); l1++) {
+			PolyObject po = entities.get(l1);
+			
+			if (po.EnumType() == PolyType.POLYLINE) {
+				Polygon pg = (Polygon)po;
+				Point p0 = new Point(pg.latLngs.get(0).lat,pg.latLngs.get(0).lng);
+				Point p1 = new Point(pg.latLngs.get(1).lat,pg.latLngs.get(1).lng);
+				Point p2 = new Point(pg.latLngs.get(2).lat,pg.latLngs.get(2).lng);
+				Field fi = new Field(p0,p1,p2);
+				totmu += fi.getEstMu();
+			}
+		}
+		return totmu;	
 	}
 
 	public void toFields() {
