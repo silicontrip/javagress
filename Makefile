@@ -2,7 +2,7 @@
 CLASSES = DrawTools.class Field.class Line.class Link.class Point.class Portal.class PortalFactory.class  teamCount.class \
 Poly.class  PolyPoint.class BlockList.class \
 layerlinker.class multilinker.class  alllinker.class multilinker2.class manylinks.class \
-maxfields.class targetlinker.class megaplan.class portalquery.class spiner.class \
+maxfields.class targetlinker.class megaplan.class portalquery.class spiner.class draw.class \
 PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class \
 Arguments.class PortalSelectionStrategy.class PortalSelectionRangeStrategy.class PortalSelectionBoxStrategy.class PortalSelectionTriangleStrategy.class \
 CellMUDB.class RunTimer.class
