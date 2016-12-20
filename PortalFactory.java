@@ -411,6 +411,60 @@ public class PortalFactory {
 		return resultMap;
 		
 	}
+
+	public HashMap<String,Portal> reducePortals (HashMap<String,Portal> portals, Double threshold) {
+
+		//int pcount[] = new int[portals.size()];
+		HashMap<String,Integer> pcount = new HashMap<String,Integer>();
+		HashMap<String,HashSet<String>> pmatch = new HashMap<String,HashSet<String>>();
+		HashMap<String,Portal> portalmap = new HashMap<String,Portal>();
+	
+		for (String guid: portals.keySet())
+		{
+			Portal po = portals.get(guid);
+			pcount.put(guid, new Integer(0));
+			pmatch.put(guid,new HashSet<String>());
+			for (Portal p2: portals.values())
+				if (po.getGeoDistance(p2) < threshold)
+				{
+					Integer i = pcount.get(guid);
+					i++;
+					pcount.put(guid,i);
+					HashSet<String> tm = pmatch.get(guid);
+					tm.add(p2.getGuid());
+				}
+
+
+		}
+		// um now what?	
+		
+		while (pcount.size() > 0)
+		{
+			Integer max = new Integer(0);
+			String maxguid=null;
+
+			for (String guid: pcount.keySet())
+			{
+				Integer thisCount = pcount.get(guid);
+				if (thisCount > max)
+				{
+					max = thisCount;
+					maxguid = new String(guid);
+				}
+
+		// find portal with the highest count
+		// add portal to output list.
+		// remove matching portals
+			}	
+			portalmap.put(maxguid,portals.get(maxguid));
+			for (String gg: pmatch.get(maxguid))
+				pcount.remove(gg);
+
+		}
+
+		return portalmap;
+
+	}
 	
 	
 	public ArrayList<Link> getPurgedLinks (Collection<Portal> portals) throws IOException {
