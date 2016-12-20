@@ -21,6 +21,61 @@ public class layerlinker {
 		} 
 	} 
 
+	private static ArrayList<Field> matchingFields(ArrayList<Field> fa, Field fi, Double threshold)
+	{
+		ArrayList<Field> ff = new ArrayList<Field>();
+		for (Field tf: fa)
+			if(tf.difference(fi) <= threshold)
+				ff.add(tf);
+
+		return ff;
+	}	
+        private static Double searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, Double maxArea) throws javax.xml.parsers.ParserConfigurationException, java.io.IOException
+        {
+                        if (list.size() > 0) {
+
+				// how to pick which field sizing algorithm
+                        //      Double thisArea = sizeFields(list);
+                                // we want to maximise number of fields
+                               // Double thisArea = new Double(list.size());
+				Double thisArea = 0.0;
+				for (Field fi: list)
+					thisArea += fi.getEstMu();
+				
+
+                                if (thisArea > maxArea) {
+                                        System.out.print(thisArea + "(" + list.size() + ") : ");
+					dt.erase();
+					for (Field fi: list)
+						dt.addField(fi);
+					System.out.println(dt);
+						
+                                        System.out.println("");
+                                        maxArea = thisArea;
+                                }
+                        }
+
+                        for (int i =start; i<fields.length; i++)
+                        {
+                                Field thisField = (Field)fields[i];
+
+                                if (!thisField.intersects(list))
+                                {
+
+                                        ArrayList<Field> newlist = new ArrayList<Field>(list);
+                                        newlist.add((Field)fields[i]);
+                                        maxArea = searchFields(dt,newlist,fields,i+1,maxArea);
+                                }
+
+                        }
+
+                return maxArea;
+        }
+	
+
+	// would like to change this to use a field search
+	// return all similar fields.  Search all similar fields for maximum layers or mu.
+
 	private static int findField(Object[] fields, int start, Field current,ArrayList<Field> exist, Double threshold)
 	{
 		int best=-1;
@@ -76,12 +131,15 @@ public class layerlinker {
 			threshold = new Double(ag.getOptionForKey("t"));
 		else
 			threshold = new Double(0.3);
+
+
+			
 		
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
 
-		if (ag.hasOption("T"))
-			target = pf.getPointsFromString(ag.getOptionForKey("T"));
+			if (ag.hasOption("T"))
+				target = pf.getPointsFromString(ag.getOptionForKey("T"));
 
 			
 			rt = new RunTimer();
@@ -108,7 +166,12 @@ public class layerlinker {
 				
 				portals = pf.portalClusterFromString(ag.getArgumentAt(0));
 				
-				System.err.println("==  portals read " + rt.split()+ " ==");
+				System.err.println("== " + portals.size() + " portals read " + rt.split()+ " ==");
+				if (ag.hasOption("P")) {
+					portals = pf.reducePortals(portals,new Double(ag.getOptionForKey("P")));
+					System.err.println("== " + portals.size() + " portals reduced " + rt.split()+ " ==");
+				}
+
 				System.err.println("== getting links ==");
 				
 				links = pf.getPurgedLinks(portals.values());
@@ -145,25 +208,19 @@ public class layerlinker {
 				portals2 = pf.portalClusterFromString(ag.getArgumentAt(1));
 				
 				
-				
-				System.err.println("==  portals read " + rt.split() + " ==");
-				System.err.println("== Reading links ==");
-				
-				
 				allPortals = new ArrayList<Portal>();
 								
 				allPortals.addAll(portals1.values());
 				allPortals.addAll(portals2.values());
 				
 				
+				System.err.println("== " + allPortals.size() + " portals read " + rt.split()+ " ==");
+				System.err.println("== Reading links ==");
+				
+				
+				
 				links = pf.getPurgedLinks(new ArrayList<Portal>(allPortals));
 				
-				/*
-				dt.erase();
-				for (Line l: links)
-					dt.addLine(l);
-				System.out.println(dt.out());
-*/
 				
 				System.err.println("==  links read " +rt.split()  + " ==");
 				System.err.println("== Generating fields ==");
@@ -171,26 +228,11 @@ public class layerlinker {
 				ArrayList<Line> li1 = pf.makeLinksFromSingleCluster(portals1.values());
 				ArrayList<Line> lf1 = pf.filterLinks(li1,links,maxBl);
 				System.err.println("== cluster 1 links:  " + lf1.size() + " ==");
-				/*
-				DrawTools dl = new DrawTools();
-				dl.setDefaultColour("#c00000");
-				for (Line l: lf1)
-					dl.addLine(l);
-				
-				System.out.println(dl.out());
-				*/
+
 				ArrayList<Line> li2 = pf.makeLinksFromDoubleCluster(portals1.values(),portals2.values());
 				ArrayList<Line> lf2 = pf.filterLinks(li2,links,maxBl);
 				System.err.println("== cluster 2 links:  " + lf2.size() + " ==");
 
-				/*
-				dl.erase();
-				dl.setDefaultColour("#c0c000");
-				for (Line l: lf2)
-					dl.addLine(l);
-
-				System.out.println(dl.out());
-				*/
 				ArrayList<Field> af = pf.makeFieldsFromDoubleLinks(lf2,lf1);
 				allfields = pf.filterFields(af,links,maxBl);
 				System.err.println("== Fields:  " + allfields.size() + " ==");
@@ -219,7 +261,7 @@ public class layerlinker {
 				allPortals.addAll(portals2.values());
 				allPortals.addAll(portals3.values());
 
-				System.err.println("==  portals  read " + rt.split()+ " ==");
+				System.err.println("== " + allPortals.size() + " portals read " + rt.split()+ " ==");
 				System.err.println("== get links ==");
 				
 				
@@ -286,7 +328,10 @@ public class layerlinker {
 			Map<Double,Field> blockField = new TreeMap<Double,Field>(Collections.reverseOrder());
 			for (Field fi: allfields) {
 				if (target==null || fi.inside(target))
-					blockField.put(fi.getGeoArea(),fi);
+					if (calc==0)
+						blockField.put(fi.getGeoArea(),fi);
+					else
+						blockField.put(fi.getEstMu(),fi);
 			}
 			System.err.println("==  fields filtered " + rt.split() + " ==");
 			System.err.println("== show matches ==");
