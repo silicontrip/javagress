@@ -1,5 +1,4 @@
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.core.type.TypeReference;  
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +22,7 @@ public class DrawTools {
 	public DrawTools(String clusterDescription) throws IOException
 	{
 		this();
-                ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = new ObjectMapper();
                 
 		JsonNode dtObj = mapper.readTree(clusterDescription);
 		for (JsonNode node: dtObj)
@@ -93,7 +92,6 @@ public class DrawTools {
 
 	public void setDefaultColour(String c) { colour = c; }
 
-
 	public void addLine (Line l) {
 		Polyline pg = new Polyline();
 		pg.addPoint(new PolyPoint(l.getoLat()/1000000.0,l.getoLng()/1000000.0));
@@ -130,8 +128,9 @@ public class DrawTools {
 	{
 
 		// normalise plan
-		toLines();
-		toFields();
+		//toLines();
+		entities = this.getAsLines();
+		entities = this.getAsFields();
 
 		Double totmu = 0.0;
 		for (int l1 =0; l1< entities.size(); l1++) {
@@ -150,26 +149,25 @@ public class DrawTools {
 		}
 		return totmu;	
 	}
-
-	public void toFields() {
-		ArrayList<PolyObject> oldent = entities;
-		entities = new ArrayList<PolyObject>();
+	
+	public ArrayList<PolyObject> getAsFields() {
+		ArrayList<PolyObject> asFields = new ArrayList<PolyObject>();
 		HashSet<PolyObject> ff = new HashSet<PolyObject>();
-		for (int l1 =0; l1< oldent.size(); l1++) {
-			PolyObject dto1 = oldent.get(l1);
+		for (int l1 =0; l1< entities.size(); l1++) {
+			PolyObject dto1 = entities.get(l1);
 			int l3=0;
 			PolyObject dto3;
 			if (dto1.EnumType() == PolyType.POLYLINE) {
 				Polyline do1 = (Polyline)dto1;
-				for (int l2=0; l2 <oldent.size(); l2++) {
+				for (int l2=0; l2 <entities.size(); l2++) {
 
-					PolyObject dto2 = oldent.get(l2);
+					PolyObject dto2 = entities.get(l2);
 					//var nff={};
 					if (dto2.EnumType() == PolyType.POLYLINE) {
 						Polyline do2 = (Polyline)dto2;
 						if (do1.latLngs.get(0).equals(do2.latLngs.get(0))) {
-							for ( l3=0; l3 <oldent.size(); l3++) {
-								dto3 = oldent.get(l3);
+							for ( l3=0; l3 <entities.size(); l3++) {
+								dto3 = entities.get(l3);
 								if (dto3.EnumType() == PolyType.POLYLINE) {
 									Polyline do3 = (Polyline)dto3;
 									if ((do1.latLngs.get(1).equals(do3.latLngs.get(0)) && do2.latLngs.get(1).equals(do3.latLngs.get(1))) || (do1.latLngs.get(1).equals(do3.latLngs.get(1)) && do2.latLngs.get(1).equals(do3.latLngs.get(0)) )) {
@@ -184,8 +182,8 @@ public class DrawTools {
 							}
 						}
 						if (do1.latLngs.get(0).equals(do2.latLngs.get(1))) {
-							for ( l3=0; l3 <oldent.size(); l3++) {
-								dto3 = oldent.get(l3);
+							for ( l3=0; l3 <entities.size(); l3++) {
+								dto3 = entities.get(l3);
 								if (dto3.EnumType() == PolyType.POLYLINE) {
 									Polyline do3 = (Polyline)dto3;
 									if ((do1.latLngs.get(1).equals(do3.latLngs.get(0)) && do2.latLngs.get(0).equals(do3.latLngs.get(1))) || (do1.latLngs.get(1).equals(do3.latLngs.get(1)) && do2.latLngs.get(0).equals(do3.latLngs.get(0)) )) {
@@ -203,26 +201,26 @@ public class DrawTools {
 					}
 				}
 			} else {
-				entities.add(dto1);
+				asFields.add(dto1);
 			}
 
 		}
-		entities.addAll(ff);
-
+		asFields.addAll(ff);
+		return asFields;
 	}
 
-	public void toLines() {
+	public ArrayList<PolyObject> getAsLines() {
 
 	//	System.out.println (">>> DrawTools::toLines");
 
-		ArrayList<PolyObject> oldent = entities;
-		entities = new ArrayList<PolyObject>();
+		// ArrayList<PolyObject> oldent = entities;
+		ArrayList<PolyObject> asLines = new ArrayList<PolyObject>();
 		HashSet<PolyObject> lines = new HashSet<PolyObject>();
 
 		//for (PolyObject po: entities)
-		for (int i=0; i < oldent.size(); i++)
+		for (int i=0; i < entities.size(); i++)
 		{
-			PolyObject po = oldent.get(i);
+			PolyObject po = entities.get(i);
 	//		System.out.println("Drawtools::toLines entity: " + i + " / " + po.EnumType());
 			if (po.EnumType() == PolyType.POLYGON)
 			{
@@ -259,23 +257,47 @@ public class DrawTools {
 				
 			} else {
 	//			System.out.println("Drawtools::toLines not polygon :"+po.type);
-				entities.add(po);
+				asLines.add(po);
 			}
 		}
 
 		// add hashSet to arraylist
-		entities.addAll(lines);
+		asLines.addAll(lines);
 
-	}
+		return asLines;
 		
+	}
+	
+	public String asIntelLink() {
+		
+		ArrayList<PolyObject> pos  = this.getAsLines();
+		String intelLink = "https://www.ingress.com/intel?pls=";
+		boolean first = true;
+		for (PolyObject po: pos)
+			if (po.EnumType() == PolyType.POLYLINE)
+			{
+				Polyline pl = (Polyline) po;
+				if (!first)
+					intelLink = new String(intelLink + "_");
+			
+				intelLink = new String (intelLink + pl);
+			}
+		// add zoom and centre
+		return intelLink;
+	}
 	public String toString() { return this.out(); }
 
 	public String out () 
 	{
-		if (addFieldAsLine) toLines();
+		
+		ArrayList<PolyObject> po = entities;
+		
+		if (addFieldAsLine)
+			po = this.getAsLines();
+		
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			return mapper.writeValueAsString(entities);
+			return mapper.writeValueAsString(po);
 		} catch (Exception e) {
 			// probably not the best thing to do with the exception.
 			return e.getMessage();
@@ -283,7 +305,13 @@ public class DrawTools {
 	}
 
 	public int size ()  { return entities.size(); }
-
+	public int countPolygons() {
+		int count =0;
+		for (PolyObject po: entities)
+			if (po.EnumType() == PolyType.POLYGON)
+				count++;
+		return count;
+	}
 	private ArrayList<PolyPoint> makeLatLngs(JsonNode latLngs)
 	{
 		ArrayList<PolyPoint> pt = new ArrayList<PolyPoint>();
@@ -296,6 +324,10 @@ public class DrawTools {
 
 
 }
+	
+//*********************************************************************************************
+//** Poly objects
+//*********************************************************************************************
 
 abstract class PolyObject {
 	public final String type;
@@ -401,6 +433,8 @@ class Polyline extends PolyObject {
 		}
 		return hc;
 	}
+	// only works with 1 line segment.  toLines generates this anyway.
+	public String toString() { return latLngs.get(0) + "," +latLngs.get(1); }
 	
 }
 
