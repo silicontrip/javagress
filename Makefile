@@ -16,7 +16,7 @@ all: portaltools.jar
 
 
 portaltools.jar: classes
-	jar -cf portaltools.jar $(CLASSES) 'PortalFactory$$1.class' 'PortalFactory$$2.class' 'PortalFactory$$3.class' 'DrawTools$$1.class'
+	jar -cf portaltools.jar $(CLASSES) 'PortalFactory$$1.class' 'PortalFactory$$2.class' 'PortalFactory$$3.class' 
 
 classes: $(CLASSES)
 
