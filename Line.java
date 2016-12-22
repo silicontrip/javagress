@@ -4,7 +4,7 @@ public class Line {
 	Point o;
 	Point d;
 	
-	public static Double earthRadius = 6371.0;
+	public static final Double earthRadius = 6371.0;
 	
 	// close to zero threshold
 	final static  double eps = 1E-10;
@@ -25,13 +25,13 @@ public class Line {
 	public Vector3d getoVect() { return new Vector3d(getoX(),getoY(),getoZ()); }
 	public Vector3d getdVect() { return new Vector3d(getdX(),getdY(),getdZ()); }
 	
-	public double getoX() { return Math.cos(Math.toRadians(o.getLat())) * Math.cos(Math.toRadians(o.getLng())); }
-	public double getoY() { return Math.cos(Math.toRadians(o.getLat())) * Math.sin(Math.toRadians(o.getLng())); }
-	public double getoZ() { return Math.sin(Math.toRadians(o.getLat())); }
+	public double getoX() { return o.getX(); }
+	public double getoY() { return o.getY(); }
+	public double getoZ() { return o.getX(); }
 	
-	public double getdX() { return Math.cos(Math.toRadians(d.getLat())) * Math.cos(Math.toRadians(d.getLng())); }
-	public double getdY() { return Math.cos(Math.toRadians(d.getLat())) * Math.sin(Math.toRadians(d.getLng())); }
-	public double getdZ() { return Math.sin(Math.toRadians(d.getLat())); }
+	public double getdX() { return d.getX(); }
+	public double getdY() { return d.getY(); }
+	public double getdZ() { return d.getZ(); }
 	
 	//public void setoLat(Long l) { o.setLat(l); }
 	//public void setoLng(Long l) { o.setLng(l); }
@@ -194,6 +194,23 @@ public class Line {
 		}
 		
 		return false;
+	}
+
+
+	public Double getGeoDistance(Point p) {
+		
+		Vector3d p0 = this.getoVect();
+                Vector3d p1 = this.getdVect();
+
+		Vector3d C = new Vector3d (p.getX(), p.getY(), p.getZ());
+
+		Vector3d N = new Vector3d();
+
+		N.cross(p0,p1);
+		double adist = Math.acos(N.dot(C));
+
+		return earthRadius * adist;
+	
 	}
 	
 	public Double getGeoDistance() {
