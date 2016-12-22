@@ -399,13 +399,13 @@ public static void printMap(Map mp) {
 	if (ag.hasOption("M"))
 		calc=1;
 
+	RunTimer rt = new RunTimer();
+
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
 			
 			System.err.println("== Reading portals ==");
-			
-			startTime = System.nanoTime();
-			runTime = startTime;
+			rt.start();	
 			
 			// System.err.println("== " + args.length + " ==");
 			
@@ -423,31 +423,26 @@ public static void printMap(Map mp) {
 				HashMap<String,Portal> portals = new HashMap<String,Portal>();
 				
 				portals = pf.portalClusterFromString(ag.getArgumentAt(0));
-				
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  portals read " + elapsedTime+ " ==");
-				System.err.println("== Reading links ==");
-				startTime = System.nanoTime();
 
+                                if (ag.hasOption("P")) {
+                                        portals = pf.reducePortals(portals,new Double(ag.getOptionForKey("P")));
+                                        System.err.println("== " + portals.size() + " portals reduced " + rt.split()+ " ==");
+                                }
+
+				
+				System.err.println("==  portals read " + rt.split() + " ==");
+				System.err.println("== Reading links ==");
 				
 				ArrayList<Link> links = purgeLinks(portals.values(),allLinks.values());
 				
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  links read " + elapsedTime+ " ==");
+				System.err.println("==  links read " + rt.split() + " ==");
 				System.err.println("== Creating link cache ==");
-				startTime = System.nanoTime();
 				
 
 				HashMap<String,teamCount> bpl = getLinkBlockersSingle(portals.values().toArray(), links);
 
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  Cache created " + elapsedTime+ " ==");
+				System.err.println("==  Cache created " + rt.split() + " ==");
 				System.err.println("== Generating fields ==");
-				startTime = System.nanoTime();
-				
 				
 				areaOut = singleCluster(portals, bpl,maxBl,dt,calc);
 				
@@ -464,11 +459,8 @@ public static void printMap(Map mp) {
 				
 				
 				
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  portals read " + elapsedTime+ " ==");
+				System.err.println("==  portals read " + rt.split() + " ==");
 				System.err.println("== Reading links ==");
-				startTime = System.nanoTime();
 				
 				
 				allPortals = new ArrayList<Portal>();
@@ -480,12 +472,8 @@ public static void printMap(Map mp) {
 				
 				ArrayList<Link> links = purgeLinks(new ArrayList<Portal>(allPortals),allLinks.values());
 
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  links read " + elapsedTime+ " ==");
+				System.err.println("==  links read " + rt.split() + " ==");
 				System.err.println("== Creating link cache ==");
-				startTime = System.nanoTime();
-				
 				
 				// create link blockers 1 and 1-2 
 				HashMap<String,teamCount> bpl = new HashMap<String,teamCount>();
@@ -497,12 +485,8 @@ public static void printMap(Map mp) {
 				tblocks = getLinkBlockersDouble(portals2.values().toArray(),portals1.values().toArray(), links);
 				bpl.putAll(tblocks);
 
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  Cache created " + elapsedTime+ " ==");
+				System.err.println("==  Cache created " + rt.split() + " ==");
 				System.err.println("== Generating fields ==");
-				startTime = System.nanoTime();
-				
 				
 				// portals1 and and portals2 is crucial ordering.
 				areaOut = doubleCluster(portals1,portals2,bpl,maxBl,dt,calc);
@@ -527,11 +511,8 @@ public static void printMap(Map mp) {
 				allPortals.addAll(portals2.values());
 				allPortals.addAll(portals3.values());
 
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  portals read " + elapsedTime+ " ==");
+				System.err.println("==  portals read " + rt.split() + " ==");
 				System.err.println("== Reading links ==");
-				startTime = System.nanoTime();
 				
 				
 				ArrayList<Link> links = purgeLinks(new ArrayList<Portal>(allPortals),allLinks.values());
@@ -540,11 +521,8 @@ public static void printMap(Map mp) {
 
 				HashMap<String,teamCount> bpl = new HashMap<String,teamCount>();
 				
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  links read " + elapsedTime+ " ==");
+				System.err.println("==  links read " + rt.split() + " ==");
 				System.err.println("== Creating link cache ==");
-				startTime = System.nanoTime();
 				
 				
 				HashMap<String,teamCount> tblocks;
@@ -555,11 +533,8 @@ public static void printMap(Map mp) {
 				tblocks = getLinkBlockersDouble(portals1.values().toArray(),portals3.values().toArray(), links);
 				bpl.putAll(tblocks);
 
-				endTime = System.nanoTime();
-				elapsedTime = (endTime - startTime)/nanoPerSec;
-				System.err.println("==  Cache created " + elapsedTime+ " ==");
+				System.err.println("==  Cache created " + rt.split() + " ==");
 				System.err.println("== Generating fields ==");
-				startTime = System.nanoTime();
 				
 				
 				areaOut = tripleCluster(portals1,portals2,portals3,bpl,maxBl,dt,calc);
@@ -567,37 +542,8 @@ public static void printMap(Map mp) {
 			} else {
 				throw new RuntimeException("Invalid command line arguments");
 			}
-			/*
-			elasedTime = (System.nanoTime() - startTime)/nanoPerSec;
-			System.err.println("== Finished reading. " + elasedTime + " elapsed time.");
 			
-			System.err.println("== " + portals.size() + " Portals. " + allLinks.size() + " Links."); 
-			
-			startTime = System.nanoTime();
-			
-			
-			elasedTime = (System.nanoTime() - startTime)/nanoPerSec;
-			System.err.println("== Finished purging. " + elasedTime + " elapsed time.");
-			
-			
-			System.err.println("== " +links.size() + " links remaining in Bounds");
-			System.err.println("== creating block cache ==");
-			startTime = System.nanoTime();
-			
-			// need different methods depending on the clusters.
-			HashMap<String,teamCount> blocksPerLink = getLinkBlockersSingle(portals.values().toArray(), links);
-			
-			elasedTime = (System.nanoTime() - startTime)/nanoPerSec;
-			System.err.println("== Finished blocking. " + elasedTime + " elapsed time.");
-			
-			
-			System.err.println("== Created " + blocksPerLink.size() + " blocked links");
-			*/
-			
-			endTime = System.nanoTime();
-			elapsedTime = (endTime - startTime)/nanoPerSec;
-			totalTime = (endTime - runTime)/nanoPerSec;
-			System.err.println("== Finished. " + elapsedTime + " elapsed time. " + totalTime + " total time.");
+			System.err.println("== Finished. " + rt.split() + " elapsed time. " + rt.stop() + " total time.");
 			
 			
 			
