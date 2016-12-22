@@ -27,7 +27,7 @@ public class Line {
 	
 	public double getoX() { return o.getX(); }
 	public double getoY() { return o.getY(); }
-	public double getoZ() { return o.getX(); }
+	public double getoZ() { return o.getZ(); }
 	
 	public double getdX() { return d.getX(); }
 	public double getdY() { return d.getY(); }
@@ -207,7 +207,10 @@ public class Line {
 		Vector3d N = new Vector3d();
 
 		N.cross(p0,p1);
-		double adist = Math.acos(N.dot(C));
+		N.normalize();
+		//double dot = N.dot(C);
+		//System.out.println("dot: " + dot);
+		double adist = Math.PI / 2 - Math.acos(N.dot(C));
 
 		return earthRadius * adist;
 	
