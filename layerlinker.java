@@ -118,9 +118,9 @@ public class layerlinker {
 			dt.setDefaultColour("#a24ac3");
 
 		if (ag.hasOption("L"))
-			dt.setFieldsAsPolyline();
-		else
-			dt.setFieldsAsPolygon();
+			dt.setOutputAsPolyline();
+		if (ag.hasOption("O"))
+			dt.setOutputAsIntel();
 
 		// mu calculation
 		if (ag.hasOption("M"))
