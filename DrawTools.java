@@ -12,7 +12,7 @@ public class DrawTools {
 
 	private ArrayList<PolyObject> entities;
 	private String colour;
-	private Boolean addFieldAsLine = false;
+	private int outputType = 0;
 
 	public DrawTools() {
 		entities = new ArrayList<PolyObject>();	
@@ -60,6 +60,7 @@ public class DrawTools {
 
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode dtObj = mapper.readTree(jsonDrawtools);
+
 		for (JsonNode node: dtObj)
 		{
 			String type = node.path("type").asText();
@@ -87,8 +88,10 @@ public class DrawTools {
 	}
 
 	public void erase() {entities = new ArrayList<PolyObject>(); }
-	public void setFieldsAsPolyline() { addFieldAsLine = true; }
-	public void setFieldsAsPolygon() { addFieldAsLine = false; }
+	public void setOutputAsPolyline() { outputType = 1; }  // I know I should ENUM this
+	public void setOutputAsPolygon() { outputType = 2; }
+	public void setOutputAsIntel() { outputType = 3; }
+	public void setOutputAsIs() { outputType = 0; }
 
 	public void setDefaultColour(String c) { colour = c; }
 
@@ -211,9 +214,6 @@ public class DrawTools {
 
 	public ArrayList<PolyObject> getAsLines() {
 
-	//	System.out.println (">>> DrawTools::toLines");
-
-		// ArrayList<PolyObject> oldent = entities;
 		ArrayList<PolyObject> asLines = new ArrayList<PolyObject>();
 		HashSet<PolyObject> lines = new HashSet<PolyObject>();
 
@@ -221,7 +221,6 @@ public class DrawTools {
 		for (int i=0; i < entities.size(); i++)
 		{
 			PolyObject po = entities.get(i);
-	//		System.out.println("Drawtools::toLines entity: " + i + " / " + po.EnumType());
 			if (po.EnumType() == PolyType.POLYGON)
 			{
 				//System.out.println("Drawtools::toLines polygon");
@@ -256,7 +255,6 @@ public class DrawTools {
 				// addLine(oldpoint,firstpoint);
 				
 			} else {
-	//			System.out.println("Drawtools::toLines not polygon :"+po.type);
 				asLines.add(po);
 			}
 		}
@@ -273,36 +271,65 @@ public class DrawTools {
 		ArrayList<PolyObject> pos  = this.getAsLines();
 		String intelLink = "https://www.ingress.com/intel?pls=";
 		boolean first = true;
+		double maxLength = 0;
+		double centreLat =0;
+		double centreLng =0;
+		double pointCount = 0;
 		for (PolyObject po: pos)
 			if (po.EnumType() == PolyType.POLYLINE)
 			{
 				Polyline pl = (Polyline) po;
-				if (!first)
+
+				double d = pl.asLine().getGeoDistance();
+				if (d> maxLength)
+					maxLength = d;
+
+				centreLat += Double.parseDouble(pl.latLngs.get(0).lat);
+				centreLng += Double.parseDouble(pl.latLngs.get(0).lng);
+				centreLat += Double.parseDouble(pl.latLngs.get(1).lat);
+				centreLng += Double.parseDouble(pl.latLngs.get(1).lng);
+				pointCount +=2;
+
+				if (!first) 
 					intelLink = new String(intelLink + "_");
 			
 				intelLink = new String (intelLink + pl);
+				first = false;
 			}
 		// add zoom and centre
+			Double zoom =  21 - Math.log(maxLength * 10) / Math.log(2);
+			//System.out.println("max: " + maxLength + " zoom: " + zoom);
+
+			centreLat /= pointCount;
+			centreLng /= pointCount;
+			intelLink = new String (intelLink + "&ll=" + centreLat + "," + centreLng+"&z="+zoom.intValue());
 		return intelLink;
 	}
-	public String toString() { return this.out(); }
+	public String toString() { 
+		if (outputType == 1)
+			return entToString(this.getAsLines());
+		if (outputType == 2)
+			return entToString(this.getAsFields());
+		if (outputType == 3)
+			return this.asIntelLink();
+	// default as is
+		return entToString(entities);
+	}
+			
 
-	public String out () 
+	protected static String entToString(ArrayList<PolyObject> ent)
 	{
-		
-		ArrayList<PolyObject> po = entities;
-		
-		if (addFieldAsLine)
-			po = this.getAsLines();
-		
+
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			return mapper.writeValueAsString(po);
+			return mapper.writeValueAsString(ent);
 		} catch (Exception e) {
 			// probably not the best thing to do with the exception.
 			return e.getMessage();
 		}
 	}
+// thinking about deprecating this.
+	public String out () { return this.toString();	}
 
 	public int size ()  { return entities.size(); }
 	public int countPolygons() {
@@ -403,6 +430,7 @@ class Polyline extends PolyObject {
 
 	public Polyline () { super("polyline"); latLngs = new ArrayList<PolyPoint>(); }
 	public Polyline(ArrayList<PolyPoint> pp, String c) { super("polyline"); latLngs = pp; setColour(c); }
+	public Line asLine() {  return new Line(latLngs.get(0).asPoint(),latLngs.get(1).asPoint()); }
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 	@Override
 	public boolean equals (Object o)
@@ -463,6 +491,7 @@ class PolyPoint {
 	public PolyPoint(String a, String o) { lat = a; lng = o; }
 	public PolyPoint(Double a, Double o) { this(String.valueOf(a),String.valueOf(o)); }
 	public PolyPoint(JsonNode jPoint) { this(jPoint.path("lat").asText(),jPoint.path("lng").asText()); }
+	public Point asPoint() { return new Point(lat,lng); }
 
 	@Override
 	public boolean equals (Object o)
