@@ -13,6 +13,7 @@ public class DrawTools {
 	private ArrayList<PolyObject> entities;
 	private String colour;
 	private int outputType = 0;
+	private final double zoomView = 0.075;
 
 	public DrawTools() {
 		entities = new ArrayList<PolyObject>();	
@@ -297,7 +298,8 @@ public class DrawTools {
 				first = false;
 			}
 		// add zoom and centre
-			Double zoom =  21 - Math.log(maxLength * 10) / Math.log(2);
+			// 21 = max browser zoom.
+			Double zoom =  21 - Math.log(maxLength / zoomView) / Math.log(2);
 			//System.out.println("max: " + maxLength + " zoom: " + zoom);
 
 			centreLat /= pointCount;
