@@ -390,10 +390,10 @@ public static void printMap(Map mp) {
         else
                 dt.setDefaultColour("#a24ac3");
 
-        if (ag.hasOption("L"))
-                dt.setFieldsAsPolyline();
-        else
-                dt.setFieldsAsPolygon();
+                       if (ag.hasOption("L"))
+                        dt.setOutputAsPolyline();
+                if (ag.hasOption("O"))
+                        dt.setOutputAsIntel();
 
 	// mu calculation
 	if (ag.hasOption("M"))
