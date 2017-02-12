@@ -129,7 +129,9 @@ public class CellMUDB {
                         S2Polygon cellPoly = polyFromCell(s2cell);
 
                         intPoly.initToIntersection(thisField, cellPoly);
-                        area = intPoly.getArea() * 6371 * 6371 ;
+                        // area = intPoly.getArea() * 6371 * 6371 ;
+			// I keep seeing 6367 being used, might explain my field MU discrepancy
+                        area = intPoly.getArea() * 6367 * 6367 ;
 
                         // get mu for cellid
                         //mudb.getHash().put(cell.toToken(),new Double(mukm));

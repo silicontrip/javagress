@@ -4,7 +4,8 @@ public class Line {
 	Point o;
 	Point d;
 	
-	public static final Double earthRadius = 6371.0;
+	//public static final Double earthRadius = 6371.0;
+	public static final Double earthRadius = 6367.0;
 	
 	// close to zero threshold
 	final static  double eps = 1E-10;
