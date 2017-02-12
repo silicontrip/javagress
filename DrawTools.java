@@ -305,8 +305,8 @@ public class DrawTools {
 			centreLat /= pointCount;
 			centreLng /= pointCount;
 			// round these to E6 format...
-			centreLat = Math.round(centreLat*1000000)/1000000;
-			centreLng = Math.round(centreLng*1000000)/1000000;
+			centreLat = Math.round(centreLat*1000000)/1000000.0;
+			centreLng = Math.round(centreLng*1000000)/1000000.0;
 
 			intelLink = new String (intelLink + "&ll=" + centreLat + "," + centreLng+"&z="+zoom.intValue());
 		return intelLink;
