@@ -102,6 +102,7 @@ public class layerlinker {
 		
 		int calc=0;
 		Double threshold;
+		Double percentile = null;
 		ArrayList<Point> target=null;
 		
 		RunTimer rt;
@@ -132,6 +133,23 @@ public class layerlinker {
 		else
 			threshold = new Double(0.3);
 
+		if (ag.hasOption("p"))
+			percentile = new Double(ag.getOptionForKey("p"));
+
+
+		if (ag.hasOption("h"))
+		{
+			System.out.println("Options");
+			System.out.println(" -E <number>       Limit number of Enlightened Blockers");
+			System.out.println(" -R <number>       Limit number of Resistance Blockers");
+			System.out.println(" -C <#colour>      Set Drawtools output colour");
+			System.out.println(" -L                Set Drawtools to output as polylines");
+			System.out.println(" -O                Output as Intel Link");
+			System.out.println(" -M                Use MU calculation");
+			System.out.println(" -t <number>       Threshold for similar fields (larger less similar)");
+			System.out.println(" -p <percentile>   Use longest percentile links");
+			System.out.println(" -T <lat,lng,...>  Use only fields  covering target points");
+		}
 
 			
 		
@@ -183,7 +201,12 @@ public class layerlinker {
 
 				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
 				System.err.println("all links: " + li.size());
-				ArrayList<Line> l2 = pf.filterLinks(li,links,maxBl);
+				ArrayList<Line> l1 = pf.filterLinks(li,links,maxBl);
+				ArrayList<Line> l2;
+				if (percentile != null)
+					l2 = pf.percentileLinks(l1,percentile);
+				else 
+					l2 = l1;
 				
 				System.err.println("purged links: " + l2.size());
 
