@@ -7,7 +7,7 @@ import java.io.*;
 
 public class Field {
 
-
+	 public static final Double earthRadius = 6367.0;
 	//Long[] lat;
 	//Long[] lng;	
 	
@@ -106,19 +106,20 @@ public class Field {
 //		
 //	}
 	
-	// this is not true spherical area
 	public Double getGeoArea () 
 	{
 
 		double a = getLine(0).getGeoDistance();
 		double b = getLine(1).getGeoDistance();
 		double c = getLine(2).getGeoDistance();
+
+		double aa = a / earthRadius;
+		double ab = b / earthRadius;
+		double ac = c / earthRadius;
 		
-		//System.err.println("length: " + a + " - " + b + " - " + c);
+		double s = ( aa + ab + ac ) - Math.PI;
 		
-		double s = ( a + b + c ) / 2.0;
-		
-		return Math.sqrt(s * (s-a) * (s-b) * (s-c));
+		return s * earthRadius * earthRadius;
 		
 	}
 	
