@@ -109,17 +109,14 @@ public class Field {
 	public Double getGeoArea () 
 	{
 
-		double a = getLine(0).getGeoDistance();
-		double b = getLine(1).getGeoDistance();
-		double c = getLine(2).getGeoDistance();
+		double a = getLine(0).getGeoDistance() / earthRadius;
+		double b = getLine(1).getGeoDistance() / earthRadius;
+		double c = getLine(2).getGeoDistance() / earthRadius;
 
-		double aa = a / earthRadius;
-		double ab = b / earthRadius;
-		double ac = c / earthRadius;
+		double s = ( a + b + c ) / 2.0;
+		double e = Math.sqrt( Math.tan(s/2.0) * Math.tan((s-a)/2.0) * Math.tan((s-b)/2.0) * Math.tan((s-c)/2.0) );
 		
-		double s = ( aa + ab + ac ) - Math.PI;
-		
-		return s * earthRadius * earthRadius;
+		return 4 * Math.atan(e) * earthRadius * earthRadius;
 		
 	}
 	
