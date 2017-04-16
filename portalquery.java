@@ -30,10 +30,6 @@ public class portalquery {
         else
                 dt.setDefaultColour("#a24ac3");
 
-        if (ag.hasOption("L"))
-                dt.setFieldsAsPolyline();
-        else
-                dt.setFieldsAsPolygon();
 
 	try {
 		PortalFactory pf = PortalFactory.getInstance();
