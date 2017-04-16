@@ -622,6 +622,26 @@ public class PortalFactory {
 		return la;
 	}
 
+	public static ArrayList<Line> percentileLinks(Collection<Line>lines, Double percentile)
+	{
+		ArrayList<Line> la = new ArrayList<Line>();
+
+
+		Map<Double,Line> linkLength = new TreeMap<Double,Line>(Collections.reverseOrder());
+
+		for (Line l: lines) 
+			linkLength.put(l.getGeoDistance(),l);
+		
+		Object[] ll = linkLength.values().toArray();
+		int end = (int) (ll.length * percentile / 100.0);
+
+		// I recon there's a quicker way to slice an array.
+		for (int i =0; i<end; i++)
+			la.add( (Line)ll[i]);
+
+		return la;
+
+	}
 	public static ArrayList<Line> filterLinks(Collection<Line>lines, Collection<Link> links, teamCount max)
 	{
 		

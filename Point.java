@@ -1,7 +1,8 @@
 
 public class Point {
 
-	public static Double earthRadius = 6371.0;
+	//public static Double earthRadius = 6371.0;
+	public static Double earthRadius = 6367.0;
 	protected Long lat;
 	protected Long lng;
 
