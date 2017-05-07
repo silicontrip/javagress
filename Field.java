@@ -125,6 +125,17 @@ public class Field {
     public Double getGeoPerimeter() {
         return 		getLine(0).getGeoDistance() + getLine(1).getGeoDistance() +getLine(2).getGeoDistance();
     }
+
+	public ArrayList<Line> getAllLines() 
+	{
+		ArrayList<Line> al = new ArrayList<Line>();
+	
+		al.add(getLine(0));
+		al.add(getLine(1));
+		al.add(getLine(2));
+
+		return al;
+	}
 	
 	// returns the line (link) for the index
 	public Line getLine(int index) {
@@ -184,6 +195,11 @@ public class Field {
 		
 		return intersect;
 
+	}
+
+	public boolean hasLine(Line l)
+	{
+		return l.equals(getLine(0)) || l.equals(getLine(1)) || l.equals(getLine(2));
 	}
 
 	public boolean intersects(Line l)
@@ -264,7 +280,7 @@ public class Field {
 		return true;
 		
 	}
-	
+
 	public Field getInverseCornerField(int corner)
 	{
 		//throw error or return null
