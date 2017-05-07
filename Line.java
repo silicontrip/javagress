@@ -232,6 +232,9 @@ public class Line {
 		// return new String ( getoLatAsDouble() + "," + getoLngAsDouble() + " - " + getdLatAsDouble() +","+ getdLngAsDouble());
 		
 	}
+	public bool hasPoint(Point p) {
+		return (p.equals(o) || p.equals(d));
+	}
 	
 	public Double getBearing() { return o.getBearingTo(d); }
 	public Double getReverseBearing() { return d.getBearingTo(o); }
