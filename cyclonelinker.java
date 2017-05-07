@@ -81,8 +81,18 @@ public class cyclonelinker {
 			}
 		}
 		for (Field fl: cadFields)
-		
+		{	
+			for (int i=0;i<3;i++)
+			{
+				for (Field cfl: fieldsList)
+				{
+					for (Line cl: cfl.getLines())
+					{
+					}
+				}
 
+			}
+		}
 	}
 
 	private static ArrayList<Field> matchingFields(ArrayList<Field> fa, Field fi, Double threshold)
