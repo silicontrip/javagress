@@ -59,7 +59,7 @@ public class targetlinker {
 		return nf;	
 	}
 
-	private static ArrayList<Field> getFieldsOverPoint (Point p, HashMap<String,Portal> portals)
+	private static ArrayList<Field> getFieldsOverPoint (ArrayList<Point> p, HashMap<String,Portal> portals)
 	{
 
 		ArrayList <Field> fields = new ArrayList<Field>();
@@ -184,7 +184,9 @@ private static boolean notMatchPortals(ArrayList<Portal> p, Field f)
 	
 public static void main(String[] args) {
 
-	Point target ;
+//	Point target ;
+        ArrayList<Point> target=null;
+
 	ArrayList <Field> fieldList = new ArrayList<Field>();
 	int cyclone_cadence =-1; // set by command line
 	Arguments ag = new Arguments(args);
@@ -199,10 +201,13 @@ public static void main(String[] args) {
 	else
 		dt.setDefaultColour("#a24ac3");
 
-	if (ag.hasOption("L"))
-		dt.setFieldsAsPolyline();
-	else
-		dt.setFieldsAsPolygon();
+                if (ag.hasOption("L"))
+                        dt.setOutputAsPolyline();
+                if (ag.hasOption("O"))
+                        dt.setOutputAsIntel();
+
+    try {
+        PortalFactory pf = PortalFactory.getInstance();
 
 	if (ag.hasOption("c"))
 		cyclone_cadence = new Integer(ag.getOptionForKey("c")).intValue();
@@ -210,18 +215,18 @@ public static void main(String[] args) {
 	System.err.println("Cadence pattern: " + cyclone_cadence);
 
 
-	target = new Point(ag.getArgumentAt(0));
+	if (ag.hasOption("T"))
+		target = pf.getPointsFromString(ag.getOptionForKey("T"));
+
 
 
 	// make sure that there is a target...
     
-    try {
 	// get point
-        PortalFactory pf = PortalFactory.getInstance();
         
         System.err.println("== Reading portals ==");
         
-        HashMap<String,Portal> portals = pf.portalClusterFromString(ag.getArgumentAt(2));
+        HashMap<String,Portal> portals = pf.portalClusterFromString(ag.getArgumentAt(0));
         System.err.println("== calculating all fields ==");
 		ArrayList<Field> validFields = getFieldsOverPoint(target,portals);
 
