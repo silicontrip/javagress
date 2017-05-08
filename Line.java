@@ -232,7 +232,7 @@ public class Line {
 		// return new String ( getoLatAsDouble() + "," + getoLngAsDouble() + " - " + getdLatAsDouble() +","+ getdLngAsDouble());
 		
 	}
-	public bool hasPoint(Point p) {
+	public boolean hasPoint(Point p) {
 		return (p.equals(o) || p.equals(d));
 	}
 	
