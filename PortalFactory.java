@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.type.TypeReference;  
 import java.util.*;
 
+// This is more than just a portal factory.
+// includes methods for generating link and field sets
+// and filtering link and field sets.
+
 public class PortalFactory {
 	
 	protected String portalApi;
@@ -620,6 +624,41 @@ public class PortalFactory {
 			}
 		}
 		return la;
+	}
+
+	public static ArrayList<Field> fieldsOverTarget (Collection<Field>allfields, ArrayList<Point>target)
+	{
+		ArrayList<Field> fa = new ArrayList<Field>();
+
+		for (Field fi: allfields)
+			if (fi.inside(target))
+				fa.add(fi);
+
+		return fa;
+	}
+// 
+	public static ArrayList<Field> percentileFields(Collection<Field>fields, Double percentile,boolean mu) throws javax.xml.parsers.ParserConfigurationException, java.io.IOException
+	{
+		ArrayList<Field> la = new ArrayList<Field>();
+
+
+		Map<Double,Field> fieldSize = new TreeMap<Double,Field>(Collections.reverseOrder());
+
+		for (Field f: fields) 
+		if (mu) 
+			fieldSize.put(f.getEstMu(),f);
+		else
+			fieldSize.put(f.getGeoArea(),f);
+		
+		Object[] fs = fieldSize.values().toArray();
+		int end = (int) (fs.length * percentile / 100.0);
+
+		// I recon there's a quicker way to slice an array.
+		for (int i =0; i<end; i++)
+			la.add( (Field)fs[i]);
+
+		return la;
+
 	}
 
 	public static ArrayList<Line> percentileLinks(Collection<Line>lines, Double percentile)
