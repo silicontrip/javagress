@@ -103,6 +103,7 @@ public class layerlinker {
 		int calc=0;
 		Double threshold;
 		Double percentile = null;
+		Double fpercentile = null;
 		ArrayList<Point> target=null;
 		
 		RunTimer rt;
@@ -135,6 +136,8 @@ public class layerlinker {
 
 		if (ag.hasOption("p"))
 			percentile = new Double(ag.getOptionForKey("p"));
+		if (ag.hasOption("f"))
+			fpercentile = new Double(ag.getOptionForKey("f"));
 
 
 		if (ag.hasOption("h"))
@@ -148,6 +151,7 @@ public class layerlinker {
 			System.out.println(" -M                Use MU calculation");
 			System.out.println(" -t <number>       Threshold for similar fields (larger less similar)");
 			System.out.println(" -p <percentile>   Use longest percentile links");
+			System.out.println(" -f <percentile>   Use largest percentile fields");
 			System.out.println(" -T <lat,lng,...>  Use only fields  covering target points");
 		}
 
@@ -201,19 +205,16 @@ public class layerlinker {
 
 				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
 				System.err.println("all links: " + li.size());
-				ArrayList<Line> l1 = pf.filterLinks(li,links,maxBl);
-				ArrayList<Line> l2;
+				li = pf.filterLinks(li,links,maxBl);
 				if (percentile != null)
-					l2 = pf.percentileLinks(l1,percentile);
-				else 
-					l2 = l1;
+					li = pf.percentileLinks(li,percentile);
 				
-				System.err.println("purged links: " + l2.size());
+				System.err.println("purged links: " + li.size());
 
 				System.err.println("==  links generated " + rt.split()+ " ==");
 				System.err.println("== Generating fields ==");
 				
-				ArrayList<Field> af = pf.makeFieldsFromSingleLinks(l2);
+				ArrayList<Field> af = pf.makeFieldsFromSingleLinks(li);
 				allfields = pf.filterFields(af,links,maxBl);
 				System.err.println("fields: " + allfields.size());
 
@@ -249,21 +250,17 @@ public class layerlinker {
 				System.err.println("== Generating fields ==");
 				
 				ArrayList<Line> li1 = pf.makeLinksFromSingleCluster(portals1.values());
-				ArrayList<Line> lf1 = pf.filterLinks(li1,links,maxBl);
-				System.err.println("== cluster 1 links:  " + lf1.size() + " ==");
+				li1 = pf.filterLinks(li1,links,maxBl);
+				System.err.println("== cluster 1 links:  " + li1.size() + " ==");
 
 				ArrayList<Line> li2 = pf.makeLinksFromDoubleCluster(portals1.values(),portals2.values());
-				ArrayList<Line> lf2 = pf.filterLinks(li2,links,maxBl);
-				System.err.println("== cluster 2 links:  " + lf2.size() + " ==");
+				li2 = pf.filterLinks(li2,links,maxBl);
+				System.err.println("== cluster 2 links:  " + li2.size() + " ==");
 
-				ArrayList<Field> af = pf.makeFieldsFromDoubleLinks(lf2,lf1);
+				ArrayList<Field> af = pf.makeFieldsFromDoubleLinks(li2,li1);
 				allfields = pf.filterFields(af,links,maxBl);
 				System.err.println("== Fields:  " + allfields.size() + " ==");
 
-				// portals1 and and portals2 is crucial ordering.
-				// two portals from portals1 and 1 from portals2
-				//allfields = doubleCluster(portals1,portals2);
-				
 
 			} else if (ag.getArguments().size() == 3) { 
 				
@@ -278,7 +275,7 @@ public class layerlinker {
 				portals2 = pf.portalClusterFromString(ag.getArgumentAt(1));
 				portals3 = pf.portalClusterFromString(ag.getArgumentAt(2));
 
-				 allPortals = new ArrayList<Portal>();
+				allPortals = new ArrayList<Portal>();
 				
 				allPortals.addAll(portals1.values());
 				allPortals.addAll(portals2.values());
@@ -302,41 +299,22 @@ public class layerlinker {
 				System.err.println("== "+li1.size()+" links generated " + rt.split()+ " ==");
 
 				
-				ArrayList<Line> lf1 = pf.filterLinks(li1,links,maxBl);
-				System.err.println("== "+lf1.size()+" links filtered " + rt.split()+ " ==");
-/*
-				dt.erase();
-				dt.setDefaultColour("#f0f000");
-				for (Line l: lf1)
-					dt.addLine(l);
-*/
+				li1 = pf.filterLinks(li1,links,maxBl);
+				System.err.println("== "+li1.size()+" links filtered " + rt.split()+ " ==");
 				
 				ArrayList<Line> li2 = pf.makeLinksFromDoubleCluster(portals2.values(),portals3.values());
 				System.err.println("== "+li2.size()+" links generated " + rt.split()+ " ==");
 
-				ArrayList<Line> lf2 = pf.filterLinks(li2,links,maxBl);
-				System.err.println("== "+lf2.size()+" links filtered " + rt.split()+ " ==");
+				li2 = pf.filterLinks(li2,links,maxBl);
+				System.err.println("== "+li2.size()+" links filtered " + rt.split()+ " ==");
 
-/*
-				dt.setDefaultColour("#f000f0");
-				for (Line l: lf2)
-					dt.addLine(l);
-*/
-				
 				ArrayList<Line> li3 = pf.makeLinksFromDoubleCluster(portals3.values(),portals1.values());
 				System.err.println("== "+li3.size()+" links generated " + rt.split()+ " ==");
 
-				ArrayList<Line> lf3 = pf.filterLinks(li3,links,maxBl);
-				System.err.println("== "+lf3.size()+" links filtered " + rt.split()+ " ==");
+				li3 = pf.filterLinks(li3,links,maxBl);
+				System.err.println("== "+li3.size()+" links filtered " + rt.split()+ " ==");
 
-/*
-				dt.setDefaultColour("#00f0f0");
-				for (Line l: lf3)
-					dt.addLine(l);
-
-				System.out.println(dt.out());
-*/
-				ArrayList<Field> af = pf.makeFieldsFromTripleLinks(lf1,lf2,lf3);
+				ArrayList<Field> af = pf.makeFieldsFromTripleLinks(li1,li2,li3);
 				allfields = pf.filterFields(af,links,maxBl);
 
 			} else {
@@ -347,16 +325,23 @@ public class layerlinker {
 			System.err.println("== purge fields ==");
 			
 			// start searching for fields.
+			if (target!=null)
+				allfields = pf.fieldsOverTarget(allfields,target);
 
-			Map<Double,Field> blockField = new TreeMap<Double,Field>(Collections.reverseOrder());
-			for (Field fi: allfields) {
-				if (target==null || fi.inside(target))
-					if (calc==0)
-						blockField.put(fi.getGeoArea(),fi);
-					else
-						blockField.put(fi.getEstMu(),fi);
-			}
+			if (fpercentile != null)
+				allfields = pf.percentileFields(allfields,fpercentile,false);
+
 			System.err.println("==  fields filtered " + rt.split() + " ==");
+			System.err.println("== sorting fields ==");
+
+		Map<Double,Field> blockField = new TreeMap<Double,Field>(Collections.reverseOrder());
+			for (Field fi: allfields) {
+				if (calc==0)
+					blockField.put(fi.getGeoArea(),fi);
+				else
+					blockField.put(fi.getEstMu(),fi);
+			}
+			System.err.println("==  fields sortered " + rt.split() + " ==");
 			System.err.println("== show matches ==");
 
 		// 	Map<Double,Field> simField = new TreeMap<Double,Field>(Collections.reverseOrder());
