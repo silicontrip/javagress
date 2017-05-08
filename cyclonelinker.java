@@ -21,20 +21,20 @@ public class cyclonelinker {
 		} 
 	} 
 
-	private static void initSearch(Object[] fields)
+	private static void initSearch(Object[] fields,DrawTools dt)
 	{
 		int max = 2;
-		for (int i =start; i<fields.length; i++)
+		for (int i =0; i<fields.length; i++)
 		{
 			Field thisField = (Field)fields[i];
 			ArrayList<Line> edges = thisField.getAllLines();
 			for (Line edge: edges)
 			{
 				ArrayList<Field> cadFields = new ArrayList<Field>();
-				for (int j =start; j<fields.length; j++)
+				for (int j =i+1; j<fields.length; j++)
 				{
 					Field testField = (Field)fields[j];
-					if (testField.hasLine(edge) && !thisField.intersects(testField))
+					if (testField.hasLine(edge) && !thisField.intersects(testField) && !thisField.equals(testField))
 					{
 						cadFields.add(testField);
 					}
@@ -49,7 +49,7 @@ public class cyclonelinker {
 							ArrayList<Field> fieldsList = new ArrayList<Field>();
 							fieldsList.add(thisField);
 							fieldsList.add(cfi);
-							max = cycloneIterate(medge,fields,fieldsList,max);
+							max = cycloneIterate(medge,fields,fieldsList,max,dt);
 						}
 					}
 			
@@ -60,18 +60,48 @@ public class cyclonelinker {
 		}
 
 	}
+	private static String drawFields(List<Field> fa,DrawTools dt)
+        {
 
-	private static int cycloneIterate (Line edge, Object[] fields, ArrayList<Field> fieldsList, int max)
+                dt.erase();
+
+                for (Field fi: fa)
+                        dt.addField(fi);
+
+                return dt.out();
+
+        }
+	
+	private static int countLinks (Point p, ArrayList<Field> flist)
 	{
+
+		int count = 0;
+		for (Field fi: flist)
+			for (Line li: fi.getAllLines())
+				if (li.hasPoint(p))
+					count++;
+				
+		return count;
+	}
+
+	private static int cycloneIterate (Line edge, Object[] fields, ArrayList<Field> fieldsList, int max,DrawTools dt)
+	{
+
+		if (fieldsList.size() > max)
+		{
+			max = fieldsList.size();
+			// draw tools
+			System.out.println("" + max + " : " + drawFields(fieldsList,dt));
+		}
 		ArrayList<Field> cadFields = new ArrayList<Field>();
-		for (int j =start; j<fields.length; j++)
+		for (int j =0; j<fields.length; j++)
 		{
 			Field testField = (Field)fields[j];
 			if (testField.hasLine(edge))
 			{
-				bool intersect = false;
+				boolean intersect = false;
 				for (Field thisField: fieldsList)
-					if (thisField.intersects(testField))
+					if (thisField.intersects(testField) || thisField.equals(testField))
 					{
 						intersect = true;
 						break;
@@ -82,71 +112,23 @@ public class cyclonelinker {
 		}
 		for (Field fl: cadFields)
 		{	
+			int pointCount[] = new int[3];
 			for (int i=0;i<3;i++)
-			{
-				for (Field cfl: fieldsList)
-				{
-					for (Line cl: cfl.getLines())
-					{
-					}
-				}
-
-			}
+				pointCount[i] = countLinks(fl.getPoint(i), fieldsList);
+			// pick points with fewest links.
+			int maxCount = pointCount[0];
+			int p1=1; int p2=2;
+			if (pointCount[1] > maxCount) { p1 = 0; p2 = 2; }
+			if (pointCount[2] > maxCount) { p1 = 0; p2 = 1; }
+			Line selEdge = new Line (fl.getPoint(p1),fl.getPoint(p2));
+			ArrayList<Field> newList = new ArrayList<Field>(fieldsList);
+			newList.add(fl);
+			
+			max = cycloneIterate(selEdge,fields,newList,max,dt);
 		}
+		return max;
 	}
 
-	private static ArrayList<Field> matchingFields(ArrayList<Field> fa, Field fi, Double threshold)
-	{
-		ArrayList<Field> ff = new ArrayList<Field>();
-		for (Field tf: fa)
-			if(tf.difference(fi) <= threshold)
-				ff.add(tf);
-
-		return ff;
-	}	
-        private static Double searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, Double maxArea) throws javax.xml.parsers.ParserConfigurationException, java.io.IOException
-        {
-                        if (list.size() > 0) {
-
-				// how to pick which field sizing algorithm
-                        //      Double thisArea = sizeFields(list);
-                                // we want to maximise number of fields
-                               // Double thisArea = new Double(list.size());
-				Double thisArea = 0.0;
-				for (Field fi: list)
-					thisArea += fi.getEstMu();
-				
-
-                                if (thisArea > maxArea) {
-                                        System.out.print(thisArea + "(" + list.size() + ") : ");
-					dt.erase();
-					for (Field fi: list)
-						dt.addField(fi);
-					System.out.println(dt);
-						
-                                        System.out.println("");
-                                        maxArea = thisArea;
-                                }
-                        }
-
-                        for (int i =start; i<fields.length; i++)
-                        {
-                                Field thisField = (Field)fields[i];
-
-                                if (!thisField.intersects(list))
-                                {
-
-                                        ArrayList<Field> newlist = new ArrayList<Field>(list);
-                                        newlist.add((Field)fields[i]);
-                                        maxArea = searchFields(dt,newlist,fields,i+1,maxArea);
-                                }
-
-                        }
-
-                return maxArea;
-        }
-	
-	
 	public static void main(String[] args) {
 		
 		int calc=0;
@@ -394,17 +376,10 @@ public class cyclonelinker {
 
 			Object[] bf = blockField.values().toArray();
 
-			initSearch(bf);
+			initSearch(bf,dt);
 
 			System.err.println("==  plans searched " + rt.split() + " ==");
 			System.err.println("== show all plans ==");
-
-
-			for (Map.Entry<Double, String> entry : plan.entrySet()) 
-			{
-				System.out.println(""  + entry.getKey() +  entry.getValue());
-				System.out.println("");
-			}
 
 
 			System.err.println("== Finished. " + rt.split() + " elapsed time. " + rt.stop() + " total time.");
