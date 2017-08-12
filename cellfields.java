@@ -149,7 +149,8 @@ public static void main(String[] args) {
         PortalFactory pf = PortalFactory.getInstance();
 		
 	String id = new String ("0x" + ag.getArgumentAt(0));
-	cellid = new S2CellId(Long.decode(id));
+	cellid = new S2CellId(Long.decode(id) << 32);
+	System.out.println("Cell selected: " + cellid.toToken());
 	S2Cell cell = new S2Cell(cellid);
 
 	S2LatLng loc = new S2LatLng(cell.getCenter());
@@ -165,8 +166,8 @@ public static void main(String[] args) {
 		Portal p = portals.get(guid);
 		S2LatLng ploc = S2LatLng.fromE6(p.getLatE6().longValue(),p.getLngE6().longValue());
 		S2CellId pcell = S2CellId.fromLatLng(ploc).parent(13);
-		System.out.println(p.getTitle() + " : " + pcell.toToken());
-		if (pcell.toToken() == ag.getArgumentAt(0))
+		System.out.println(p.getTitle() + " : " + pcell.toToken() + " == " + ag.getArgumentAt(0));
+		if (pcell.toToken().equals(ag.getArgumentAt(0)))
 			cellportals.put(guid,p);
 	}
 
