@@ -24,13 +24,16 @@ public class cyclonelinker {
 	private static void initSearch(Object[] fields,DrawTools dt)
 	{
 		int max = 2;
-		for (int i =0; i<fields.length; i++)
+		// scan through all fields
+		for (int i=0; i<fields.length; i++)
 		{
 			Field thisField = (Field)fields[i];
 			ArrayList<Line> edges = thisField.getAllLines();
+			// try each edge of field.
 			for (Line edge: edges)
 			{
 				ArrayList<Field> cadFields = new ArrayList<Field>();
+				// find fields with matching edge
 				for (int j =i+1; j<fields.length; j++)
 				{
 					Field testField = (Field)fields[j];
@@ -39,6 +42,8 @@ public class cyclonelinker {
 						cadFields.add(testField);
 					}
 				}
+
+				// search the current fields with the 2 non matching edges
 				for (Field cfi: cadFields)
 				{
 					ArrayList<Line> medges = cfi.getAllLines();
@@ -49,10 +54,9 @@ public class cyclonelinker {
 							ArrayList<Field> fieldsList = new ArrayList<Field>();
 							fieldsList.add(thisField);
 							fieldsList.add(cfi);
-							max = cycloneIterate(medge,fields,fieldsList,max,dt);
+							max = cycloneIterate(i+1,medge,fields,fieldsList,max,dt);
 						}
 					}
-			
 				}
 
 				
@@ -84,9 +88,10 @@ public class cyclonelinker {
 		return count;
 	}
 
-	private static int cycloneIterate (Line edge, Object[] fields, ArrayList<Field> fieldsList, int max,DrawTools dt)
+	private static int cycloneIterate (int start, Line edge, Object[] fields, ArrayList<Field> fieldsList, int max,DrawTools dt)
 	{
 
+		// if we have a better plan, print it.
 		if (fieldsList.size() > max)
 		{
 			max = fieldsList.size();
@@ -94,7 +99,7 @@ public class cyclonelinker {
 			System.out.println("" + max + " : " + drawFields(fieldsList,dt));
 		}
 		ArrayList<Field> cadFields = new ArrayList<Field>();
-		for (int j =0; j<fields.length; j++)
+		for (int j =start; j<fields.length; j++)
 		{
 			Field testField = (Field)fields[j];
 			if (testField.hasLine(edge))
@@ -124,7 +129,7 @@ public class cyclonelinker {
 			ArrayList<Field> newList = new ArrayList<Field>(fieldsList);
 			newList.add(fl);
 			
-			max = cycloneIterate(selEdge,fields,newList,max,dt);
+			max = cycloneIterate(start,selEdge,fields,newList,max,dt);
 		}
 		return max;
 	}
@@ -176,7 +181,6 @@ public class cyclonelinker {
 			System.out.println(" -C <#colour>      Set Drawtools output colour");
 			System.out.println(" -L                Set Drawtools to output as polylines");
 			System.out.println(" -O                Output as Intel Link");
-			System.out.println(" -M                Use MU calculation");
 			System.out.println(" -t <number>       Threshold for similar fields (larger less similar)");
 			System.out.println(" -p <percentile>   Use longest percentile links");
 			System.out.println(" -T <lat,lng,...>  Use only fields  covering target points");
@@ -356,18 +360,16 @@ public class cyclonelinker {
 				throw new RuntimeException("Invalid command line arguments");
 			}
 			
-			System.err.println("==  fields generated " + rt.split() + " ==");
+			System.err.println("== fields generated " + rt.split() + " ==");
 			System.err.println("== purge fields ==");
 			
 			// start searching for fields.
 
-			Map<Double,Field> blockField = new TreeMap<Double,Field>(Collections.reverseOrder());
+			//Map<Double,Field> blockField = new TreeMap<Double,Field>(Collections.reverseOrder());
+			Map<Double,Field> blockField = new TreeMap<Double,Field>();
 			for (Field fi: allfields) {
 				if (target==null || fi.inside(target))
-					if (calc==0)
-						blockField.put(fi.getGeoArea(),fi);
-					else
-						blockField.put(fi.getEstMu(),fi);
+					blockField.put(fi.getGeoPerimeter(),fi);
 			}
 			System.err.println("==  fields filtered " + rt.split() + " ==");
 			System.err.println("== show matches ==");
