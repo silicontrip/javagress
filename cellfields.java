@@ -28,6 +28,18 @@ public class cellfields {
 		for (Field fi: fa)
 		{
 			area += fi.getGeoArea();
+		// errr these should be all within the 1 cell
+		// so there is a linear relationship between size and mu.
+		// not much point in doing the mu overhead calculation.
+		/*
+			try {
+				area += fi.getEstMu();
+			} catch (Exception e) {
+				area += fi.getGeoArea();
+			}
+		*/
+				
+
 		}
 		return area;
 	}
@@ -83,9 +95,9 @@ public class cellfields {
 	{
 			if (list.size() > 0) {
 				
-			//	Double thisArea = sizeFields(list);
+				Double thisArea = sizeFields(list);
 				// we want to maximise number of fields
-				Double thisArea = new Double(list.size());
+			//	Double thisArea = new Double(list.size());
 				
 				if (thisArea > maxArea) {
 					System.out.println(thisArea + " : " + drawFields(list,dt));
@@ -125,6 +137,7 @@ public class cellfields {
 
 public static void main(String[] args) {
 
+	int calc=0;
 	ArrayList<Point> target=null;
 	S2CellId cellid;
 	
@@ -144,6 +157,11 @@ public static void main(String[] args) {
                         dt.setOutputAsPolyline();
                 if (ag.hasOption("O"))
                         dt.setOutputAsIntel();
+
+                // mu calculation
+                if (ag.hasOption("M"))
+                        calc=1;
+
 
 	try {
         PortalFactory pf = PortalFactory.getInstance();
