@@ -3,7 +3,7 @@ import java.net.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.type.TypeReference;  
 import java.util.*;
-
+import com.google.common.geometry.*;
 
 // This is more than just a portal factory.
 // includes methods for generating link and field sets
@@ -139,7 +139,30 @@ public class PortalFactory {
 
 			
 		}
+		// get clusters in cell
+		else if (clusterDescription.startsWith("0x"))
+		{
+			S2CellId cellid = new S2CellId(Long.decode(clusterDescription) << 32);
+			S2Cell cell = new S2Cell(cellid);
+			S2LatLng loc = new S2LatLng(cell.getCenter());
+
+			HashMap<String,Portal> portals = getPortals("" + loc.latDegrees() + "," + loc.lngDegrees(),"1");
+
+				HashMap<String,Portal> cellportals = new HashMap<String,Portal>();
+
+	for (String guid : portals.keySet())
+	{
+		Portal p = portals.get(guid);
+		S2LatLng ploc = S2LatLng.fromE6(p.getLatE6().longValue(),p.getLngE6().longValue());
+		S2CellId pcell = S2CellId.fromLatLng(ploc).parent(13);
+		//System.out.println(p.getTitle() + " : " + pcell.toToken() + " == " + ag.getArgumentAt(0));
 		
+		if (("0x" +pcell.toToken()).equals(clusterDescription))
+			cellportals.put(guid,p);
+	}
+		return cellportals;
+		}
+
 		// single (or range)
 		else if (size == 1) {			
 			// split on :
