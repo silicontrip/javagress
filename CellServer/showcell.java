@@ -36,10 +36,11 @@ public class showcell
                         }
                         else
                         {
-				response = cs.cellalize(dtobj);
+				for (int i=0; i < dtobj.length(); i++)
+				{
+					response = cs.cellalize(dtobj.getJSONObject(i));
 
-                        }
-                    System.out.println( "" + response + "\n\r" );
+			    System.out.println( "" + response + "\n\r" );
 			double min_mu = 0;
 			double max_mu = 0;
 			for (Iterator<String> id= response.keys(); id.hasNext();)
@@ -50,6 +51,8 @@ public class showcell
 				max_mu += cell.getDouble("area") * cell.getDouble("mu_max");
 			}
 			System.out.println ("MU: [" + min_mu + "," + max_mu + "] " + ((min_mu + max_mu) / 2 ) + " +/- " + (max_mu - min_mu) / (max_mu+min_mu) * 100 + "%");
+			}
+                        }
 		}
         }
         catch ( IOException e )

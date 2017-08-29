@@ -52,9 +52,9 @@ public class CellServer
         handler.start();
     }
     
-	public JSONObject cellalize (JSONArray  dtobj)
+	public JSONObject cellalize (JSONObject  field)
 	{
-		JSONObject field = dtobj.getJSONObject(0);
+		//JSONObject field = dtobj.getJSONObject(0);
 		JSONObject response = new JSONObject();
 
 		if (field.has("latLngs"))
@@ -137,7 +137,7 @@ public class CellServer
                         }
                         else
                         {
-				response = cellalize(dtobj);
+				response = cellalize(dtobj.getJSONObject(0));
 
                         }
                     }
