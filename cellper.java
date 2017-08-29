@@ -230,8 +230,9 @@ public class cellper {
 				double minmu = lower*at;
 				double maxmu = upper*at;
 
-				if (maxmu - minmu > 1.0) 
-					System.out.println("[" + lower*at +"," + upper*at +"] " + at + " / " + dt.out());
+				//if (maxmu - minmu > 1.0) 
+				if (Math.round(minmu) != Math.round(maxmu))
+					System.out.println("[" + minmu +"," + maxmu +"] " + at + " / " + dt.out());
 			}
 
 			System.err.println("== Finished. " + rt.split() + " elapsed time. " + rt.stop() + " total time.");
