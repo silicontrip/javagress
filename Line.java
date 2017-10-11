@@ -236,6 +236,10 @@ public class Line {
 		return (p.equals(o) || p.equals(d));
 	}
 	
+	public double sign(Point p)
+	{
+		return (o.getLng() - p.getLng()) * (d.getLat() - p.getLat())  - (d.getLng() - p.getLng()) * (o.getLat() - p.getLat());
+	}
 	public Double getBearing() { return o.getBearingTo(d); }
 	public Double getReverseBearing() { return d.getBearingTo(o); }
 	

@@ -1,3 +1,4 @@
+import com.google.common.geometry.*;
 
 public class Point {
 
@@ -13,6 +14,7 @@ public class Point {
 	public Double getLat() { return lat/1000000.0; }
 	public Double getLng() { return lng/1000000.0; }
 
+	public S2LatLng getS2LatLng() { return S2LatLng.fromDegrees(getLat(),getLng()); }
 	
 	// Greater Circle maths functions
 	public Double getLatAsRad() { return Math.toRadians(lat / 1000000.0 ); }

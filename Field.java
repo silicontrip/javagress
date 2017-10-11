@@ -1,22 +1,20 @@
-import java.util.ArrayList; 
-import java.util.Collection;
 import com.google.common.geometry.*;
 
-import javax.xml.parsers.*;
 import java.io.*;
+
+import java.util.ArrayList; 
+import java.util.Collection;
+import java.util.HashMap;
+
+import javax.xml.parsers.*;
 
 public class Field {
 
-	 public static final Double earthRadius = 6367.0;
-	//Long[] lat;
-	//Long[] lng;	
-	
+	public static final Double earthRadius = 6367.0;
 	Portal[] portals;
 	Point[] points;
 	
 	public Field () {
-		//lat = new Long[3];
-		//lng = new Long[3];
 		portals = new Portal[3];
 		points = new Point[3];
 	}
@@ -55,10 +53,55 @@ public class Field {
 		return mudb.getEstMu(this);
 	}
 
+	public S2Polygon getS2Polygon()
+	{
+        S2PolygonBuilder pb = new S2PolygonBuilder(S2PolygonBuilder.Options.UNDIRECTED_UNION);
+        pb.addEdge(points[0].getS2LatLng().toPoint(),points[1].getS2LatLng().toPoint());
+        pb.addEdge(points[1].getS2LatLng().toPoint(),points[2].getS2LatLng().toPoint());
+        pb.addEdge(points[2].getS2LatLng().toPoint(),points[0].getS2LatLng().toPoint());
+
+        return pb.assemblePolygon();
+	}
+
+	public S2CellUnion getCells()
+	{
+		S2RegionCoverer rc = new S2RegionCoverer();
+        // ingress mu calculation specifics
+        rc.setMaxLevel(13);
+        rc.setMinLevel(0);
+        rc.setMaxCells(20);
+        return rc.getCovering (getS2Polygon());
+	}
+
+	public HashMap<S2CellId,Double> getCellIntersection()
+	{
+
+		HashMap<S2CellId,Double> polyArea = new HashMap<S2CellId,Double>();
+		S2CellUnion cells = getCells();
+		S2Polygon fieldPoly = getS2Polygon();
+        for (S2CellId cellid: cells)
+        {
+			S2Cell cell = new S2Cell(cellid);
+			S2PolygonBuilder pb = new S2PolygonBuilder(S2PolygonBuilder.Options.UNDIRECTED_UNION);
+        	pb.addEdge(cell.getVertex(0),cell.getVertex(1));
+        	pb.addEdge(cell.getVertex(1),cell.getVertex(2));
+        	pb.addEdge(cell.getVertex(2),cell.getVertex(3));
+        	pb.addEdge(cell.getVertex(3),cell.getVertex(0));
+			S2Polygon cellPoly = pb.assemblePolygon();
+			S2Polygon intPoly = new S2Polygon();
+			intPoly.initToIntersection(fieldPoly, cellPoly);
+
+			polyArea.put(cellid,new Double(intPoly.getArea() *  earthRadius * earthRadius));
+		}
+		return polyArea;
+		
+	}
+
 	public Portal getPortal(int index) { return portals[index]; }
 	public Point getPoint(int index) { return points[index]; }
 	public S2LatLng getS2LatLng(int index) { return S2LatLng.fromE6(getLat(index),getLng(index)); }
-	
+	/* really don't think fields should be mutable */
+	/*
 	public void setLat(int index, Long l)
 	{
 		if (index >=0 && index <= 2) 
@@ -76,7 +119,7 @@ public class Field {
 			points[index].setLng(l);
 		}
 	}
-	
+	*/
 	public Long getLat(int index)
 	{
 		if (index >=0 && index <= 2) 
@@ -96,16 +139,7 @@ public class Field {
 		}
 		return 0L;
 	}
-	
-//	public Double getArea () 
-////	{
-//	
-//		return (Math.abs(lng[0] * (lat[1] - lat[2]) +
-//				   lng[1] * (lat[2] - lat[0]) +
-//				   lng[2] * (lat[0] - lat[1])))/200000.0;
-//		
-//	}
-	
+
 	public Double getGeoArea () 
 	{
 
@@ -117,11 +151,10 @@ public class Field {
 		double e = Math.sqrt( Math.tan(s/2.0) * Math.tan((s-a)/2.0) * Math.tan((s-b)/2.0) * Math.tan((s-c)/2.0) );
 		
 		return 4 * Math.atan(e) * earthRadius * earthRadius;
-		
 	}
 	
     public Double getGeoPerimeter() {
-        return 		getLine(0).getGeoDistance() + getLine(1).getGeoDistance() +getLine(2).getGeoDistance();
+        return 	getLine(0).getGeoDistance() + getLine(1).getGeoDistance() +getLine(2).getGeoDistance();
     }
 
 	public ArrayList<Line> getAllLines() 
@@ -158,8 +191,6 @@ public class Field {
 
 	public boolean touches(Field f) 
 	{
-
-
 		return (f.getPortal(0) == this.getPortal(0)  ||
 			f.getPortal(0) == this.getPortal(1)  ||
 			f.getPortal(0) == this.getPortal(2)  ||
@@ -194,7 +225,22 @@ public class Field {
 		return intersect;
 
 	}
+	
+	// only works if there is 1 shared link
+	public Line getSharedLine(Field f)
+	{
+		if ( getLine(0).equals(f.getLine(0)) ||	getLine(0).equals(f.getLine(1)) || getLine(0).equals(f.getLine(2)) ) return getLine(0);
+		if ( getLine(1).equals(f.getLine(0)) ||	getLine(1).equals(f.getLine(1)) || getLine(1).equals(f.getLine(2)) ) return getLine(1);
+		if ( getLine(2).equals(f.getLine(0)) ||	getLine(2).equals(f.getLine(1)) || getLine(2).equals(f.getLine(2)) ) return getLine(2);
+		return null;
+	}
 
+	public boolean sharesLine(Field f)
+	{
+		return getLine(0).equals(f.getLine(0)) || getLine(0).equals(f.getLine(1)) || getLine(0).equals(f.getLine(2)) ||
+			getLine(1).equals(f.getLine(0)) || getLine(1).equals(f.getLine(1)) || getLine(1).equals(f.getLine(2)) ||
+			getLine(2).equals(f.getLine(0)) || getLine(2).equals(f.getLine(1)) || getLine(2).equals(f.getLine(2)); 
+	}
 	public boolean hasLine(Line l)
 	{
 		return l.equals(getLine(0)) || l.equals(getLine(1)) || l.equals(getLine(2));
@@ -203,6 +249,14 @@ public class Field {
 	public boolean intersects(Line l)
 	{
 		return l.intersects(getLine(0)) || l.intersects(getLine(1)) || l.intersects(getLine(2));
+	}
+
+	public boolean intersectsLine(ArrayList<Line> la)
+	{
+		for (Line l: la)
+			if (this.intersects(l))
+				return true;
+		return false;
 	}
 
 	public teamCount countIntersects(Collection<Link> links)
@@ -235,11 +289,7 @@ public class Field {
 				allLinks.add(li); 
 			}
 		}
-
-	
 		return allLinks;	
-		
-	
 	}
     
 	protected double sign (Point p1, Point p2, Point p3) 
@@ -250,9 +300,7 @@ public class Field {
     
 	protected double sign (double p1a, double p1o, double p2a, double p2o, double p3a, double p3o)
 	{
-	
 		return (p1o - p3o) * (p2a - p3a) - (p2o - p3o) * (p1a - p3a);
-		
 	}
 	
 	// not true geo inside
@@ -279,6 +327,41 @@ public class Field {
 		
 	}
 
+	public boolean inside (Field f)
+	{
+		for (int p =0; p<3; p++)
+			if (this.inside(f.getPoint(p)))
+				return true;
+		return false;
+	}
+
+	public boolean layers (Field f)
+	{
+		return this.inside(f) || f.inside(this);
+	}
+
+	public boolean layers (ArrayList<Field> fa)
+	{
+
+		if (fa.size() == 0 )
+			return true;
+		for (Field f: fa)
+			if (this.layers(f))
+				return true;
+		return false;
+	}
+
+	// only works if line doesn't match field 
+	public Point getOtherPoint(Line l)
+	{
+		if (!l.hasPoint(getPoint(0))) return getPoint(0);
+		if (!l.hasPoint(getPoint(1))) return getPoint(1);
+		if (!l.hasPoint(getPoint(2))) return getPoint(2);
+		
+		return null;
+
+	}
+
 	public Field getInverseCornerField(int corner)
 	{
 		//throw error or return null
@@ -300,6 +383,7 @@ public class Field {
 	public ArrayList<Portal> getPrevPortalLink (ArrayList<Portal> p) { return getPortalLinkInc(p,-1); }
 	public ArrayList<Point> getNextLink (ArrayList<Point> p) { return getLinkInc(p,1); }
 	public ArrayList<Point> getPrevLink (ArrayList<Point> p) { return getLinkInc(p,-1); }
+		// this should accept and return a line...
 
 	public ArrayList<Point> getLinkInc (ArrayList<Point> p,int inc)
 	{
@@ -318,6 +402,7 @@ public class Field {
 		return next;
 
 	}
+	// this should accept and return a line...
 	public ArrayList<Portal> getPortalLinkInc (ArrayList<Portal> p,int inc)
 	{
 		int i1 = getPointIndex(p.get(0));
@@ -334,6 +419,20 @@ public class Field {
 		next.add(getPortal(i2));
 		return next;
 
+	}
+
+	public boolean hasPoint(Point p)
+	{
+	/*
+		System.out.println("0: " + points[0]);
+		System.out.println("1: " + points[1]);
+		System.out.println("2: " + points[2]);
+		boolean p1 = p.equals(points[0]);
+		boolean p2 = p.equals(points[1]);
+		boolean p3 = p.equals(points[2]);
+		System.out.println("" + p1 + "," + p2 + "," + p3);
+	*/
+		return ( p.equals(points[0]) || p.equals(points[1]) || p.equals(points[2]) );
 	}
 
 	// determine which anchor equals the supplied point
@@ -368,39 +467,44 @@ public class Field {
 		return total;
 
 	}
-
-	
 	
 	// compare two fields have the same anchor points
 	public boolean equals(Field f) 
 	{
 	
 		return (((f.getLat(0) == this.getLat(0) && f.getLng(0) == this.getLng(0)) ||
-				(f.getLat(0) == this.getLat(0) && f.getLng(1) == this.getLng(1)) ||
-				(f.getLat(0) == this.getLat(0) && f.getLng(2) == this.getLng(2))) &&
+			(f.getLat(0) == this.getLat(0) && f.getLng(1) == this.getLng(1)) ||
+			(f.getLat(0) == this.getLat(0) && f.getLng(2) == this.getLng(2))) &&
 				
-				((f.getLat(1) == this.getLat(1) && f.getLng(1) == this.getLng(1)) ||
-				 (f.getLat(1) == this.getLat(1) && f.getLng(2) == this.getLng(2)) ||
-				 (f.getLat(1) == this.getLat(1) && f.getLng(0) == this.getLng(0))) &&
-				 ((f.getLat(2) == this.getLat(2) && f.getLng(2) == this.getLng(2)) ||
-				  (f.getLat(2) == this.getLat(2) && f.getLng(0) == this.getLng(0)) ||
-				 (f.getLat(2) == this.getLat(2) && f.getLng(1) == this.getLng(1))));
+			((f.getLat(1) == this.getLat(1) && f.getLng(1) == this.getLng(1)) ||
+			(f.getLat(1) == this.getLat(1) && f.getLng(2) == this.getLng(2)) ||
+			(f.getLat(1) == this.getLat(1) && f.getLng(0) == this.getLng(0))) &&
+			((f.getLat(2) == this.getLat(2) && f.getLng(2) == this.getLng(2)) ||
+			(f.getLat(2) == this.getLat(2) && f.getLng(0) == this.getLng(0)) ||
+			(f.getLat(2) == this.getLat(2) && f.getLng(1) == this.getLng(1))));
 	
-				}
+	}
+
+	public boolean isContainedIn(ArrayList<Field> fa)
+	{
+		for (Field f: fa)
+			if (this.equals(f))
+				return true;
+		return false;
+	}
 	
 	public String toString() { return this.getDraw(); } 
 	
 	public String getDraw() 
 	{
-		
+		// want to set colour
 		return new String ( "{\"type\":\"polygon\",\"latLngs\":[{\"lat\":" + this.getLat(0)/1000000.0 + 
 						   ",\"lng\":" + this.getLng(0)/1000000.0 +
 						   "},{\"lat\":" + this.getLat(1)/1000000.0 +
 						   ",\"lng\":" + this.getLng(1)/1000000.0 +
 						   "},{\"lat\":" + this.getLat(2)/1000000.0 +
 						   ",\"lng\":" + this.getLng(2)/1000000.0 +
-						   "}],\"color\":\"#a05000\"}" );
-		
+						   "}],\"color\":\"#a05000\"}" );	
 	}
 		
 }

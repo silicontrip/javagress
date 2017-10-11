@@ -114,6 +114,8 @@ public class DrawTools {
 		entities.add(pg);
 	}	
 
+	public void addMarker (Point p) { addMarker(p.getLat(),p.getLng()); }
+
 	public void addMarker (PolyPoint p) { entities.add(new Marker(p,colour)); }
 	public void addMarker (String lat, String lng) { addMarker(new PolyPoint(lat,lng)); }
 	public void addMarker (Double lat, Double lng) { addMarker(new PolyPoint(lat,lng)); }
