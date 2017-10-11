@@ -21,119 +21,13 @@ public class cellfields {
 		
 	}
 	
-	private static Double sizeFields(List<Field> fa)
-	{
-		Double area = 0.0;
-		
-		for (Field fi: fa)
-		{
-			area += fi.getGeoArea();
-		// errr these should be all within the 1 cell
-		// so there is a linear relationship between size and mu.
-		// not much point in doing the mu overhead calculation.
-		/*
-			try {
-				area += fi.getEstMu();
-			} catch (Exception e) {
-				area += fi.getGeoArea();
-			}
-		*/
-				
-
-		}
-		return area;
-	}
-
-	private static int iterSearchFields (DrawTools dt, Object[] fields)
-	{
-
-		int mostFields = 0;
-
-		ArrayList<Integer> sStack = new ArrayList<Integer>();
-		ArrayList<ArrayList<Field>> fStack = new ArrayList<ArrayList<Field>>();
-
-		while (sStack.size() > 0) {
-
-			System.out.println ("size: " + sStack.size());
-
-			ArrayList<Field> list = fStack.remove(fStack.size()-1);
-			Integer start = sStack.remove(sStack.size()-1);
-			if (list.size() > 0) {
-				int thisSize = list.size();
-				if (thisSize > mostFields)
-				{
-					mostFields = thisSize;
-					System.out.println(thisSize + " : " + drawFields(list,dt));
-					System.out.println("");
-				}
-			}
-
-			for (int i =start; i<fields.length; i++)
-			{
-				Field thisField = (Field)fields[i];
-				if (!thisField.intersects(list))
-//				if (!newFieldIntersect(list,thisField))
-				{
-					ArrayList<Field> newlist = new ArrayList<Field>(list);
-					newlist.add((Field)fields[i]);
-					
-
-					sStack.add (new Integer(i+1));
-					fStack.add (newlist);
-
-				}
-			}
-
-		}
-
-		return mostFields;
-		
-
-	}
-	
-	private static Double searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth)
-	{
-			if (list.size() > 0) {
-				
-				Double thisArea = sizeFields(list);
-				// we want to maximise number of fields
-			//	Double thisArea = new Double(list.size());
-				
-				if (thisArea > maxArea) {
-					System.out.println(thisArea + " : " + drawFields(list,dt));
-					System.out.println("");
-					maxArea = thisArea;
-				}
-			}
-			
-			for (int i =start; i<fields.length; i++)
-			{
-				Field thisField = (Field)fields[i];
-				
-				//	System.err.println(" - new Field Intersect - ");
-				if (!thisField.intersects(list))
-				// if (!newFieldIntersect(list,thisField))
-				{
-					//		System.err.println(" = END new Field Intersect = ");
-					
-					
-					ArrayList<Field> newlist = new ArrayList<Field>(list);
-					newlist.add((Field)fields[i]);
-					
-					/* this was an integrity check and is redundant.
-					if (fieldIntersect(newlist)) {
-						throw new RuntimeException("Field Collision : " + drawFields(list,dt) + " / " + thisField );
-						
-					}
-					*/
-					
-					maxArea = searchFields(dt,newlist,fields,i+1,maxArea,depth+1);
-				}
-				
-			}
-		
-		return maxArea;
-	}
+// specify Cell to generate for
+// generate fields at range km
+// if field.count < threshold { range++ }
+// foreach field
+// get cell mu intersection
+// determine error of cell of interest vs error of other cells.
+// pick the best ratio
 
 public static void main(String[] args) {
 
@@ -141,9 +35,7 @@ public static void main(String[] args) {
 	ArrayList<Point> target=null;
 	S2CellId cellid;
 	
-	
 	Arguments ag = new Arguments(args);
-
 	
 	teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
 	
@@ -153,65 +45,114 @@ public static void main(String[] args) {
 	else
 		dt.setDefaultColour("#a24ac3");
 
-                if (ag.hasOption("L"))
-                        dt.setOutputAsPolyline();
-                if (ag.hasOption("O"))
-                        dt.setOutputAsIntel();
+	int range = 1;
+	if (ag.hasOption("r"))
+		range = (new Integer(ag.getOptionForKey("r"))).intValue();
+		
 
-                // mu calculation
-                if (ag.hasOption("M"))
-                        calc=1;
 
+    if (ag.hasOption("L"))
+        dt.setOutputAsPolyline();
+    if (ag.hasOption("O"))
+        dt.setOutputAsIntel();
 
 	try {
         PortalFactory pf = PortalFactory.getInstance();
 		
-	String id = new String ("0x" + ag.getArgumentAt(0));
-	cellid = new S2CellId(Long.decode(id) << 32);
-	System.out.println("Cell selected: " + cellid.toToken());
-	S2Cell cell = new S2Cell(cellid);
+		String id = new String ("0x" + ag.getArgumentAt(0));
+		cellid = new S2CellId(Long.decode(id) << 32);
+		System.out.println("Cell selected: " + cellid.toToken());
 
-	S2LatLng loc = new S2LatLng(cell.getCenter());
+		CellServer cs = new CellServer();
 
-        System.err.println("== Reading portals ==");
-        
-        HashMap<String,Portal> portals = pf.portalClusterFromString("" + loc.latDegrees() + "," + loc.lngDegrees() + ":1");
+		S2Cell cell = new S2Cell(cellid);
 
-	HashMap<String,Portal> cellportals = new HashMap<String,Portal>();
+		S2LatLng loc = new S2LatLng(cell.getCenter());
 
-	for (String guid : portals.keySet())
-	{
-		Portal p = portals.get(guid);
-		S2LatLng ploc = S2LatLng.fromE6(p.getLatE6().longValue(),p.getLngE6().longValue());
-		S2CellId pcell = S2CellId.fromLatLng(ploc).parent(13);
-		System.out.println(p.getTitle() + " : " + pcell.toToken() + " == " + ag.getArgumentAt(0));
-		if (pcell.toToken().equals(ag.getArgumentAt(0)))
-			cellportals.put(guid,p);
-	}
+    	System.err.println("== Reading portals ==");
+    	HashMap<String,Portal> portals = new HashMap<String,Portal>();
 
+		while (portals.size() < 3)
+		{
+    		portals = pf.portalClusterFromString("" + loc.latDegrees() + "," + loc.lngDegrees() + ":" + range);
+		}	
 
-        ArrayList<Link> links = pf.getPurgedLinks(cellportals.values());
-		ArrayList<Line> li = pf.makeLinksFromSingleCluster(cellportals.values());
+        ArrayList<Link> links = pf.getPurgedLinks(portals.values());
+		ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
 		// check that maxBl is set
 		ArrayList<Line> l2 = pf.filterLinks(li,links,maxBl);
 		ArrayList<Field> allfields = pf.makeFieldsFromSingleLinks(l2);
 
-		ArrayList<Field> fiList = new ArrayList<Field>();
-		
 		for (Field fi: allfields) {
-			if (target==null || fi.inside(target))
-				fiList.add(fi);
+			// get mu cell intersection
+			HashMap<S2CellId,Double> cellCover = fi.getCellIntersection();
+			// determine error of cell of interest vs error of other cells.
+		//	HashMap<S2CellId,UniformDistribution> error = new HashMap<S2CellId,UniformDistribution>();
+
+			double thisError = 0;
+			double otherError =0;
+
+			double thisArea = 0;
+			double thisPError = 0;
+			double otherMU = 0;
+
+
+			for(S2CellId lcell : cellCover.keySet())
+			{
+
+				double area = cellCover.get(lcell);
+				UniformDistribution cmu = cs.getMU(lcell);
+				if (cmu == null)
+				{
+					thisError = 0;
+					break;
+				}
+				UniformDistribution mu = cmu.mul(area);
+
+				//System.out.println("" + lcell.toToken() + ": " + cmu + " x " + area + " = " + mu);
+
+				if (lcell.toToken().equals(ag.getArgumentAt(0)))
+				{
+					thisArea = area;
+				}
+				else
+					otherMU += mu.mean();
+
+				// want to reduce area in non selected cells.
+				mu = mu.mul(area);
+				if (lcell.toToken().equals(ag.getArgumentAt(0)))
+					thisError = mu.error();
+				else
+					otherError += mu.error();
+				//error.put(lcell,mu);
+			}
+			
+
+			//if (otherError==0) 
+			//	otherError = 1E-64;
+
+
+			double ratio = thisError / otherError;
+			if (thisError > 0)	
+			{
+				if (ratio < 100.0)
+				{
+				String mumu = String.format("%.12f",(ratio*thisArea));
+				String muratio = String.format("%.12f", ratio);
+				String mustr = String.format("%.12f", thisArea);
+				System.out.println(mumu + " " + mustr + " " + muratio +  " : [" + fi  + "]");
+				}
+			}
+			//}
+		
 		}
 		
-		System.out.println("Total Fields: " + fiList.size());
+		//System.out.println("Total Fields: " + fiList.size());
 
 			// sort through colliding fields.
 		
-		// iterSearchFields(dt,  fiList.toArray());
-		searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
+		//  searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
 		
-      //  System.out.println("]");
-
         
     } catch (Exception e) {
         
