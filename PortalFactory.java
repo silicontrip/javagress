@@ -57,7 +57,6 @@ public class PortalFactory {
 		
 		ArrayList<Polygon> tmpObj;
 		
-		// System.out.println(clusterDescription);
 		
 		try {
 			tmpObj = mapper.readValue(clusterDescription,new TypeReference<Collection<Polygon>>() {});
@@ -65,7 +64,6 @@ public class PortalFactory {
 			throw new IOException("Invalid Drawtools: " + e);
 		}
 	
-		// System.out.println(tmpObj.latLngs);
 		
 		// there should be only 1 entry
 		for (Polygon entry : tmpObj) {
@@ -155,7 +153,6 @@ public class PortalFactory {
 		Portal p = portals.get(guid);
 		S2LatLng ploc = S2LatLng.fromE6(p.getLatE6().longValue(),p.getLngE6().longValue());
 		S2CellId pcell = S2CellId.fromLatLng(ploc).parent(13);
-		//System.out.println(p.getTitle() + " : " + pcell.toToken() + " == " + ag.getArgumentAt(0));
 		
 		if (("0x" +pcell.toToken()).equals(clusterDescription))
 			cellportals.put(guid,p);
@@ -207,7 +204,6 @@ public class PortalFactory {
 		
 		String urlString = portalApi + "?ll=" + URLEncoder.encode(loc1,"UTF-8") +"&l2="+URLEncoder.encode(loc2,"UTF-8") ;
 		
-		// System.out.println(urlString);
 		
 		return readPortalsFromUrl(urlString);
 		
@@ -317,12 +313,11 @@ public class PortalFactory {
 			search = "title";
 		}
 
-		System.out.println("File searching on: " + search);
+		System.err.println("File searching on: " + search);
 		
 		for (Map.Entry<String, HashMap<String,Object>> entry : portalMap.entrySet()) {
 			HashMap<String, Object> portalEntry = entry.getValue();
 			String portalSearch = (String)portalEntry.get(search);
-		// System.out.println(portalSearch + " == " + locationDesc);
 			if (locationDesc.equalsIgnoreCase(portalSearch)) {
 				return new Point (((Integer)portalEntry.get("lat")).longValue(),((Integer)portalEntry.get("lng")).longValue());
 			}
@@ -350,7 +345,6 @@ public class PortalFactory {
 		// circle ll=, rr=
 		// since this string is constructed internally, we will do minimal checking.
 		
-		//System.out.println(query.get("ll"));
 		
 		if (query.containsKey("rr")) {
 
@@ -401,8 +395,7 @@ public class PortalFactory {
 
 		
 		url = new URL(urlString);
-		//System.out.println("urlstring: " + urlString + " query: " +url.getQuery());
-		System.out.println("Query: " +url.getQuery());
+		System.err.println("Query: " +url.getQuery());
 
 		rd = new BufferedReader(new InputStreamReader(url.openStream()));
 		while ((line = rd.readLine()) != null) { result += line; }
@@ -427,7 +420,6 @@ public class PortalFactory {
 			
 			String key = entry.getKey();
 			
-			//	 System.out.println(entry.getValue());
 			
 			// HashMap<String,String> portalMap = mapper.readValue(entry.getValue(),HashMap.class);
 			
@@ -549,7 +541,6 @@ public class PortalFactory {
 			
 			// Line linkLine = link.getLine();
 
-		//	System.out.println("link: " + link);
 			
 			// if link intesects or is contained in bounding box
 			if ((line0.intersects(link) ||
@@ -579,7 +570,6 @@ public class PortalFactory {
 		
 		String urlString = linkApi ;
 		
-		// System.out.println(urlString);
 		
 		url = new URL(urlString);
 		
@@ -601,7 +591,6 @@ public class PortalFactory {
 			
 			String key = (String)entry.get("guid");
 			
-			//	 System.out.println(entry.getValue());
 			
 			// HashMap<String,String> portalMap = mapper.readValue(entry.getValue(),HashMap.class);
 			
@@ -710,15 +699,12 @@ public class PortalFactory {
 		
 		ArrayList<Line> la = new ArrayList<Line>();
 	
-		//System.out.println("" + links.size() + " links in play");
-		//System.out.println("" + max + " blocking limits");
 		
 		for (Line l: lines) {
 				
 			teamCount bb = new teamCount();
 			for (Link link: links) {
 				if (l.intersects(link)) {
-					//System.out.println("** intersect team: "+ link.getTeamEnum());
 					bb.incTeamEnum(link.getTeamEnum());
 				}
 				if (bb.moreThan(max))
@@ -739,7 +725,6 @@ public class PortalFactory {
 			teamCount bb = new teamCount();
 			for (Link link: links) {
 				if (fi.intersects(link)) {
-					//System.out.println("** intersect team: "+ link.getTeamEnum());
 					bb.incTeamEnum(link.getTeamEnum());
 				}
 				if (bb.moreThan(max))
@@ -877,7 +862,6 @@ public class PortalFactory {
 		for (int i =0; i < pointDesc.length; i += 2)
 			pa.add(new Point(pointDesc[i],pointDesc[i+1]));
 
-		System.out.println("Got " + pa.size() + " points.");
 
 		return pa;
 	}
