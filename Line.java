@@ -13,6 +13,8 @@ public class Line {
 	
 	public Long getdLat() { return d.getLatE6(); }
 	public Long getdLng() { return d.getLngE6(); }
+
+	// not mutable.
 	//public void setdLat(Long l) { d.setLat(l); }
 	//public void setdLng(Long l) { d.setLng(l); }
 	
@@ -45,12 +47,6 @@ public class Line {
 	{
 		this.d = new Point(d);
 		this.o = new Point(o);
-		
-		// not sure if this is wise.
-		
-		//this.d = d;
-		//this.o = o;
-		
 	}
 	
 	public Line (Long dla,Long dlo, Long ola,Long olo)
