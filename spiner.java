@@ -202,6 +202,17 @@ public class spiner {
 
 				ArrayList<Line> li = pf.makeLinksFromSingleCluster(portals.values());
 				System.err.println("== potential links generated " + li.size() + " " + rt.split()+ "s ==");
+				for (Line l: li)
+				{
+				for (Portal p: allPortal)
+				{
+					System.out.print("Link: " + l);
+					System.out.println(" Portal: "  + p);
+					double sign = l.sign(p);
+					System.out.println("sign :" + sign);
+
+				}
+				}
 				
 				for (int i = 0; i < portals.size()-1; i++) {
 					Portal pki = allPortal.get(i);
