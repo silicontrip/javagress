@@ -280,10 +280,12 @@ public class multilinker2 {
         else
                 dt.setDefaultColour("#a24ac3");
 
-        if (ag.hasOption("L"))
-                dt.setFieldsAsPolyline();
-        else
-                dt.setFieldsAsPolygon();
+
+                if (ag.hasOption("L"))
+                        dt.setOutputAsPolyline();
+                if (ag.hasOption("O"))
+                        dt.setOutputAsIntel();
+
 
 	int maxLinks=0; 
 	if (ag.hasOption("N"))
