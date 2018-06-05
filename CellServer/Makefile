@@ -1,7 +1,8 @@
 
-CLASSES=CellServer.class showcell.class
+CLASSES=Arguments.class CellServer.class UniformDistribution.class \
+showcell.class mucelliter.class validatecell.class fielduse.class muquadcell.class
 
-CP=lib/s2-geometry-java.jar:lib/json-java.jar:.
+CP=lib/guava-18.0.jar:lib/mongo-java-driver-3.0.2.jar:lib/s2-geometry-java.jar:lib/json-java.jar:.
 
 all: cellserver.jar
 
