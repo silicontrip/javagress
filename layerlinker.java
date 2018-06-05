@@ -104,6 +104,7 @@ public class layerlinker {
 		Double threshold;
 		Double percentile = null;
 		Double fpercentile = null;
+		Double notOver = 8000000000.0; // populaton of earth
 		ArrayList<Point> target=null;
 		
 		RunTimer rt;
@@ -128,6 +129,9 @@ public class layerlinker {
 		if (ag.hasOption("M"))
 			calc=1;
 		
+		if (ag.hasOption("m"))
+			notOver = new Double (ag.getOptionForKey("m"));
+
 		
 		if (ag.hasOption("t"))
 			threshold = new Double(ag.getOptionForKey("t"));
@@ -369,12 +373,23 @@ public class layerlinker {
 
 					tfi = (Field)bf[best];
 
+					
 					if (calc==0)
+					{
 						at  += tfi.getGeoArea();
+						dt.addField(tfi);
+						fc.add(tfi);
+					}
 					else
-						at  += tfi.getEstMu();
-					dt.addField(tfi);
-					fc.add(tfi);
+					{
+				//System.out.println ("at: " + at  + " est: " + tfi.getEstMu());
+						if (at + tfi.getEstMu() < notOver)
+						{
+							at  += tfi.getEstMu();
+							dt.addField(tfi);
+							fc.add(tfi);
+						}
+					}
 					best = findField(bf,best+1,tfi,fc,threshold); // make threshold configurable
 				}
 				// calc area, layers 
