@@ -2,46 +2,22 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 public class Link extends Line {
-
 	
 	public static final int NEUTRAL = 0;
 	public static final int ENLIGHTENED = 1;
 	public static final int RESISTANCE = 2;
 	
-	
 	protected String guid;
-//	protected Long dLat;
-//	protected Long dLng;
 	protected String dGuid;
 	
-//	protected Long oLat;
-//	protected Long oLng;
 	protected String oGuid;
 	protected String team;
 	protected int teamEnum;
 
-//	public Long getdLat() { return dLat; }
-//	public Long getdLng() { return dLng; }
-//	public void setdLat(Long l) { dLat=l; }
-//	public void setdLng(Long l) { dLng=l; }
-
-//	public Long getoLat() { return oLat; }
-//	public Long getoLng() { return oLng; }
-//	public void setoLat(Long l) { oLat=l; }
-//	public void setoLng(Long l) { oLng=l; }
-
 	public String getGuid() { return guid; }
-	// public void setGuid(String g) { guid = g; }
-
 	public String getdGuid() { return dGuid; }
-	// public void setdGuid(String g) { dGuid = g; }
-
 	public String getoGuid() { return oGuid; }
-	// public void setoGuid(String g) { oGuid = g; }
 	
-	//public void setdLocation(Point lo) { setdLat(lo.getLatE6()); setdLng(lo.getLngE6()); }
-	//public void setoLocation(Point lo) { setoLat(lo.getLatE6()); setoLng(lo.getLngE6()); }
-
 	public Point getdLocation() { return new Point(getdLat(),getdLng()); }
 	public Point getoLocation() { return new Point(getoLat(),getoLng()); }
 	
@@ -92,14 +68,6 @@ public class Link extends Line {
 		this.oGuid=og;
 		setTeam(tt);
 
-		//setGuid(g);
-		//setdGuid(dg);
-		//setdLat(new Long(dla));
-		//setdLng(new Long(dlo));
-		//setoGuid(og);
-		//setoLat(new Long(ola));
-		//setoLng(new Long(olo));
-		//setTeam(team);
 	}
 	
 	
@@ -110,15 +78,8 @@ public class Link extends Line {
 		dGuid=dg;
 		oGuid=og;
 		setTeam(tt);
-		//setGuid(g);
-		//setdGuid(dg);
-		//setdLat(dla);
-		//setdLng(dlo);
-		//setoGuid(og);
-		//setoLat(ola);
-		//setoLng(olo);
-		//setTeam(team);
 	}
+
 	/*
 	public String toString() { 
 		
