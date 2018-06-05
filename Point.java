@@ -1,4 +1,5 @@
 import com.google.common.geometry.*;
+import javax.vecmath.Vector3d;
 
 public class Point {
 
@@ -6,6 +7,11 @@ public class Point {
 	public static Double earthRadius = 6367.0;
 	protected Long lat;
 	protected Long lng;
+
+	protected Double x;
+	protected Double y;
+	protected Double z;
+
 
 	public Long getLatE6() { return lat; }
 	public Long getLngE6() { return lng; }
@@ -19,19 +25,31 @@ public class Point {
 	// Greater Circle maths functions
 	public Double getLatAsRad() { return Math.toRadians(lat / 1000000.0 ); }
 	public Double getLngAsRad() { return Math.toRadians(lng / 1000000.0 ); }
-	public Double getX() { return Math.cos(getLatAsRad()) * Math.cos(getLngAsRad()); }
-	public Double getY() { return Math.cos(getLatAsRad()) * Math.sin(getLngAsRad()); }
-	public Double getZ() { return Math.sin(getLatAsRad()); }
+	public Double getX() { return x; }
+	public Double getY() { return y; }
+	public Double getZ() { return z; }
 
+	public Vector3d getVector() { return new Vector3d(x,y,z); }
+
+	protected void setX(Double l) { x = l; }
+	protected void setY(Double l) { y = l; }
+	protected void setZ(Double l) { z = l; }
+
+	protected void setXYZ() 
+	{
+		setX(Math.cos(getLatAsRad()) * Math.cos(getLngAsRad()));
+		setY(Math.cos(getLatAsRad()) * Math.sin(getLngAsRad()));
+		setZ(Math.sin(getLatAsRad()));
+	}
 	
-	public void setLat(Long l) { lat=l; }
-	public void setLng(Long l) { lng=l; }
+	protected void setLat(Long l) { lat=l; }
+	protected void setLng(Long l) { lng=l; }
 
-	public void setLat(Double d) {  d *= new Double(1000000.0); setLat(d.longValue()); }
-	public void setLng(Double d) {  d *= new Double(1000000.0); setLng(d.longValue()); }
+	protected void setLat(Double d) {  d *= new Double(1000000.0); setLat(d.longValue()); }
+	protected void setLng(Double d) {  d *= new Double(1000000.0); setLng(d.longValue()); }
 
-	public void setLat(String s) { setLat(Double.parseDouble(s)); }
-	public void setLng(String s) { setLng(Double.parseDouble(s)); }
+	protected void setLat(String s) { setLat(Double.parseDouble(s)); }
+	protected void setLng(String s) { setLng(Double.parseDouble(s)); }
 
 	@Override
 	public final boolean equals(Object obj2)
@@ -50,6 +68,7 @@ public class Point {
 	public Point (java.lang.Long la, java.lang.Long ln) {
 		setLat(la);
 		setLng(ln);
+		setXYZ();
 	}
 
 	public Point (String ld)
@@ -58,24 +77,28 @@ public class Point {
 		String[] coord = ld.split(",");
 		setLat(coord[0]);
 		setLng(coord[1]);
-		
+		setXYZ();
 	}
 	
 	public Point (String la, String ln)
 	{
 		setLat(la);
 		setLng(ln);
+		
+		setXYZ();
 	}
 	public Point (Double la,Double ln) {
 		la *= new Double(1000000.0);
 		ln *= new Double(1000000.0);
 		setLat(la.longValue());
 		setLng(ln.longValue());
+		setXYZ();
 	}
 
 	public Point(Point p) {
 		setLat(p.getLatE6());
 		setLng(p.getLngE6());
+		setXYZ();
 	}
 
 

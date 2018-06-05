@@ -1,4 +1,5 @@
 import javax.vecmath.Vector3d;
+
 public class Line {
 	
 	Point o;
@@ -23,8 +24,8 @@ public class Line {
 	public Double getdLatAsDouble() { return new Double(d.getLatE6()); }
 	public Double getdLngAsDouble() { return new Double(d.getLngE6()); }
 	
-	public Vector3d getoVect() { return new Vector3d(getoX(),getoY(),getoZ()); }
-	public Vector3d getdVect() { return new Vector3d(getdX(),getdY(),getdZ()); }
+	public Vector3d getoVect() { return o.getVector(); }
+	public Vector3d getdVect() { return d.getVector(); }
 	
 	public double getoX() { return o.getX(); }
 	public double getoY() { return o.getY(); }
@@ -238,6 +239,16 @@ public class Line {
 	
 	public double sign(Point p)
 	{
+
+		Vector3d T = new Vector3d();
+		Vector3d S = new Vector3d();
+		Vector3d R = new Vector3d();
+
+		S.sub(d.getVector(),o.getVector());
+		R.sub(p.getVector(),d.getVector());
+
+		T.cross(S,R);
+		System.out.println("vector : " + T);
 		return (o.getLng() - p.getLng()) * (d.getLat() - p.getLat())  - (d.getLng() - p.getLng()) * (o.getLat() - p.getLat());
 	}
 	public Double getBearing() { return o.getBearingTo(d); }
