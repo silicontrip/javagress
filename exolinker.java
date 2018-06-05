@@ -168,7 +168,7 @@ public class exolinker {
 		// don't want to overdose on rethrows.
 		Double ratio = 1.0;
 		if (anchors.size() < limit) {
-			Double score = 1.0*(spine.size()-2) + (spine.size()*2-1) * anchors.size();
+			Double score = 1.0*(spine.size()-1) + (spine.size()*2-1) * anchors.size();
 			if (score > max)
 			{
 
