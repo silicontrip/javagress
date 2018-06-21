@@ -194,23 +194,28 @@ public class Line {
 		return false;
 	}
 
-
 	public Double getGeoDistance(Point p) {
 		
-		Vector3d p0 = this.getoVect();
-                Vector3d p1 = this.getdVect();
+		Vector3d A = this.getoVect();
+                Vector3d B = this.getdVect();
 
-		Vector3d C = new Vector3d (p.getX(), p.getY(), p.getZ());
-
+		Vector3d C = p.getVector();
 		Vector3d N = new Vector3d();
 
-		N.cross(p0,p1);
+		N.cross(A,B);
 		N.normalize();
-		//double dot = N.dot(C);
-		//System.out.println("dot: " + dot);
-		double adist = Math.PI / 2 - Math.acos(N.dot(C));
 
-		return earthRadius * adist;
+		double dt = C.dot(N);
+
+		Vector3d F = new Vector3d();
+		F.scale(dt,N);
+
+		Vector3d T = new Vector3d();
+
+		T.sub(C,F);
+		T.normalize();
+
+		return C.angle(T) * earthRadius;
 	
 	}
 	
