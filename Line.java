@@ -198,25 +198,76 @@ public class Line {
 		
 		Vector3d A = this.getoVect();
                 Vector3d B = this.getdVect();
-
 		Vector3d C = p.getVector();
-		Vector3d N = new Vector3d();
 
-		N.cross(A,B);
+		
+		Vector3d N = new Vector3d();
+		N.cross(A,B);  // N = A x B
 		N.normalize();
 
-		double dt = C.dot(N);
-
 		Vector3d F = new Vector3d();
-		F.scale(dt,N);
-
+		F.cross(C,N);
+		F.normalize();
+	
 		Vector3d T = new Vector3d();
-
-		T.sub(C,F);
+		T.cross(N,F);
 		T.normalize();
 
-		return C.angle(T) * earthRadius;
+		double ac = A.angle(C) * earthRadius;
+		double bc = B.angle(C) * earthRadius;
+		double tc = T.angle(C) * earthRadius;
+
+		double onSeg = Math.abs(A.angle(B) - A.angle(T) - B.angle(T));
+
+		if (onSeg < 1E-10)
+		{
+		
+		//System.out.println("" + tc + " T: " + onSeg );
+		
+			return tc;
+		}
+		else if (ac < bc)
+		{
+		//System.out.println("" + ac + " A: " + onSeg );
+			return ac;
+		}
+		else
+		{
+		//System.out.println("" + bc + " B: " + onSeg );
+			return bc;
+		}
+
+/*
+		Vector3d asb = new Vector3d(A);
+		asb.sub(B);  // asb = A - B
+		double t = ( B.dot(B) - A.dot(A) + asb.dot(C) ) / asb.dot(asb);
+
+		//System.out.println("line T: " + t);
+		if (t >= -1 && t <= 1)
+		//if (t >= 0 && t <= 1)
+		{
+			Vector3d N = new Vector3d();
+			N.cross(A,B);  // N = A x B
+			N.normalize();
+
+			double dt = N.dot(C);
+
+			double a = Math.PI / 2 - Math.acos(dt);
+
+			System.out.println ("" + Math.abs(a * earthRadius) +", " + t);
+
+			return Math.abs(a * earthRadius);
+		} else if (t > 1) {
+			System.out.println ("" + A.angle(C) * earthRadius +", " + B.angle(C) * earthRadius + ": " +  t);
+			return A.angle(C) * earthRadius;
+		} else if (t < -1) {
+			System.out.println ("" + B.angle(C) * earthRadius +", " + A.angle(C) * earthRadius + ": " + t);
+			return B.angle(C) * earthRadius;
+		}
 	
+		// we should not get here but will the compiler complain.
+		return null; // yes it did complain
+		*/
 	}
 	
 	public Double getGeoDistance() {

@@ -64,15 +64,15 @@ public class portalshadow {
 				Portal pt = (Portal)pair.getValue();
 				System.out.println(pair.getKey() + ":" + pair.getValue() + ((Portal)pair.getValue()).getUrl());
 
-				dt.addMarker(pt.getLat(), (pt.getLng()));
+				//dt.addMarker(pt.getLat(), (pt.getLng()));
 				it.remove(); // avoids a ConcurrentModificationException
 					// why ?
 				Iterator lit = links.entrySet().iterator();
 				while (lit.hasNext())
 				{
 					Map.Entry lpair = (Map.Entry)lit.next();
-					Link li = (Link)pair.getValue();
-					System.out.println("" + li+ " : " + li.getGeoDistance(pt));
+					Link li = (Link)lpair.getValue();
+					System.out.println("" +  li.getGeoDistance(pt) + " : [" + li + "] "  + pt.getBearingTo(li.getO()) + " - " + pt.getBearingTo(li.getD() ));
 					lit.remove();
 				}
 			}
