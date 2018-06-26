@@ -209,13 +209,13 @@ public class Line {
 			int obscure = 0;
 			
 			if ( (this.getO().equals(l.getO()) || this.getD().equals(l.getO()) )) obscure |= 1;
-			if ( (this.getD().equals(l.getD()) || this.getD().equals(l.getD()) )) obscure |= 2;
+			if ( (this.getO().equals(l.getD()) || this.getD().equals(l.getD()) )) obscure |= 1;
 
 			if (po.intersects(this))
-				obscure |= 4;
+				obscure |= 2;
 
 			if (pd.intersects(this))
-				obscure |= 8;
+				obscure |= 4;
 
 			// partial obscure O
 			// partial obscure D

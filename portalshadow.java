@@ -89,10 +89,12 @@ public class portalshadow {
 					{
 						Map.Entry lpair = (Map.Entry)lit.next();
 						Link li = (Link)lpair.getValue();
-						if (li.getGeoDistance(pt) < minDist)
-						{
-							minDist = li.getGeoDistance(pt);
-							closeLink = li;
+						if (!li.hasPoint(pt)) {
+							if (li.getGeoDistance(pt) < minDist)
+							{
+								minDist = li.getGeoDistance(pt);
+								closeLink = li;
+							}
 						}
 						// System.out.println("" +  li.getGeoDistance(pt) + " : [" + li + "] "  + pt.getBearingTo(li.getO()) + " - " + pt.getBearingTo(li.getD() ));
 						//lit.remove();
@@ -107,18 +109,23 @@ public class portalshadow {
 					while (lit.hasNext())
 					{
 						Map.Entry lpair = (Map.Entry)lit.next();
-                                                Link li = (Link)lpair.getValue();
+                        Link li = (Link)lpair.getValue();
 						int obs = 0;
 						for (Link sli: shadowList) {
 							if (sli.equals(li))
-								obs = 15;
+								obs = 7;
+							if (li.hasPoint(pt))
+								obs = 7;
 							obs = obs | sli.obscuredFromBy(pt,li);
 						}
 						//if (obs >0)
-						//	System.out.println("" + obs + " : [" + li + "]");
-					//	if (obs ==1 || obs==2 || obs==3 || obs == 4 || obs == 8)
-					//		remLinks.put(li.getGuid(),li);
-
+						//	
+						if (!(obs==3 || obs==5 || obs==6 || obs==7))
+						{
+							remLinks.put(li.getGuid(),li);
+							//System.out.println("" + obs + " : [" + li + "]");
+						}
+					/*
 						if (obs==0) { dt.setDefaultColour("#00F000"); dt.addLine(li); }
 						if (obs==1) { dt.setDefaultColour("#F08000"); dt.addLine(li); }
 						if (obs==2) { dt.setDefaultColour("#80F000"); dt.addLine(li); }
@@ -127,7 +134,7 @@ public class portalshadow {
 						if (obs==8) { dt.setDefaultColour("#0080F0"); dt.addLine(li); }
 						//if (obs==6) { dt.setDefaultColour("#F00000"); dt.addLine(li); }
 						//if (obs==12) { dt.setDefaultColour("#F00000"); dt.addLine(li); }
-
+						*/
 					}
 					lit = remLinks.entrySet().iterator();
 				}
