@@ -1,5 +1,6 @@
 import javax.vecmath.Vector3d;
 
+
 public class Line {
 	
 	Point o;
@@ -194,6 +195,39 @@ public class Line {
 		return false;
 	}
 
+	// concept, are we obscured by l or do we obscure l?
+	public int obscuredFromBy (Point p, Line l)
+	{
+
+			// project line from p to l.o
+			// project line from p to l.d
+
+			// are we obscured by l ?
+			Line po = new Line(p,l.getO());
+			Line pd = new Line(p,l.getD());
+
+			int obscure = 0;
+			
+			if ( (this.getO().equals(l.getO()) || this.getD().equals(l.getO()) )) obscure |= 1;
+			if ( (this.getD().equals(l.getD()) || this.getD().equals(l.getD()) )) obscure |= 2;
+
+			if (po.intersects(this))
+				obscure |= 4;
+
+			if (pd.intersects(this))
+				obscure |= 8;
+
+			// partial obscure O
+			// partial obscure D
+			// total obscure
+			// same O
+			// same D
+			// partial obscure O,D
+
+			return obscure;
+
+	}
+
 	public Double getGeoDistance(Point p) {
 		
 		Vector3d A = this.getoVect();
@@ -236,38 +270,6 @@ public class Line {
 		//System.out.println("" + bc + " B: " + onSeg );
 			return bc;
 		}
-
-/*
-		Vector3d asb = new Vector3d(A);
-		asb.sub(B);  // asb = A - B
-		double t = ( B.dot(B) - A.dot(A) + asb.dot(C) ) / asb.dot(asb);
-
-		//System.out.println("line T: " + t);
-		if (t >= -1 && t <= 1)
-		//if (t >= 0 && t <= 1)
-		{
-			Vector3d N = new Vector3d();
-			N.cross(A,B);  // N = A x B
-			N.normalize();
-
-			double dt = N.dot(C);
-
-			double a = Math.PI / 2 - Math.acos(dt);
-
-			System.out.println ("" + Math.abs(a * earthRadius) +", " + t);
-
-			return Math.abs(a * earthRadius);
-		} else if (t > 1) {
-			System.out.println ("" + A.angle(C) * earthRadius +", " + B.angle(C) * earthRadius + ": " +  t);
-			return A.angle(C) * earthRadius;
-		} else if (t < -1) {
-			System.out.println ("" + B.angle(C) * earthRadius +", " + A.angle(C) * earthRadius + ": " + t);
-			return B.angle(C) * earthRadius;
-		}
-	
-		// we should not get here but will the compiler complain.
-		return null; // yes it did complain
-		*/
 	}
 	
 	public Double getGeoDistance() {
