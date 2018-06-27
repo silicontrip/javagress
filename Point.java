@@ -107,7 +107,10 @@ public class Point {
 	}
 
 	public Point inverse() {
-		return new Point(-this.getLatE6(),180000000 - this.getLngE6());
+		if (this.getLngE6() >0)
+			return new Point(-this.getLatE6(),this.getLngE6()-180000000);
+		else
+			return new Point(-this.getLatE6(),this.getLngE6()+180000000);
 	}
 
 	public Double getAngDistance(Point p) {
