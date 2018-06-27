@@ -111,7 +111,10 @@ public class Point {
 	}
 
 	public Double getAngDistance(Point p) {
-	
+
+		return this.getVector().angle(p.getVector());
+
+/*
 		Double oLat = this.getLat();
 		Double oLng = this.getLng();
 		Double dLat = p.getLat();
@@ -125,6 +128,7 @@ public class Point {
 		Math.sin(lng / 2.0) * Math.sin(lng/2.0);
 		
 		return 2.0 * Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+*/
 	}
 	
 	public Double getGeoDistance(Point p) {
