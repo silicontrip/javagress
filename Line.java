@@ -1,6 +1,5 @@
 import javax.vecmath.Vector3d;
 
-
 public class Line {
 	
 	Point o;
@@ -14,11 +13,6 @@ public class Line {
 	
 	public Long getdLat() { return d.getLatE6(); }
 	public Long getdLng() { return d.getLngE6(); }
-
-	// not mutable.
-	//public void setdLat(Long l) { d.setLat(l); }
-	//public void setdLng(Long l) { d.setLng(l); }
-	
 	public Long getoLat() { return o.getLatE6(); }
 	public Long getoLng() { return o.getLngE6(); }
 	
@@ -30,6 +24,7 @@ public class Line {
 	public Vector3d getoVect() { return o.getVector(); }
 	public Vector3d getdVect() { return d.getVector(); }
 	
+	/*
 	public double getoX() { return o.getX(); }
 	public double getoY() { return o.getY(); }
 	public double getoZ() { return o.getZ(); }
@@ -37,7 +32,7 @@ public class Line {
 	public double getdX() { return d.getX(); }
 	public double getdY() { return d.getY(); }
 	public double getdZ() { return d.getZ(); }
-	
+	*/
 	//public void setoLat(Long l) { o.setLat(l); }
 	//public void setoLng(Long l) { o.setLng(l); }
 	
@@ -75,51 +70,59 @@ public class Line {
 	public boolean findIn(Line[] lines)
 	{
 		for (Line line : lines)
-		{
 			if (equals(line)) { return true; }
-		}
 		
 		return false;
 	}
 	
-	public double[] greaterCircle (Line l)
+	private Vector3d getGreatCircleIntersection (Line l)
 	{
-		
-		Vector3d p0 = this.getoVect();
-		Vector3d p1 = this.getdVect();
-		Vector3d p2 = l.getoVect();
-		Vector3d p3 = l.getdVect();
-		
-		// System.out.println("["+p0 +" - "+p1+"] x [" + p2 + " - " + p3 + "]");
-		
-		Vector3d V = new Vector3d();
-		V.cross(p0,p1);
-		V.normalize();
-		
-		Vector3d U = new Vector3d();
-		U.cross(p2,p3);
-		U.normalize();
-		
+		Vector3d V = this.getNormal();		
+		Vector3d U = l.getNormal();		
 		Vector3d D = new Vector3d();
 		D.cross( V, U );
+
 		if (D.length() == 0)
-			return new double[]{0,0,0,0}; // equal or on the same greater circle and don't intersect
+			return D;
 		D.normalize();
 		
-		
+		return D;
+	}
+
+	int pointOn (Vector3d D)
+	{
 		Vector3d S1 = new Vector3d();
 		Vector3d S2 = new Vector3d();
-		Vector3d S3 = new Vector3d();
-		Vector3d S4 = new Vector3d();
+		Vector3d V = this.getNormal();
 		
 	// so what are we working out here?
-		S1.cross(p0,V);
-		S2.cross(p1,V);
-		S3.cross(p2,U);
-		S4.cross(p3,U);
-		
-		return new double[]{ -S1.dot(D),  S2.dot(D), -S3.dot(D),  S4.dot(D)} ;
-/*
+		S1.cross(getoVect(),V);
+		S2.cross(getdVect(),V);
+	
+		double p0 =-S1.dot(D);
+		double p1 = S2.dot(D);
+
+		int zero=0;
+		int count=0;
+
+		if (Math.abs(p0) < eps)
+			zero++;
+		else
+			count += Math.signum(p0);
+
+		if (Math.abs(p1) < eps)
+			zero++;
+		else
+			count += Math.signum(p1);
+
+		if (count==2 || count == -2)  // handles antipodal ???
+			return 1;  // on line
+
+		if (zero>0)
+			return 2; // at end
+
+		return 3; // not on line
+		/*
 		double s0 = -S1.dot(D);
 		double s1 = S2.dot(D);
 		double s2 = -S3.dot(D);
@@ -130,83 +133,22 @@ public class Line {
 	public int greaterCircleIntersectType (Line l)
 	{
 		
-/*
-		Vector3d p0 = this.getoVect();
-		Vector3d p1 = this.getdVect();
-		Vector3d p2 = l.getoVect();
-		Vector3d p3 = l.getdVect();
-		
-		// System.out.println("["+p0 +" - "+p1+"] x [" + p2 + " - " + p3 + "]");
-		
-		Vector3d V = new Vector3d();
-		V.cross(p0,p1);
-		V.normalize();
-		
-		Vector3d U = new Vector3d();
-		U.cross(p2,p3);
-		U.normalize();
-		
-		Vector3d D = new Vector3d();
-		D.cross( V, U );
-		if (D.length() == 0)
-			return 0; // equal
-		D.normalize();
-		
-		
-		Vector3d S1 = new Vector3d();
-		Vector3d S2 = new Vector3d();
-		Vector3d S3 = new Vector3d();
-		Vector3d S4 = new Vector3d();
-		
-		S1.cross(p0,V);
-		S2.cross(p1,V);
-		S3.cross(p2,U);
-		S4.cross(p3,U);
-		
-		double s0 = -S1.dot(D);
-		double s1 = S2.dot(D);
-		double s2 = -S3.dot(D);
-		double s3 = S4.dot(D);
-*/
-		double[] intersectParams = greaterCircle(l);		
+		Vector3d intPoint = getGreatCircleIntersection(l);		
 
-		//System.out.println("Signs: " + s0 + " " + s1 + " " + s2 + " " + s3 );
-		
-		int count=0,zero=0;
-		
-		for (int i=0; i<4; i++) 
-			if (Math.abs(intersectParams[i]) < eps)
-				zero++;
-			else
-				count += Math.signum(intersectParams[i]);
+		int p1 = this.pointOn(intPoint);
+		int p2 = l.pointOn(intPoint);
 
-/*
-		if (Math.abs(s1) < eps)
-			zero++;
-		else
-			count += Math.signum(s1);
-		if (Math.abs(s2) < eps)
-			zero++;
-		else
-			count += Math.signum(s2);
-		
-		if (Math.abs(s3) < eps)
-			zero++;
-		else
-			count += Math.signum(s3);
-*/	
+		if (p1==1 && p2 == 1)
+			return 1;
 
-		if (count == -4 || count == 4)
-			return 1; // intersect
-		
-		if (zero==4)
-			return 0; // equal
-		
-		if (zero > 0)
-			return 3; // one endpoint touches.
-		
-		return 2; // not intersect
-		
+		if (p1==0 && p2==0)
+			return 0;
+
+		if (p1==0 || p2==0)
+			return 3;
+
+		return 2;
+
 	}
 	public boolean intersects(Line l) {
 		
@@ -259,8 +201,8 @@ public class Line {
 
 			int obscure = 0;
 			
-			if ( (this.getO().equals(l.getO()) || this.getD().equals(l.getO()) )) obscure |= 1;
-			if ( (this.getO().equals(l.getD()) || this.getD().equals(l.getD()) )) obscure |= 1;
+			if ( (this.getO().equals(l.getO()) || this.getD().equals(l.getO()) )) obscure = 1;
+			if ( (this.getO().equals(l.getD()) || this.getD().equals(l.getD()) )) obscure = 1;
 
 			if (po.intersects(this))
 				obscure |= 2;
@@ -291,13 +233,44 @@ public class Line {
 
 		Line pto = new Line (this.getO(),p.inverse());
 		Line ptd = new Line (this.getD(),p.inverse());
-		//Line plo = new Line (p,l.getO());
-		//Line pld = new Line (p,l.getO());
-
-		
+		Line plo = new Line (p,l.getO());
+		Line pld = new Line (p,l.getD());
+	
 		int p1 = pto.greaterCircleIntersectType(l);
 		int p2 = ptd.greaterCircleIntersectType(l);
 
+		System.out.println("pto: " + p1 + " ptd: " + p2);
+		System.out.println("[" + l + ","+pto+","+ptd+"]");
+
+		if (p1 == 1 && p2 != 1)
+		{
+			// determine point where pto and l intersect
+			Point pp = new Point(l.getGreatCircleIntersection(pto));
+			// determine if the new line is o to intersection or d to intersection
+			int p3 = plo.greaterCircleIntersectType(this);
+			int p4 = pld.greaterCircleIntersectType(this);
+
+			System.out.println("O: " + p3 + " P: "+p4 + " ;; " + pp );
+			System.out.println ("[" + plo + "," + pld + "," + this + "]");
+			// we should never see both p3 and p4 intersecting
+			if (p3==1)
+				return new Line(pp,l.getD());
+
+			// we assume that p4==1
+			return new Line(pp,l.getO());
+
+		}
+	if (p2 ==1 && p1 != 1)
+	{
+		// determine point where ptd and l intersect
+		Point pp = new Point(l.getGreatCircleIntersection(ptd));
+
+		int p3 = plo.greaterCircleIntersectType(this);
+		int p4 = pld.greaterCircleIntersectType(this);
+
+		System.out.println("O: " + p3 + " P: "+p4);
+		System.out.println ("[" + plo + "," + pld + "," + this + "]");
+	}
 
 		System.out.println("pto: " + p1 + " : [" + pto+", "+l+"]");
 		System.out.println("ptd: " + p2 + " : [" + ptd+", "+l+"]");
@@ -309,7 +282,7 @@ public class Line {
 	private Vector3d getNormal()
 	{
 		Vector3d A = this.getoVect();
-                Vector3d B = this.getdVect();
+        Vector3d B = this.getdVect();
 		
 		Vector3d N = new Vector3d();
 		N.cross(A,B);  // N = A x B
