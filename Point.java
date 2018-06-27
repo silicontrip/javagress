@@ -8,10 +8,13 @@ public class Point {
 	protected Long lat;
 	protected Long lng;
 
+	protected Vector3d v;
+
+	/*
 	protected Double x;
 	protected Double y;
 	protected Double z;
-
+	*/
 
 	public Long getLatE6() { return lat; }
 	public Long getLngE6() { return lng; }
@@ -25,25 +28,35 @@ public class Point {
 	// Greater Circle maths functions
 	public Double getLatAsRad() { return Math.toRadians(lat / 1000000.0 ); }
 	public Double getLngAsRad() { return Math.toRadians(lng / 1000000.0 ); }
+	/*
 	public Double getX() { return x; }
 	public Double getY() { return y; }
 	public Double getZ() { return z; }
+*/
+	public Vector3d getVector() { return v; }
 
-	public Vector3d getVector() { return new Vector3d(x,y,z); }
-
+	/*
 	protected void setX(Double l) { x = l; }
 	protected void setY(Double l) { y = l; }
 	protected void setZ(Double l) { z = l; }
+*/
+	protected void setXYZ(double x, double y, double z) { v.set(x,y,z); }
 
 	protected void setXYZ() 
 	{
-		setX(Math.cos(getLatAsRad()) * Math.cos(getLngAsRad()));
-		setY(Math.cos(getLatAsRad()) * Math.sin(getLngAsRad()));
-		setZ(Math.sin(getLatAsRad()));
+		setXYZ(
+			Math.cos(getLatAsRad()) * Math.cos(getLngAsRad()),
+			Math.cos(getLatAsRad()) * Math.sin(getLngAsRad()),
+			Math.sin(getLatAsRad())
+		);
 	}
 	
 	protected void setLat(Long l) { lat=l; }
 	protected void setLng(Long l) { lng=l; }
+
+	protected void setLatFromRad(Double l) { setLat(l * 180 / Math.PI); }
+	protected void setLngFromRad(Double l) { setLng(l * 180 / Math.PI); }
+
 
 	protected void setLat(Double d) {  d *= new Double(1000000.0); setLat(d.longValue()); }
 	protected void setLng(Double d) {  d *= new Double(1000000.0); setLng(d.longValue()); }
@@ -65,9 +78,29 @@ public class Point {
 		return (getLatE6().hashCode() * 2  +1 )+ ( getLngE6().hashCode() * 2 );
 	}
 	
+	public Point (Vector3d vec)
+	{
+		this.v = new Vector3d(vec);
+		this.v.normalize();
+
+		double lng = - (Math.atan2(-v.z,-v.x))- Math.PI / 2;
+		if (lng < -Math.PI) lng += Math.PI*2;
+
+		Vector3d p  = new Vector3d (v.x,0,v.z);
+		p.normalize();
+
+		double lat = Math.acos(p.dot(v));
+		if (v.y < 0) lat = -lat;
+
+		setLatFromRad(lat);
+		setLngFromRad(lng);
+
+	}
+
 	public Point (java.lang.Long la, java.lang.Long ln) {
 		setLat(la);
 		setLng(ln);
+		v = new Vector3d();
 		setXYZ();
 	}
 
@@ -77,6 +110,8 @@ public class Point {
 		String[] coord = ld.split(",");
 		setLat(coord[0]);
 		setLng(coord[1]);
+		v = new Vector3d();
+
 		setXYZ();
 	}
 	
@@ -84,7 +119,8 @@ public class Point {
 	{
 		setLat(la);
 		setLng(ln);
-		
+		v = new Vector3d();
+
 		setXYZ();
 	}
 	public Point (Double la,Double ln) {
@@ -92,12 +128,16 @@ public class Point {
 		ln *= new Double(1000000.0);
 		setLat(la.longValue());
 		setLng(ln.longValue());
+		v = new Vector3d();
+
 		setXYZ();
 	}
 
 	public Point(Point p) {
 		setLat(p.getLatE6());
 		setLng(p.getLngE6());
+		v = new Vector3d();
+
 		setXYZ();
 	}
 
