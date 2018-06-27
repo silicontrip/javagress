@@ -289,18 +289,18 @@ public class Line {
 	public void shadow (Point p, Line l)
 	{
 
-		Line pto = new Line (p,this.getO());
-		Line ptd = new Line (p,this.getD());
-		Line plo = new Line (p,l.getO());
-		Line pld = new Line (p,l.getO());
+		Line pto = new Line (this.getO(),p.inverse());
+		Line ptd = new Line (this.getD(),p.inverse());
+		//Line plo = new Line (p,l.getO());
+		//Line pld = new Line (p,l.getO());
 
 		
-		double[] p1 = pto.greaterCircle(l);
-		double[] p2 = ptd.greaterCircle(l);
+		int p1 = pto.greaterCircleIntersectType(l);
+		int p2 = ptd.greaterCircleIntersectType(l);
 
 
-		System.out.println("pto: " + da(p1));
-		System.out.println("ptd: " + da(p2));
+		System.out.println("pto: " + p1 + " : [" + pto+", "+l+"]");
+		System.out.println("ptd: " + p2 + " : [" + ptd+", "+l+"]");
 
 
 
