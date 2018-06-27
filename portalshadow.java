@@ -80,9 +80,8 @@ public class portalshadow {
 					// why ?
 				Iterator lit = links.entrySet().iterator();
 
-				while (remLinks.size()  >0) 
+				while (remLinks.size() >0) 
 				{
-
 					double minDist = 6882.0; // approx max link distance
 					Link closeLink = null;
 					while (lit.hasNext())
@@ -96,20 +95,32 @@ public class portalshadow {
 								closeLink = li;
 							}
 						}
-						// System.out.println("" +  li.getGeoDistance(pt) + " : [" + li + "] "  + pt.getBearingTo(li.getO()) + " - " + pt.getBearingTo(li.getD() ));
+						//System.out.println("" +  li.getGeoDistance(pt) + " : [" + li + "] "  + pt.getBearingTo(li.getO()) + " - " + pt.getBearingTo(li.getD() ));
 						//lit.remove();
 					}
 					System.out.println("" +  closeLink.getGeoDistance(pt) + " : [" + closeLink + "] "  + pt.getBearingTo(closeLink.getO()) + " - " + pt.getBearingTo(closeLink.getD()));
+
+					for (Link li: shadowList)
+					{
+						System.out.println("[" + closeLink + "," + li + "]");
+						closeLink.shadow(pt,li);
+					}
+
 					shadowList.add(closeLink);
 					dt.setDefaultColour("#a24ac3");
 					dt.addLine(closeLink);
+					dt.setDefaultColour("#f0f0f0");
+					dt.addField(new Field(pt,closeLink.getD(),closeLink.getO()));
 
 					lit = remLinks.entrySet().iterator();
 					remLinks = new HashMap<String,Link>();
+					DrawTools stepdt = new DrawTools();
+					stepdt.setDefaultColour("#F0F0F0");
+					stepdt.addLine(closeLink);
 					while (lit.hasNext())
 					{
 						Map.Entry lpair = (Map.Entry)lit.next();
-                        Link li = (Link)lpair.getValue();
+                        			Link li = (Link)lpair.getValue();
 						int obs = 0;
 						for (Link sli: shadowList) {
 							if (sli.equals(li))
@@ -125,6 +136,12 @@ public class portalshadow {
 							remLinks.put(li.getGuid(),li);
 							//System.out.println("" + obs + " : [" + li + "]");
 						}
+						else
+						{
+							stepdt.setDefaultColour("#F0F000");
+							stepdt.addLine(li);
+						}
+			
 					/*
 						if (obs==0) { dt.setDefaultColour("#00F000"); dt.addLine(li); }
 						if (obs==1) { dt.setDefaultColour("#F08000"); dt.addLine(li); }
@@ -137,6 +154,10 @@ public class portalshadow {
 						*/
 					}
 					lit = remLinks.entrySet().iterator();
+					System.out.println("");
+					System.out.println(dt.out());
+					System.out.println("");
+
 				}
 			}
 
