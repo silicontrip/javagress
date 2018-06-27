@@ -28,18 +28,8 @@ public class Point {
 	// Greater Circle maths functions
 	public Double getLatAsRad() { return Math.toRadians(lat / 1000000.0 ); }
 	public Double getLngAsRad() { return Math.toRadians(lng / 1000000.0 ); }
-	/*
-	public Double getX() { return x; }
-	public Double getY() { return y; }
-	public Double getZ() { return z; }
-*/
 	public Vector3d getVector() { return v; }
 
-	/*
-	protected void setX(Double l) { x = l; }
-	protected void setY(Double l) { y = l; }
-	protected void setZ(Double l) { z = l; }
-*/
 	protected void setXYZ(double x, double y, double z) { v.set(x,y,z); }
 
 	protected void setXYZ() 
@@ -51,6 +41,13 @@ public class Point {
 		);
 	}
 	
+	protected void setLL()
+	{
+		// much fudging going on here, not sure this works for all cases.
+		setLngFromRad(Math.atan2(v.y,v.x) + Math.PI );
+		setLatFromRad(Math.asin(v.z));
+	}
+
 	protected void setLat(Long l) { lat=l; }
 	protected void setLng(Long l) { lng=l; }
 
@@ -82,18 +79,9 @@ public class Point {
 	{
 		this.v = new Vector3d(vec);
 		this.v.normalize();
+		setLL();
 
-		double lng = - (Math.atan2(-v.z,-v.x))- Math.PI / 2;
-		if (lng < -Math.PI) lng += Math.PI*2;
-
-		Vector3d p  = new Vector3d (v.x,0,v.z);
-		p.normalize();
-
-		double lat = Math.acos(p.dot(v));
-		if (v.y < 0) lat = -lat;
-
-		setLatFromRad(lat);
-		setLngFromRad(lng);
+		//System.out.println("vec => " + getLat() + "," + getLng());
 
 	}
 
