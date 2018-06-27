@@ -82,10 +82,55 @@ public class Line {
 		return false;
 	}
 	
+	public double[] greaterCircle (Line l)
+	{
+		
+		Vector3d p0 = this.getoVect();
+		Vector3d p1 = this.getdVect();
+		Vector3d p2 = l.getoVect();
+		Vector3d p3 = l.getdVect();
+		
+		// System.out.println("["+p0 +" - "+p1+"] x [" + p2 + " - " + p3 + "]");
+		
+		Vector3d V = new Vector3d();
+		V.cross(p0,p1);
+		V.normalize();
+		
+		Vector3d U = new Vector3d();
+		U.cross(p2,p3);
+		U.normalize();
+		
+		Vector3d D = new Vector3d();
+		D.cross( V, U );
+		if (D.length() == 0)
+			return new double[]{0,0,0,0}; // equal or on the same greater circle and don't intersect
+		D.normalize();
+		
+		
+		Vector3d S1 = new Vector3d();
+		Vector3d S2 = new Vector3d();
+		Vector3d S3 = new Vector3d();
+		Vector3d S4 = new Vector3d();
+		
+	// so what are we working out here?
+		S1.cross(p0,V);
+		S2.cross(p1,V);
+		S3.cross(p2,U);
+		S4.cross(p3,U);
+		
+		return new double[]{ -S1.dot(D),  S2.dot(D), -S3.dot(D),  S4.dot(D)} ;
+/*
+		double s0 = -S1.dot(D);
+		double s1 = S2.dot(D);
+		double s2 = -S3.dot(D);
+		double s3 = S4.dot(D);
+*/
+	}
 	
 	public int greaterCircleIntersectType (Line l)
 	{
 		
+/*
 		Vector3d p0 = this.getoVect();
 		Vector3d p1 = this.getdVect();
 		Vector3d p2 = l.getoVect();
@@ -122,15 +167,20 @@ public class Line {
 		double s1 = S2.dot(D);
 		double s2 = -S3.dot(D);
 		double s3 = S4.dot(D);
-		
+*/
+		double[] intersectParams = greaterCircle(l);		
+
 		//System.out.println("Signs: " + s0 + " " + s1 + " " + s2 + " " + s3 );
 		
 		int count=0,zero=0;
 		
-		if (Math.abs(s0) < eps)
-			zero++;
-		else
-			count += Math.signum(s0);
+		for (int i=0; i<4; i++) 
+			if (Math.abs(intersectParams[i]) < eps)
+				zero++;
+			else
+				count += Math.signum(intersectParams[i]);
+
+/*
 		if (Math.abs(s1) < eps)
 			zero++;
 		else
@@ -144,7 +194,8 @@ public class Line {
 			zero++;
 		else
 			count += Math.signum(s3);
-		
+*/	
+
 		if (count == -4 || count == 4)
 			return 1; // intersect
 		
@@ -152,7 +203,7 @@ public class Line {
 			return 0; // equal
 		
 		if (zero > 0)
-			return 3; // parallel?
+			return 3; // one endpoint touches.
 		
 		return 2; // not intersect
 		
@@ -228,6 +279,44 @@ public class Line {
 
 	}
 
+
+	private String da (double[] ip)
+	{
+		return "[" + ip[0] + ", " + ip[1] + ", " + ip[2] + ", " + ip[3] + "]";
+	}
+	//return the line subsection (array)
+	// that we make on line l from point p
+	public void shadow (Point p, Line l)
+	{
+
+		Line pto = new Line (p,this.getO());
+		Line ptd = new Line (p,this.getD());
+		Line plo = new Line (p,l.getO());
+		Line pld = new Line (p,l.getO());
+
+		
+		double[] p1 = pto.greaterCircle(l);
+		double[] p2 = ptd.greaterCircle(l);
+
+
+		System.out.println("pto: " + da(p1));
+		System.out.println("ptd: " + da(p2));
+
+
+
+	}
+
+	private Vector3d getNormal()
+	{
+		Vector3d A = this.getoVect();
+                Vector3d B = this.getdVect();
+		
+		Vector3d N = new Vector3d();
+		N.cross(A,B);  // N = A x B
+		N.normalize();
+		return N;
+	}
+
 	public Double getGeoDistance(Point p) {
 		
 		Vector3d A = this.getoVect();
@@ -253,7 +342,7 @@ public class Line {
 
 		double onSeg = Math.abs(A.angle(B) - A.angle(T) - B.angle(T));
 
-		if (onSeg < 1E-10)
+		if (onSeg < eps)
 		{
 		
 		//System.out.println("" + tc + " T: " + onSeg );
@@ -293,7 +382,6 @@ public class Line {
 	
 	public double sign(Point p)
 	{
-
 		Vector3d T = new Vector3d();
 		Vector3d S = new Vector3d();
 		Vector3d R = new Vector3d();
