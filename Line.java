@@ -254,21 +254,23 @@ public class Line {
 		return false;
 	}
 
-	// concept, are we obscured by l or do we obscure l?
-	public int obscuredFromBy (Point p, Line l)
+	//  do we obscure l?
+	public boolean obscuredFromBy (Point p, Line l)
 	{
-
 			// project line from p to l.o
 			// project line from p to l.d
 
-			// are we obscured by l ?
 			Line po = new Line(p,l.getO());
 			Line pd = new Line(p,l.getD());
 
+			if (po.intersects(this) && pd.intersects(this))
+				return true;
+			return false;
+/*
 			int obscure = 0;
 			
-			if ( (this.getO().equals(l.getO()) || this.getD().equals(l.getO()) )) obscure = 1;
-			if ( (this.getO().equals(l.getD()) || this.getD().equals(l.getD()) )) obscure = 1;
+			// if ( (this.getO().equals(l.getO()) || this.getD().equals(l.getO()) )) obscure = 1;
+			// if ( (this.getO().equals(l.getD()) || this.getD().equals(l.getD()) )) obscure = 1;
 
 			if (po.intersects(this))
 				obscure |= 2;
@@ -276,17 +278,12 @@ public class Line {
 			if (pd.intersects(this))
 				obscure |= 4;
 
-			// partial obscure O
-			// partial obscure D
-			// total obscure
-			// same O
-			// same D
-			// partial obscure O,D
+			if (obscure ==1)
+				obscure = 0;
 
 			return obscure;
-
+			*/
 	}
-
 
 	private String da (double[] ip)
 	{
@@ -307,39 +304,50 @@ public class Line {
 		int p1 = pto.greaterCircleIntersectType(l);
 		int p2 = ptd.greaterCircleIntersectType(l);
 
-		//System.out.println("pto: " + p1 + " ptd: " + p2);
-		//System.out.println("[" + this +","+ l + ","+pto+","+ptd+"]");
+		int p3 = plo.greaterCircleIntersectType(this);
+		int p4 = pld.greaterCircleIntersectType(this);
 
-		if (p1 == 1 && p2 != 1)
+
+		System.out.println("pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " [" + this +","+ l + "]");
+
+		if (p2==3 && p1 ==3)
+		{
+			al.add(l);
+			return al;
+		}
+
+		if (p3 == 1 && p4 ==1)
+			return al;
+
+		if (p1 != 2 && p2 == 2)
 		{
 			// determine point where pto and l intersect
 			Point pp = new Point(l.getGreatCircleIntersection(pto));
 			pp = l.pointNear(pp); 
 		
 			// determine if the new line is o to intersection or d to intersection
-			int p3 = plo.greaterCircleIntersectType(this);
-			int p4 = pld.greaterCircleIntersectType(this);
+
 
 			//System.out.println("Shadowed by O end at " + pp + " on point: " + l.pointOn(pp));
 
 			// System.out.println("O: o: " + p3 + " p: "+p4 + " ;; " + pp );
 			//System.out.println ("[" + plo + "," + pld + "," + this + "]");
 			// we should never see both p3 and p4 intersecting
-			if (p3==1)
+			if (p3!=2)
 				al.add(new Line(pp,l.getD()));
 			else 
 			// we assume that p4==1
 				al.add(new Line(pp,l.getO()));
 		
 		}
-		if (p2 ==1 && p1 != 1)
+		if (p2 !=2 && p1 == 2)
 		{
 		// determine point where ptd and l intersect
 			Point pp = new Point(l.getGreatCircleIntersection(ptd));
 
 			pp = l.pointNear(pp); 
-			int p3 = plo.greaterCircleIntersectType(this);
-			int p4 = pld.greaterCircleIntersectType(this);
+			//int p3 = plo.greaterCircleIntersectType(this);
+			//int p4 = pld.greaterCircleIntersectType(this);
 
 
 			//System.out.println("Shadowed by D end at " + pp + " on " + l.pointOn(pp));
@@ -347,7 +355,7 @@ public class Line {
 		//System.out.println("O: " + p3 + " P: "+p4);
 		//System.out.println ("[" + plo + "," + pld + "," + this + "]");
 
-			if (p3==1)
+			if (p3!=2)
 				al.add(new Line(pp,l.getD()));
 			else 
 			// we assume that p4==1
@@ -377,7 +385,7 @@ public class Line {
 				al.add(new Line(po,l.getD()));
 
 		}
-		if (p1!=1 && p2 !=1)
+		if (p1==2 && p2 ==2)
 			al.add(l);
 
 		// I just want to say Funky Cole medina, at this point, 
@@ -401,9 +409,8 @@ public class Line {
 	public Double getGeoDistance(Point p) {
 		
 		Vector3d A = this.getoVect();
-                Vector3d B = this.getdVect();
+        Vector3d B = this.getdVect();
 		Vector3d C = p.getVector();
-
 		
 		Vector3d N = new Vector3d();
 		N.cross(A,B);  // N = A x B
@@ -425,19 +432,14 @@ public class Line {
 
 		if (onSeg < eps)
 		{
-		
-		//System.out.println("" + tc + " T: " + onSeg );
-		
 			return tc;
 		}
 		else if (ac < bc)
 		{
-		//System.out.println("" + ac + " A: " + onSeg );
 			return ac;
 		}
 		else
 		{
-		//System.out.println("" + bc + " B: " + onSeg );
 			return bc;
 		}
 	}

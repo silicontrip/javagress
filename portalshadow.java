@@ -98,15 +98,7 @@ public class portalshadow {
 						//System.out.println("" +  li.getGeoDistance(pt) + " : [" + li + "] "  + pt.getBearingTo(li.getO()) + " - " + pt.getBearingTo(li.getD() ));
 						//lit.remove();
 					}
-	/*
-					System.out.println("" +  closeLink.getGeoDistance(pt) + " : [" + closeLink + "] "  + pt.getBearingTo(closeLink.getO()) + " - " + pt.getBearingTo(closeLink.getD()));
-
-					for (Link li: shadowList)
-					{
-						System.out.println("[" + closeLink + "," + li + "]");
-						closeLink.shadow(pt,li);
-					}
-	*/
+					//System.out.println("" +  closeLink.getGeoDistance(pt) + " : [" + closeLink + "] "  + pt.getBearingTo(closeLink.getO()) + " - " + pt.getBearingTo(closeLink.getD() ));
 
 					shadowList.add(closeLink);
 
@@ -115,16 +107,18 @@ public class portalshadow {
 					while (lit.hasNext())
 					{
 						Map.Entry lpair = (Map.Entry)lit.next();
-                        			Link li = (Link)lpair.getValue();
-						int obs = 0;
+                        Link li = (Link)lpair.getValue();
+						boolean obs = false;
+
 						for (Link sli: shadowList) {
 							if (sli.equals(li))
-								obs = 7;
+								obs = true;
 							if (li.hasPoint(pt))
-								obs = 7;
-							obs = obs | sli.obscuredFromBy(pt,li);
+								obs = true;
+							obs = obs || sli.obscuredFromBy(pt,li);
 						}
-						if (!(obs==3 || obs==5 || obs==6 || obs==7))
+
+						if (!obs)
 						{
 							remLinks.put(li.getGuid(),li);
 						}
@@ -147,6 +141,17 @@ public class portalshadow {
 						}
 						sl = nsl;
 					}
+					// if sl has changed then we need to iterate shadowList again
+					for (Link l2: shadowList)
+					{
+						ArrayList<Line> nsl = new ArrayList<Line>();
+						for (Line l3: sl)
+						{
+							nsl.addAll( l2.shadow(pt,l3));
+						}
+						sl = nsl;
+					}
+
 					resultShadowList.addAll(sl);
 				}	
 
