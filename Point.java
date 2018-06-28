@@ -44,7 +44,7 @@ public class Point {
 	protected void setLL()
 	{
 		// much fudging going on here, not sure this works for all cases.
-		setLngFromRad(Math.atan2(v.y,v.x) + Math.PI );
+		setLngFromRad(Math.atan2(v.y,v.x));
 		setLatFromRad(Math.asin(v.z));
 	}
 
