@@ -154,6 +154,46 @@ public class Line {
 */
 	}
 	
+// there appears to be a bug calculating this with 2 individual lines
+	int pointOn(Vector3d D, Line l)
+	{
+		Vector3d S1 = new Vector3d();
+		Vector3d S2 = new Vector3d();
+		Vector3d S3 = new Vector3d();
+		Vector3d S4 = new Vector3d();
+		Vector3d V = this.getNormal();
+		Vector3d U = l.getNormal();
+		
+	// so what are we working out here?
+		S1.cross(getoVect(),V);
+		S2.cross(getdVect(),V);
+		S3.cross(l.getoVect(),U);
+		S4.cross(l.getdVect(),U);
+	
+		double [] p = new double[] {-S1.dot(D),S2.dot(D),-S3.dot(D),S4.dot(D)};
+
+		int zero=0;
+		int count=0;
+
+		for (int i =0; i<4; i++)
+		if (Math.abs(p[i]) < eps)
+			zero++;
+		else
+			count += Math.signum(p[i]);
+
+		if (zero==4)
+			return 0;
+
+		if (count==-4 ||count==4)
+			return 1;
+		
+		if (zero>0)
+			return 3;
+
+		return 2;
+	}
+
+	
 	public int greaterCircleIntersectType (Line l)
 	{
 		
