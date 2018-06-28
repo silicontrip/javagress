@@ -1,4 +1,5 @@
 import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 
 public class Line {
 	
@@ -89,6 +90,27 @@ public class Line {
 		return D;
 	}
 
+
+	// determines if this point or it's antipode are nearest this line
+	Point pointNear(Point p) { 
+		double op = this.getO().getGeoDistance(p);
+	//	double dp = this.getD().getGeoDistance(p);
+		double oa = this.getO().getGeoDistance(p.inverse());
+	//	double da = this.getD().getGeoDistance(p.inverse());
+		
+	//	System.out.println("P: " + op + ","+dp + "A: "+oa+","+da);
+
+		if (op < oa)
+			return p;
+
+		return p.inverse();
+		
+	}
+
+	int pointOn(Point p) { return pointOn(p.getVector()); }
+	
+
+// determines if the point or it's antipode, defined by D is on the current line
 	int pointOn (Vector3d D)
 	{
 		Vector3d S1 = new Vector3d();
@@ -115,7 +137,9 @@ public class Line {
 		else
 			count += Math.signum(p1);
 
-		if (count==2 || count == -2)  // handles antipodal ???
+		//System.out.println("Zero: " + zero + " count: " + count);
+
+		if (count==2 || count == -2)  // handles antipodal ???  yes 
 			return 1;  // on line
 
 		if (zero>0)
@@ -226,9 +250,9 @@ public class Line {
 	{
 		return "[" + ip[0] + ", " + ip[1] + ", " + ip[2] + ", " + ip[3] + "]";
 	}
-	//return the line subsection (array)
+	// return the line subsection (array)
 	// that we make on line l from point p
-	public void shadow (Point p, Line l)
+	public ArrayList<Line> shadow (Point p, Line l)
 	{
 
 		Line pto = new Line (this.getO(),p.inverse());
@@ -236,46 +260,88 @@ public class Line {
 		Line plo = new Line (p,l.getO());
 		Line pld = new Line (p,l.getD());
 	
+		ArrayList<Line> al = new ArrayList<Line>();
+		
 		int p1 = pto.greaterCircleIntersectType(l);
 		int p2 = ptd.greaterCircleIntersectType(l);
 
 		System.out.println("pto: " + p1 + " ptd: " + p2);
-		System.out.println("[" + l + ","+pto+","+ptd+"]");
+		System.out.println("[" + this +","+ l + ","+pto+","+ptd+"]");
 
 		if (p1 == 1 && p2 != 1)
 		{
 			// determine point where pto and l intersect
 			Point pp = new Point(l.getGreatCircleIntersection(pto));
+			pp = l.pointNear(pp); 
+		
 			// determine if the new line is o to intersection or d to intersection
 			int p3 = plo.greaterCircleIntersectType(this);
 			int p4 = pld.greaterCircleIntersectType(this);
 
-			System.out.println("O: " + p3 + " P: "+p4 + " ;; " + pp );
-			System.out.println ("[" + plo + "," + pld + "," + this + "]");
+			//System.out.println("Shadowed by O end at " + pp + " on point: " + l.pointOn(pp));
+
+			System.out.println("O: o: " + p3 + " p: "+p4 + " ;; " + pp );
+			//System.out.println ("[" + plo + "," + pld + "," + this + "]");
 			// we should never see both p3 and p4 intersecting
 			if (p3==1)
-				return new Line(pp,l.getD());
-
+				al.add(new Line(pp,l.getD()));
+			else 
 			// we assume that p4==1
-			return new Line(pp,l.getO());
+				al.add(new Line(pp,l.getO()));
+		
+		}
+		if (p2 ==1 && p1 != 1)
+		{
+		// determine point where ptd and l intersect
+			Point pp = new Point(l.getGreatCircleIntersection(ptd));
+
+			pp = l.pointNear(pp); 
+			int p3 = plo.greaterCircleIntersectType(this);
+			int p4 = pld.greaterCircleIntersectType(this);
+
+
+			//System.out.println("Shadowed by D end at " + pp + " on " + l.pointOn(pp));
+			System.out.println("P: o: " + p3 + " p: "+p4 + " ;; " + pp );
+		//System.out.println("O: " + p3 + " P: "+p4);
+		//System.out.println ("[" + plo + "," + pld + "," + this + "]");
+
+			if (p3==1)
+				al.add(new Line(pp,l.getD()));
+			else 
+			// we assume that p4==1
+				al.add(new Line(pp,l.getO()));
+		}
+		if (p1==1 && p2 == 1)
+		{
+			Point pd = new Point(l.getGreatCircleIntersection(ptd));
+			pd = l.pointNear(pd);
+			Point po = new Point(l.getGreatCircleIntersection(pto));
+			po = l.pointNear(po);
+
+			System.out.println("Shadowed subsection at " + pd + " & " + po);
+			double pddo = l.getO().getGeoDistance(pd);
+			double pddd = l.getD().getGeoDistance(pd);
+			double podo = l.getO().getGeoDistance(po);
+			double podd = l.getD().getGeoDistance(po);
+
+			if (pddo < pddd)
+				al.add(new Line(pd,l.getO()));
+			else
+				al.add(new Line(pd,l.getD()));
+			
+			if (podo < podd)
+				al.add(new Line(po,l.getO()));
+			else
+				al.add(new Line(po,l.getD()));
 
 		}
-	if (p2 ==1 && p1 != 1)
-	{
-		// determine point where ptd and l intersect
-		Point pp = new Point(l.getGreatCircleIntersection(ptd));
+		if (p1!=1 && p2 !=1)
+			al.add(l);
 
-		int p3 = plo.greaterCircleIntersectType(this);
-		int p4 = pld.greaterCircleIntersectType(this);
-
-		System.out.println("O: " + p3 + " P: "+p4);
-		System.out.println ("[" + plo + "," + pld + "," + this + "]");
-	}
-
-		System.out.println("pto: " + p1 + " : [" + pto+", "+l+"]");
-		System.out.println("ptd: " + p2 + " : [" + ptd+", "+l+"]");
-
-
+		// I just want to say Funky Cole medina, at this point, 
+		// this method has been doing my head in for that long.
+		// not to mention debugging all the supporting methods in other classes.
+		return al;
 
 	}
 
