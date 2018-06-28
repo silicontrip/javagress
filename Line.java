@@ -199,6 +199,8 @@ public class Line {
 		
 		Vector3d intPoint = getGreatCircleIntersection(l);		
 
+		return this.pointOn(intPoint,l);
+/*
 		int p1 = this.pointOn(intPoint);
 		int p2 = l.pointOn(intPoint);
 
@@ -212,7 +214,7 @@ public class Line {
 			return 3;
 
 		return 2;
-
+*/
 	}
 	public boolean intersects(Line l) {
 		
@@ -305,8 +307,8 @@ public class Line {
 		int p1 = pto.greaterCircleIntersectType(l);
 		int p2 = ptd.greaterCircleIntersectType(l);
 
-		System.out.println("pto: " + p1 + " ptd: " + p2);
-		System.out.println("[" + this +","+ l + ","+pto+","+ptd+"]");
+		//System.out.println("pto: " + p1 + " ptd: " + p2);
+		//System.out.println("[" + this +","+ l + ","+pto+","+ptd+"]");
 
 		if (p1 == 1 && p2 != 1)
 		{
@@ -320,7 +322,7 @@ public class Line {
 
 			//System.out.println("Shadowed by O end at " + pp + " on point: " + l.pointOn(pp));
 
-			System.out.println("O: o: " + p3 + " p: "+p4 + " ;; " + pp );
+			// System.out.println("O: o: " + p3 + " p: "+p4 + " ;; " + pp );
 			//System.out.println ("[" + plo + "," + pld + "," + this + "]");
 			// we should never see both p3 and p4 intersecting
 			if (p3==1)
@@ -341,7 +343,7 @@ public class Line {
 
 
 			//System.out.println("Shadowed by D end at " + pp + " on " + l.pointOn(pp));
-			System.out.println("P: o: " + p3 + " p: "+p4 + " ;; " + pp );
+			// System.out.println("P: o: " + p3 + " p: "+p4 + " ;; " + pp );
 		//System.out.println("O: " + p3 + " P: "+p4);
 		//System.out.println ("[" + plo + "," + pld + "," + this + "]");
 
