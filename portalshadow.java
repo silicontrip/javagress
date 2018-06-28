@@ -152,7 +152,7 @@ public class portalshadow {
 
 				dt.setDefaultColour("#f0f0f0");
 				for (Line li: resultShadowList)
-					dt.addLine(li);	
+					dt.addField(new Field(pt,li.getO(),li.getD()));	
 			}
 
 			System.out.println(dt.out());
