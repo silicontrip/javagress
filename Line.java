@@ -370,7 +370,7 @@ public class Line {
 		
 			// determine if the new line is o to intersection or d to intersection
 
-				if (p3==1)
+				if (p3!=2)
 					al.add(new Line(pp,l.getD()));
 				else 
 			// we assume that p4==1
@@ -386,7 +386,7 @@ public class Line {
 		
 			// determine if the new line is o to intersection or d to intersection
 
-				if (p3==1)
+				if (p3!=2)
 					al.add(new Line(pp,l.getD()));
 				else 
 			// we assume that p4==1
