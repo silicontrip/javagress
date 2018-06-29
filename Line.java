@@ -307,91 +307,105 @@ public class Line {
 		int p3 = plo.greaterCircleIntersectType(this);
 		int p4 = pld.greaterCircleIntersectType(this);
 
+		DrawTools dt = new DrawTools();
 
-		System.out.println("pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " [" + this +","+ l + "]");
+		dt.setDefaultColour("#f0f000"); dt.addLine(this);
+		dt.setDefaultColour("#8040f0"); dt.addLine(l);
 
-		if (p2==3 && p1 ==3)
+		//System.out.println("pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " " + dt);
+
+		if (p1==1 || p2==1 || p3 == 1 || p4 == 1)
 		{
-			al.add(l);
-			return al;
-		}
+			if ((p3 == 1 && p4 ==1) || (p3==1 && p4==3) || (p3==3&&p4==1))
+			{
+			//	System.out.println("DENY pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 );
+				return al;
+			}
+			//System.out.println("SHAD pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " "  + dt );
+			if (p1 == 2 && p2 == 2)
+			{
+				Point pp = new Point(l.getGreatCircleIntersection(this));
+				pp = l.pointNear(pp); 
+			
+				if (p3==1)
+					al.add(new Line(pp,l.getD()));
+				else
+					al.add(new Line(pp,l.getO()));
+				return al;
+			}
+			if (p1==1 && p2==1)
+			{
 
-		if (p3 == 1 && p4 ==1)
-			return al;
+				Point pd = new Point(l.getGreatCircleIntersection(ptd));
+				pd = l.pointNear(pd);
+				Point po = new Point(l.getGreatCircleIntersection(pto));
+				po = l.pointNear(po);
 
-		if (p1 != 2 && p2 == 2)
-		{
-			// determine point where pto and l intersect
-			Point pp = new Point(l.getGreatCircleIntersection(pto));
-			pp = l.pointNear(pp); 
+				double pddo = l.getO().getGeoDistance(pd);
+				double pddd = l.getD().getGeoDistance(pd);
+				double podo = l.getO().getGeoDistance(po);
+				double podd = l.getD().getGeoDistance(po);
+
+				if (pddo < pddd)
+					al.add(new Line(pd,l.getO()));
+				else
+					al.add(new Line(pd,l.getD()));
+			
+				if (podo < podd)
+					al.add(new Line(po,l.getO()));
+				else
+					al.add(new Line(po,l.getD()));
+
+				return al;
+
+			}
+			if (p1 ==1) 
+			{
+
+				Point pp = new Point(l.getGreatCircleIntersection(pto));
+				pp = l.pointNear(pp); 
 		
 			// determine if the new line is o to intersection or d to intersection
 
-
-			//System.out.println("Shadowed by O end at " + pp + " on point: " + l.pointOn(pp));
-
-			// System.out.println("O: o: " + p3 + " p: "+p4 + " ;; " + pp );
-			//System.out.println ("[" + plo + "," + pld + "," + this + "]");
-			// we should never see both p3 and p4 intersecting
-			if (p3!=2)
-				al.add(new Line(pp,l.getD()));
-			else 
+				if (p3==1)
+					al.add(new Line(pp,l.getD()));
+				else 
 			// we assume that p4==1
-				al.add(new Line(pp,l.getO()));
+					al.add(new Line(pp,l.getO()));
 		
-		}
-		if (p2 !=2 && p1 == 2)
-		{
-		// determine point where ptd and l intersect
-			Point pp = new Point(l.getGreatCircleIntersection(ptd));
+				return al;
+			}
+			if (p2==1)
+			{
+		
+				Point pp = new Point(l.getGreatCircleIntersection(ptd));
+				pp = l.pointNear(pp); 
+		
+			// determine if the new line is o to intersection or d to intersection
 
-			pp = l.pointNear(pp); 
-			//int p3 = plo.greaterCircleIntersectType(this);
-			//int p4 = pld.greaterCircleIntersectType(this);
-
-
-			//System.out.println("Shadowed by D end at " + pp + " on " + l.pointOn(pp));
-			// System.out.println("P: o: " + p3 + " p: "+p4 + " ;; " + pp );
-		//System.out.println("O: " + p3 + " P: "+p4);
-		//System.out.println ("[" + plo + "," + pld + "," + this + "]");
-
-			if (p3!=2)
-				al.add(new Line(pp,l.getD()));
-			else 
+				if (p3==1)
+					al.add(new Line(pp,l.getD()));
+				else 
 			// we assume that p4==1
-				al.add(new Line(pp,l.getO()));
+					al.add(new Line(pp,l.getO()));
+		
+				return al;
+			}
 		}
-		if (p1==1 && p2 == 1)
-		{
-			Point pd = new Point(l.getGreatCircleIntersection(ptd));
-			pd = l.pointNear(pd);
-			Point po = new Point(l.getGreatCircleIntersection(pto));
-			po = l.pointNear(po);
+		
 
-			System.out.println("Shadowed subsection at " + pd + " & " + po);
-			double pddo = l.getO().getGeoDistance(pd);
-			double pddd = l.getD().getGeoDistance(pd);
-			double podo = l.getO().getGeoDistance(po);
-			double podd = l.getD().getGeoDistance(po);
-
-			if (pddo < pddd)
-				al.add(new Line(pd,l.getO()));
-			else
-				al.add(new Line(pd,l.getD()));
-			
-			if (podo < podd)
-				al.add(new Line(po,l.getO()));
-			else
-				al.add(new Line(po,l.getD()));
-
-		}
-		if (p1==2 && p2 ==2)
+		//if ((p2==3 && p1 ==3) || (p1==2 && p2==2 && p3==2 && p4==2) || (p1==3 && p2==2) || (p1==2 && p2==3))
+	//	{
+			//System.out.println("PASS pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 );
 			al.add(l);
+			return al;
+	//	}
 
 		// I just want to say Funky Cole medina, at this point, 
 		// this method has been doing my head in for that long.
 		// not to mention debugging all the supporting methods in other classes.
-		return al;
+	//	System.out.println("UNKN pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " " + dt);
+	//	return al;
 
 	}
 
