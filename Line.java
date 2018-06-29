@@ -310,7 +310,7 @@ public class Line {
 		DrawTools dt = new DrawTools();
 
 		dt.setDefaultColour("#f0f000"); dt.addLine(this);
-		dt.setDefaultColour("#8040f0"); dt.addLine(l);
+		dt.setDefaultColour("#f040f0"); dt.addLine(l);
 
 		//System.out.println("pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " " + dt);
 
@@ -318,7 +318,7 @@ public class Line {
 		{
 			if ((p3 == 1 && p4 ==1) || (p3==1 && p4==3) || (p3==3&&p4==1))
 			{
-			//	System.out.println("DENY pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 );
+			//	System.out.println("DENY pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " " + dt );
 				return al;
 			}
 			//System.out.println("SHAD pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " "  + dt );
@@ -342,17 +342,20 @@ public class Line {
 				po = l.pointNear(po);
 
 				double pddo = l.getO().getGeoDistance(pd);
-				double pddd = l.getD().getGeoDistance(pd);
 				double podo = l.getO().getGeoDistance(po);
+
+				double pddd = l.getD().getGeoDistance(pd);
 				double podd = l.getD().getGeoDistance(po);
 
-				if (pddo < pddd)
+				//System.out.println ("pdo: " + pddo + " pdd: " + pddd + " poo: " + podo + " pod: " + podd);
+
+				if (pddo < podo)
 					al.add(new Line(pd,l.getO()));
 				else
-					al.add(new Line(pd,l.getD()));
-			
-				if (podo < podd)
 					al.add(new Line(po,l.getO()));
+			
+				if (pddd < podd)
+					al.add(new Line(pd,l.getD()));
 				else
 					al.add(new Line(po,l.getD()));
 
@@ -397,8 +400,9 @@ public class Line {
 		//if ((p2==3 && p1 ==3) || (p1==2 && p2==2 && p3==2 && p4==2) || (p1==3 && p2==2) || (p1==2 && p2==3))
 	//	{
 			//System.out.println("PASS pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 );
-			al.add(l);
-			return al;
+			return null;
+			//al.add(l);
+			//return al;
 	//	}
 
 		// I just want to say Funky Cole medina, at this point, 
