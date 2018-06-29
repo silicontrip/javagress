@@ -107,7 +107,7 @@ public class portalshadow {
 					while (lit.hasNext())
 					{
 						Map.Entry lpair = (Map.Entry)lit.next();
-                        Link li = (Link)lpair.getValue();
+						Link li = (Link)lpair.getValue();
 						boolean obs = false;
 
 						for (Link sli: shadowList) {
@@ -127,35 +127,66 @@ public class portalshadow {
 
 				}
 				// so now we have a list of links that the portal can get to at least part of
+				
+/*				
+				for (Link l1 : shadowList)
+					dt.addLine(l1);
+				System.out.println(dt);
+*/
 				ArrayList<Line> resultShadowList = new ArrayList<Line>();
 				for (Link l1 : shadowList)
 				{
 					ArrayList<Line> sl= new ArrayList<Line>();
 					sl.add(l1);
-					for (Link l2: shadowList)
-					{
-						ArrayList<Line> nsl = new ArrayList<Line>();
-						for (Line l3: sl)
+					boolean changed = false;
+				//	do {
+						changed = false;
+						for (Link l2: shadowList)
 						{
-							nsl.addAll( l2.shadow(pt,l3));
-						}
-						sl = nsl;
-					}
-					// if sl has changed then we need to iterate shadowList again
-					for (Link l2: shadowList)
-					{
-						ArrayList<Line> nsl = new ArrayList<Line>();
-						for (Line l3: sl)
-						{
-							nsl.addAll( l2.shadow(pt,l3));
-						}
-						sl = nsl;
-					}
 
+							if (!l2.equals(l1)) {
+								ArrayList<Line> nsl = new ArrayList<Line>();
+								for (Line l3: sl)
+								{
+									ArrayList<Line> rl = l2.shadow(pt,l3);
+									if (rl != null)	{
+										nsl.addAll( rl );
+										changed = true;
+/*
+										dt.erase();
+										dt.setDefaultColour("#f00000");
+										dt.addLine(l3);
+										dt.setDefaultColour("#f0f000");
+										for (Line ll: rl)
+											dt.addLine(ll);
+										System.out.println("");
+										System.out.println(dt);
+*/
+									} else {
+										nsl.add(l3);
+									}
+								}
+								sl = nsl;
+							}
+						}
+				//	} while (changed);
+					// if sl has changed then we need to iterate shadowList again
+				/*
+					for (Link l2: shadowList)
+					{
+						ArrayList<Line> nsl = new ArrayList<Line>();
+						for (Line l3: sl)
+						{
+							nsl.addAll( l2.shadow(pt,l3));
+						}
+						sl = nsl;
+					}
+				*/
 					resultShadowList.addAll(sl);
 				}	
-
+				dt.erase();
 				dt.setDefaultColour("#f0f0f0");
+				dt.addMarker(pt);
 				for (Line li: resultShadowList)
 					dt.addField(new Field(pt,li.getO(),li.getD()));	
 			}
