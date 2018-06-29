@@ -128,11 +128,14 @@ public class portalshadow {
 				}
 				// so now we have a list of links that the portal can get to at least part of
 				
-/*				
+				
+/*
 				for (Link l1 : shadowList)
 					dt.addLine(l1);
 				System.out.println(dt);
+				System.out.println("");
 */
+
 				ArrayList<Line> resultShadowList = new ArrayList<Line>();
 				for (Link l1 : shadowList)
 				{
@@ -152,6 +155,8 @@ public class portalshadow {
 									if (rl != null)	{
 										nsl.addAll( rl );
 										changed = true;
+
+
 /*
 										dt.erase();
 										dt.setDefaultColour("#f00000");
@@ -162,6 +167,7 @@ public class portalshadow {
 										System.out.println("");
 										System.out.println(dt);
 */
+
 									} else {
 										nsl.add(l3);
 									}
@@ -185,8 +191,9 @@ public class portalshadow {
 					resultShadowList.addAll(sl);
 				}	
 				dt.erase();
-				dt.setDefaultColour("#f0f0f0");
+				dt.setDefaultColour("#a24ac3");
 				dt.addMarker(pt);
+				dt.setDefaultColour("#f0f0f0");
 				for (Line li: resultShadowList)
 					dt.addField(new Field(pt,li.getO(),li.getD()));	
 			}
