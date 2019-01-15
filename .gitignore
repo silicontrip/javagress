@@ -7,3 +7,7 @@ jackson*
 *.png
 *.csv
 *.properties
+*.swp
+*.xz
+*.xml
+*.php
