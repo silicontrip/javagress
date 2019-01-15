@@ -1,4 +1,5 @@
 import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 
 public class Line {
 	
@@ -226,9 +227,9 @@ public class Line {
 	{
 		return "[" + ip[0] + ", " + ip[1] + ", " + ip[2] + ", " + ip[3] + "]";
 	}
-	//return the line subsection (array)
+	// return the line subsection (array)
 	// that we make on line l from point p
-	public void shadow (Point p, Line l)
+	public ArrayList<Line> shadow (Point p, Line l)
 	{
 
 		Line pto = new Line (this.getO(),p.inverse());
@@ -236,6 +237,8 @@ public class Line {
 		Line plo = new Line (p,l.getO());
 		Line pld = new Line (p,l.getD());
 	
+		ArrayList<Line> al = new ArrayList<Line>();
+		
 		int p1 = pto.greaterCircleIntersectType(l);
 		int p2 = ptd.greaterCircleIntersectType(l);
 
@@ -254,11 +257,11 @@ public class Line {
 			System.out.println ("[" + plo + "," + pld + "," + this + "]");
 			// we should never see both p3 and p4 intersecting
 			if (p3==1)
-				return new Line(pp,l.getD());
-
+				al.add(new Line(pp,l.getD()));
+			else 
 			// we assume that p4==1
-			return new Line(pp,l.getO());
-
+				al.add(new Line(pp,l.getO()));
+		
 		}
 	if (p2 ==1 && p1 != 1)
 	{
@@ -270,12 +273,39 @@ public class Line {
 
 		System.out.println("O: " + p3 + " P: "+p4);
 		System.out.println ("[" + plo + "," + pld + "," + this + "]");
+
+			if (p3==1)
+				al.add(new Line(pp,l.getD()));
+			else 
+			// we assume that p4==1
+				al.add(new Line(pp,l.getO()));
 	}
+		if (p1==1 && p2 == 1)
+		{
+			Point pd = new Point(l.getGreatCircleIntersection(ptd));
+			Point po = new Point(l.getGreatCircleIntersection(pto));
 
-		System.out.println("pto: " + p1 + " : [" + pto+", "+l+"]");
-		System.out.println("ptd: " + p2 + " : [" + ptd+", "+l+"]");
+			double pddo = l.getO().getGeoDistance(pd);
+			double pddd = l.getD().getGeoDistance(pd);
+			double podo = l.getO().getGeoDistance(po);
+			double podd = l.getD().getGeoDistance(po);
 
+			if (pddo < pddd)
+				al.add(new Line(pd,l.getO()));
+			else
+				al.add(new Line(pd,l.getD()));
+			
+			if (podo < podd)
+				al.add(new Line(po,l.getO()));
+			else
+				al.add(new Line(po,l.getD()));
 
+		}
+
+		// I just want to say Funky Cole medina, at this point, 
+		// this method has been doing my head in for that long.
+		// not to mention debugging all the supporting methods in other classes.
+		return al;
 
 	}
 
