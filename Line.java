@@ -90,6 +90,27 @@ public class Line {
 		return D;
 	}
 
+
+	// determines if this point or it's antipode are nearest this line
+	Point pointNear(Point p) { 
+		double op = this.getO().getGeoDistance(p);
+	//	double dp = this.getD().getGeoDistance(p);
+		double oa = this.getO().getGeoDistance(p.inverse());
+	//	double da = this.getD().getGeoDistance(p.inverse());
+		
+	//	System.out.println("P: " + op + ","+dp + "A: "+oa+","+da);
+
+		if (op < oa)
+			return p;
+
+		return p.inverse();
+		
+	}
+
+	int pointOn(Point p) { return pointOn(p.getVector()); }
+	
+
+// determines if the point or it's antipode, defined by D is on the current line
 	int pointOn (Vector3d D)
 	{
 		Vector3d S1 = new Vector3d();
@@ -116,7 +137,9 @@ public class Line {
 		else
 			count += Math.signum(p1);
 
-		if (count==2 || count == -2)  // handles antipodal ???
+		//System.out.println("Zero: " + zero + " count: " + count);
+
+		if (count==2 || count == -2)  // handles antipodal ???  yes 
 			return 1;  // on line
 
 		if (zero>0)
@@ -131,11 +154,53 @@ public class Line {
 */
 	}
 	
+// there appears to be a bug calculating this with 2 individual lines
+	int pointOn(Vector3d D, Line l)
+	{
+		Vector3d S1 = new Vector3d();
+		Vector3d S2 = new Vector3d();
+		Vector3d S3 = new Vector3d();
+		Vector3d S4 = new Vector3d();
+		Vector3d V = this.getNormal();
+		Vector3d U = l.getNormal();
+		
+	// so what are we working out here?
+		S1.cross(getoVect(),V);
+		S2.cross(getdVect(),V);
+		S3.cross(l.getoVect(),U);
+		S4.cross(l.getdVect(),U);
+	
+		double [] p = new double[] {-S1.dot(D),S2.dot(D),-S3.dot(D),S4.dot(D)};
+
+		int zero=0;
+		int count=0;
+
+		for (int i =0; i<4; i++)
+		if (Math.abs(p[i]) < eps)
+			zero++;
+		else
+			count += Math.signum(p[i]);
+
+		if (zero==4)
+			return 0;
+
+		if (count==-4 ||count==4)
+			return 1;
+		
+		if (zero>0)
+			return 3;
+
+		return 2;
+	}
+
+	
 	public int greaterCircleIntersectType (Line l)
 	{
 		
 		Vector3d intPoint = getGreatCircleIntersection(l);		
 
+		return this.pointOn(intPoint,l);
+/*
 		int p1 = this.pointOn(intPoint);
 		int p2 = l.pointOn(intPoint);
 
@@ -149,7 +214,7 @@ public class Line {
 			return 3;
 
 		return 2;
-
+*/
 	}
 	public boolean intersects(Line l) {
 		
@@ -189,21 +254,23 @@ public class Line {
 		return false;
 	}
 
-	// concept, are we obscured by l or do we obscure l?
-	public int obscuredFromBy (Point p, Line l)
+	//  do we obscure l?
+	public boolean obscuredFromBy (Point p, Line l)
 	{
-
 			// project line from p to l.o
 			// project line from p to l.d
 
-			// are we obscured by l ?
 			Line po = new Line(p,l.getO());
 			Line pd = new Line(p,l.getD());
 
+			if (po.intersects(this) && pd.intersects(this))
+				return true;
+			return false;
+/*
 			int obscure = 0;
 			
-			if ( (this.getO().equals(l.getO()) || this.getD().equals(l.getO()) )) obscure = 1;
-			if ( (this.getO().equals(l.getD()) || this.getD().equals(l.getD()) )) obscure = 1;
+			// if ( (this.getO().equals(l.getO()) || this.getD().equals(l.getO()) )) obscure = 1;
+			// if ( (this.getO().equals(l.getD()) || this.getD().equals(l.getD()) )) obscure = 1;
 
 			if (po.intersects(this))
 				obscure |= 2;
@@ -211,17 +278,12 @@ public class Line {
 			if (pd.intersects(this))
 				obscure |= 4;
 
-			// partial obscure O
-			// partial obscure D
-			// total obscure
-			// same O
-			// same D
-			// partial obscure O,D
+			if (obscure ==1)
+				obscure = 0;
 
 			return obscure;
-
+			*/
 	}
-
 
 	private String da (double[] ip)
 	{
@@ -242,71 +304,110 @@ public class Line {
 		int p1 = pto.greaterCircleIntersectType(l);
 		int p2 = ptd.greaterCircleIntersectType(l);
 
-		System.out.println("pto: " + p1 + " ptd: " + p2);
-		System.out.println("[" + l + ","+pto+","+ptd+"]");
-
-		if (p1 == 1 && p2 != 1)
-		{
-			// determine point where pto and l intersect
-			Point pp = new Point(l.getGreatCircleIntersection(pto));
-			// determine if the new line is o to intersection or d to intersection
-			int p3 = plo.greaterCircleIntersectType(this);
-			int p4 = pld.greaterCircleIntersectType(this);
-
-			System.out.println("O: " + p3 + " P: "+p4 + " ;; " + pp );
-			System.out.println ("[" + plo + "," + pld + "," + this + "]");
-			// we should never see both p3 and p4 intersecting
-			if (p3==1)
-				al.add(new Line(pp,l.getD()));
-			else 
-			// we assume that p4==1
-				al.add(new Line(pp,l.getO()));
-		
-		}
-	if (p2 ==1 && p1 != 1)
-	{
-		// determine point where ptd and l intersect
-		Point pp = new Point(l.getGreatCircleIntersection(ptd));
-
 		int p3 = plo.greaterCircleIntersectType(this);
 		int p4 = pld.greaterCircleIntersectType(this);
 
-		System.out.println("O: " + p3 + " P: "+p4);
-		System.out.println ("[" + plo + "," + pld + "," + this + "]");
+		DrawTools dt = new DrawTools();
 
-			if (p3==1)
-				al.add(new Line(pp,l.getD()));
-			else 
-			// we assume that p4==1
-				al.add(new Line(pp,l.getO()));
-	}
-		if (p1==1 && p2 == 1)
+		dt.setDefaultColour("#f0f000"); dt.addLine(this);
+		dt.setDefaultColour("#f040f0"); dt.addLine(l);
+
+		//System.out.println("pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " " + dt);
+
+		if (p1==1 || p2==1 || p3 == 1 || p4 == 1)
 		{
-			Point pd = new Point(l.getGreatCircleIntersection(ptd));
-			Point po = new Point(l.getGreatCircleIntersection(pto));
-
-			double pddo = l.getO().getGeoDistance(pd);
-			double pddd = l.getD().getGeoDistance(pd);
-			double podo = l.getO().getGeoDistance(po);
-			double podd = l.getD().getGeoDistance(po);
-
-			if (pddo < pddd)
-				al.add(new Line(pd,l.getO()));
-			else
-				al.add(new Line(pd,l.getD()));
+			if ((p3 == 1 && p4 ==1) || (p3==1 && p4==3) || (p3==3&&p4==1))
+			{
+			//	System.out.println("DENY pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " " + dt );
+				return al;
+			}
+			//System.out.println("SHAD pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 + " "  + dt );
+			if (p1 == 2 && p2 == 2)
+			{
+				Point pp = new Point(l.getGreatCircleIntersection(this));
+				pp = l.pointNear(pp); 
 			
-			if (podo < podd)
-				al.add(new Line(po,l.getO()));
-			else
-				al.add(new Line(po,l.getD()));
+				if (p3==1)
+					al.add(new Line(pp,l.getD()));
+				else
+					al.add(new Line(pp,l.getO()));
+				return al;
+			}
+			if (p1==1 && p2==1)
+			{
 
+				Point pd = new Point(l.getGreatCircleIntersection(ptd));
+				pd = l.pointNear(pd);
+				Point po = new Point(l.getGreatCircleIntersection(pto));
+				po = l.pointNear(po);
+
+				double pddo = l.getO().getGeoDistance(pd);
+				double podo = l.getO().getGeoDistance(po);
+
+				double pddd = l.getD().getGeoDistance(pd);
+				double podd = l.getD().getGeoDistance(po);
+
+				//System.out.println ("pdo: " + pddo + " pdd: " + pddd + " poo: " + podo + " pod: " + podd);
+
+				if (pddo < podo)
+					al.add(new Line(pd,l.getO()));
+				else
+					al.add(new Line(po,l.getO()));
+			
+				if (pddd < podd)
+					al.add(new Line(pd,l.getD()));
+				else
+					al.add(new Line(po,l.getD()));
+
+				return al;
+
+			}
+			if (p1 ==1) 
+			{
+
+				Point pp = new Point(l.getGreatCircleIntersection(pto));
+				pp = l.pointNear(pp); 
+		
+			// determine if the new line is o to intersection or d to intersection
+
+				if (p3!=2)
+					al.add(new Line(pp,l.getD()));
+				else 
+			// we assume that p4==1
+					al.add(new Line(pp,l.getO()));
+		
+				return al;
+			}
+			if (p2==1)
+			{
+		
+				Point pp = new Point(l.getGreatCircleIntersection(ptd));
+				pp = l.pointNear(pp); 
+		
+			// determine if the new line is o to intersection or d to intersection
+
+				if (p3!=2)
+					al.add(new Line(pp,l.getD()));
+				else 
+			// we assume that p4==1
+					al.add(new Line(pp,l.getO()));
+		
+				return al;
+			}
 		}
+		
+
+		//if ((p2==3 && p1 ==3) || (p1==2 && p2==2 && p3==2 && p4==2) || (p1==3 && p2==2) || (p1==2 && p2==3))
+	//	{
+			//System.out.println("PASS pto: " + p1 + " ptd: " + p2+ " plo: " + p3 + " pld: "+p4 );
+			return null;
+			//al.add(l);
+			//return al;
+	//	}
 
 		// I just want to say Funky Cole medina, at this point, 
 		// this method has been doing my head in for that long.
 		// not to mention debugging all the supporting methods in other classes.
-		return al;
-
 	}
 
 	private Vector3d getNormal()
@@ -323,9 +424,8 @@ public class Line {
 	public Double getGeoDistance(Point p) {
 		
 		Vector3d A = this.getoVect();
-                Vector3d B = this.getdVect();
+        Vector3d B = this.getdVect();
 		Vector3d C = p.getVector();
-
 		
 		Vector3d N = new Vector3d();
 		N.cross(A,B);  // N = A x B
@@ -347,19 +447,14 @@ public class Line {
 
 		if (onSeg < eps)
 		{
-		
-		//System.out.println("" + tc + " T: " + onSeg );
-		
 			return tc;
 		}
 		else if (ac < bc)
 		{
-		//System.out.println("" + ac + " A: " + onSeg );
 			return ac;
 		}
 		else
 		{
-		//System.out.println("" + bc + " B: " + onSeg );
 			return bc;
 		}
 	}

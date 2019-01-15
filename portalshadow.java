@@ -69,13 +69,13 @@ public class portalshadow {
 			// } end loop
 			// } end loop 
 			ArrayList<Link> shadowList = new ArrayList<Link>();
-			while (it.hasNext()) {
+			if (it.hasNext()) { 
 				Map.Entry pair = (Map.Entry)it.next();
 				Portal pt = (Portal)pair.getValue();
 				System.out.println(pair.getKey() + ":" + pair.getValue() + ((Portal)pair.getValue()).getUrl());
 
 				HashMap<String,Link> remLinks = links ;
-				//dt.addMarker(pt.getLat(), (pt.getLng()));
+				dt.addMarker(pt.getLat(), pt.getLng());
 				it.remove(); // avoids a ConcurrentModificationException
 					// why ?
 				Iterator lit = links.entrySet().iterator();
@@ -98,67 +98,104 @@ public class portalshadow {
 						//System.out.println("" +  li.getGeoDistance(pt) + " : [" + li + "] "  + pt.getBearingTo(li.getO()) + " - " + pt.getBearingTo(li.getD() ));
 						//lit.remove();
 					}
-					System.out.println("" +  closeLink.getGeoDistance(pt) + " : [" + closeLink + "] "  + pt.getBearingTo(closeLink.getO()) + " - " + pt.getBearingTo(closeLink.getD()));
-
-					for (Link li: shadowList)
-					{
-						System.out.println("[" + closeLink + "," + li + "]");
-						closeLink.shadow(pt,li);
-					}
+					//System.out.println("" +  closeLink.getGeoDistance(pt) + " : [" + closeLink + "] "  + pt.getBearingTo(closeLink.getO()) + " - " + pt.getBearingTo(closeLink.getD() ));
 
 					shadowList.add(closeLink);
-					dt.setDefaultColour("#a24ac3");
-					dt.addLine(closeLink);
-					dt.setDefaultColour("#f0f0f0");
-					dt.addField(new Field(pt,closeLink.getD(),closeLink.getO()));
 
 					lit = remLinks.entrySet().iterator();
 					remLinks = new HashMap<String,Link>();
-					DrawTools stepdt = new DrawTools();
-					stepdt.setDefaultColour("#F0F0F0");
-					stepdt.addLine(closeLink);
 					while (lit.hasNext())
 					{
 						Map.Entry lpair = (Map.Entry)lit.next();
-                        			Link li = (Link)lpair.getValue();
-						int obs = 0;
+						Link li = (Link)lpair.getValue();
+						boolean obs = false;
+
 						for (Link sli: shadowList) {
 							if (sli.equals(li))
-								obs = 7;
+								obs = true;
 							if (li.hasPoint(pt))
-								obs = 7;
-							obs = obs | sli.obscuredFromBy(pt,li);
+								obs = true;
+							obs = obs || sli.obscuredFromBy(pt,li);
 						}
-						//if (obs >0)
-						//	
-						if (!(obs==3 || obs==5 || obs==6 || obs==7))
+
+						if (!obs)
 						{
 							remLinks.put(li.getGuid(),li);
-							//System.out.println("" + obs + " : [" + li + "]");
 						}
-						else
-						{
-							stepdt.setDefaultColour("#F0F000");
-							stepdt.addLine(li);
-						}
-			
-					/*
-						if (obs==0) { dt.setDefaultColour("#00F000"); dt.addLine(li); }
-						if (obs==1) { dt.setDefaultColour("#F08000"); dt.addLine(li); }
-						if (obs==2) { dt.setDefaultColour("#80F000"); dt.addLine(li); }
-						if (obs==3) { dt.setDefaultColour("#F0F000"); dt.addLine(li); }
-						if (obs==4) { dt.setDefaultColour("#00F080"); dt.addLine(li); }
-						if (obs==8) { dt.setDefaultColour("#0080F0"); dt.addLine(li); }
-						//if (obs==6) { dt.setDefaultColour("#F00000"); dt.addLine(li); }
-						//if (obs==12) { dt.setDefaultColour("#F00000"); dt.addLine(li); }
-						*/
 					}
 					lit = remLinks.entrySet().iterator();
-					System.out.println("");
-					System.out.println(dt.out());
-					System.out.println("");
 
 				}
+				// so now we have a list of links that the portal can get to at least part of
+				
+				
+/*
+				for (Link l1 : shadowList)
+					dt.addLine(l1);
+				System.out.println(dt);
+				System.out.println("");
+*/
+
+				ArrayList<Line> resultShadowList = new ArrayList<Line>();
+				for (Link l1 : shadowList)
+				{
+					ArrayList<Line> sl= new ArrayList<Line>();
+					sl.add(l1);
+					boolean changed = false;
+				//	do {
+						changed = false;
+						for (Link l2: shadowList)
+						{
+
+							if (!l2.equals(l1)) {
+								ArrayList<Line> nsl = new ArrayList<Line>();
+								for (Line l3: sl)
+								{
+									ArrayList<Line> rl = l2.shadow(pt,l3);
+									if (rl != null)	{
+										nsl.addAll( rl );
+										changed = true;
+
+
+/*
+										dt.erase();
+										dt.setDefaultColour("#f00000");
+										dt.addLine(l3);
+										dt.setDefaultColour("#f0f000");
+										for (Line ll: rl)
+											dt.addLine(ll);
+										System.out.println("");
+										System.out.println(dt);
+*/
+
+									} else {
+										nsl.add(l3);
+									}
+								}
+								sl = nsl;
+							}
+						}
+				//	} while (changed);
+					// if sl has changed then we need to iterate shadowList again
+				/*
+					for (Link l2: shadowList)
+					{
+						ArrayList<Line> nsl = new ArrayList<Line>();
+						for (Line l3: sl)
+						{
+							nsl.addAll( l2.shadow(pt,l3));
+						}
+						sl = nsl;
+					}
+				*/
+					resultShadowList.addAll(sl);
+				}	
+				dt.erase();
+				dt.setDefaultColour("#a24ac3");
+				dt.addMarker(pt);
+				dt.setDefaultColour("#f0f0f0");
+				for (Line li: resultShadowList)
+					dt.addField(new Field(pt,li.getO(),li.getD()));	
 			}
 
 			System.out.println(dt.out());
