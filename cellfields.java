@@ -37,7 +37,7 @@ public static void main(String[] args) {
 	
 	Arguments ag = new Arguments(args);
 	
-	teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+	teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"),ag.getOptionForKey("N"));
 	
 	DrawTools dt = new DrawTools();
 	if (ag.hasOption("C"))

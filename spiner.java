@@ -159,7 +159,7 @@ public class spiner {
 		
 		//System.out.println ("Arguments: " + ag );
 
-		teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+		teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"),ag.getOptionForKey("N"));
         
 		DrawTools dt = new DrawTools(); 
 		if (ag.hasOption("C"))
