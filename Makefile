@@ -11,7 +11,7 @@ CellMUDB.class RunTimer.class
 
 #PolyPoint.class CombinationFactory.class BlockList.class 
 
-CP=cellserver.jar:vecmath-1.5.1.jar:s2-geometry-java.jar:jackson-annotations-2.9.6.jar:jackson-core-2.9.6.jar:jackson-databind-2.9.6.jar:.
+CP=cellserver.jar:vecmath.jar:s2-geometry-java.jar:jackson-annotations-2.15.2.jar:jackson-core-2.15.2.jar:jackson-databind-2.15.2.jar:.
 
 all: portaltools.jar
 
