@@ -32,44 +32,43 @@ public class layerlinker {
 	}	
         private static Double searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, Double maxArea) throws javax.xml.parsers.ParserConfigurationException, java.io.IOException
         {
-                        if (list.size() > 0) {
+            if (list.size() > 0) {
 
 				// how to pick which field sizing algorithm
-                        //      Double thisArea = sizeFields(list);
-                                // we want to maximise number of fields
-                               // Double thisArea = new Double(list.size());
+                //      Double thisArea = sizeFields(list);
+                // we want to maximise number of fields
+                // Double thisArea = new Double(list.size());
 				Double thisArea = 0.0;
 				for (Field fi: list)
 					thisArea += fi.getEstMu();
 				
-
-                                if (thisArea > maxArea) {
-                                        System.out.print(thisArea + "(" + list.size() + ") : ");
+                if (thisArea > maxArea) {
+                    System.out.print(thisArea + "(" + list.size() + ") : ");
 					dt.erase();
 					for (Field fi: list)
 						dt.addField(fi);
 					System.out.println(dt);
 						
-                                        System.out.println("");
-                                        maxArea = thisArea;
-                                }
-                        }
+                    System.out.println("");
+                    maxArea = thisArea;
+                }
+            }
 
-                        for (int i =start; i<fields.length; i++)
-                        {
-                                Field thisField = (Field)fields[i];
+            for (int i =start; i<fields.length; i++)
+            {
+                Field thisField = (Field)fields[i];
 
-                                if (!thisField.intersects(list))
-                                {
+                if (!thisField.intersects(list))
+                {
 
-                                        ArrayList<Field> newlist = new ArrayList<Field>(list);
-                                        newlist.add((Field)fields[i]);
-                                        maxArea = searchFields(dt,newlist,fields,i+1,maxArea);
-                                }
+                    ArrayList<Field> newlist = new ArrayList<Field>(list);
+                    newlist.add((Field)fields[i]);
+                    maxArea = searchFields(dt,newlist,fields,i+1,maxArea);
+                }
 
-                        }
+            }
 
-                return maxArea;
+            return maxArea;
         }
 	
 
@@ -101,6 +100,7 @@ public class layerlinker {
 	public static void main(String[] args) {
 		
 		int calc=0;
+		int maxLayers = 0;
 		Double threshold;
 		Double percentile = null;
 		Double fpercentile = null;
@@ -143,6 +143,8 @@ public class layerlinker {
 		if (ag.hasOption("f"))
 			fpercentile = new Double(ag.getOptionForKey("f"));
 
+		if (ag.hasOption("l"))
+			maxLayers = Integer.valueOf(ag.getOptionForKey("l"));
 
 		if (ag.hasOption("h"))
 		{
@@ -154,12 +156,14 @@ public class layerlinker {
 			System.out.println(" -O                Output as Intel Link");
 			System.out.println(" -M                Use MU calculation");
 			System.out.println(" -t <number>       Threshold for similar fields (larger less similar)");
+			System.out.println(" -l <number>       Maximum number of layers in plan");
 			System.out.println(" -p <percentile>   Use longest percentile links");
 			System.out.println(" -f <percentile>   Use largest percentile fields");
-			System.out.println(" -T <lat,lng,...>  Use only fields  covering target points");
+			System.out.println(" -T <lat,lng,...>  Use only fields covering target points");
 		}
 
-			
+		System.err.println("== MaxLayers: " + maxLayers + " ==");
+	
 		
 		try {
 			PortalFactory pf = PortalFactory.getInstance();
@@ -231,21 +235,16 @@ public class layerlinker {
 				HashMap<String,Portal> portals1 = new HashMap<String,Portal>();
 				HashMap<String,Portal> portals2 = new HashMap<String,Portal>();
 
-				
 				portals1 = pf.portalClusterFromString(ag.getArgumentAt(0));
 				portals2 = pf.portalClusterFromString(ag.getArgumentAt(1));
-				
 				
 				allPortals = new ArrayList<Portal>();
 								
 				allPortals.addAll(portals1.values());
 				allPortals.addAll(portals2.values());
 				
-				
 				System.err.println("== " + allPortals.size() + " portals read " + rt.split()+ " ==");
 				System.err.println("== Reading links ==");
-				
-				
 				
 				links = pf.getPurgedLinks(new ArrayList<Portal>(allPortals));
 				
@@ -356,36 +355,35 @@ public class layerlinker {
 
 			Double bestbest = 0.0;
 				
-			for (int i =0; i< bf.length;i++ )  {
+			for (int i =0; i< bf.length;i++ ) {
 				Field tfi = (Field)bf[i];
 				Double at = 0.0;
 				if (calc==0)
-					at  += tfi.getGeoArea();
+					at += tfi.getGeoArea();
 				else
-					at  += tfi.getEstMu();
+					at += tfi.getEstMu();
 
 				ArrayList<Field> fc = new ArrayList<Field>();
 				dt.erase();
 				fc.add(tfi);
 				dt.addField(tfi);
 				int best = findField(bf,i+1,tfi,fc,threshold); // make threshold configurable
-				while (best != -1) {
+				while (best != -1 && (maxLayers==0 || fc.size() < maxLayers)) {
 
 					tfi = (Field)bf[best];
 
-					
 					if (calc==0)
 					{
-						at  += tfi.getGeoArea();
+						at += tfi.getGeoArea();
 						dt.addField(tfi);
 						fc.add(tfi);
 					}
 					else
 					{
-				//System.out.println ("at: " + at  + " est: " + tfi.getEstMu());
+						//System.out.println ("at: " + at  + " est: " + tfi.getEstMu());
 						if (at + tfi.getEstMu() < notOver)
 						{
-							at  += tfi.getEstMu();
+							at += tfi.getEstMu();
 							dt.addField(tfi);
 							fc.add(tfi);
 						}
