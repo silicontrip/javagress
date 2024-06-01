@@ -60,8 +60,8 @@ public class megaplan {
 		
 		for (Field fi: fa)
 		{
-			//area += fi.getGeoArea();
-			area += fi.getEstMu();
+			area += fi.getGeoArea();
+			//area += fi.getEstMu();
 		}
 		return area;
 	}
@@ -175,6 +175,8 @@ public class megaplan {
         
         BlockList blocksPerLink = new BlockList();
         
+		System.err.println("== " + portalKeys.length + " portal Keys size ==");
+
         
         // Object[] portalKeys = portals.values().toArray();
         
@@ -185,9 +187,9 @@ public class megaplan {
                 Portal pi = (Portal)portalKeys[i];
                 Portal pj = (Portal)portalKeys[j];
                 
-                //	String guidKey = new String (pi.getGuid()+pj.getGuid());
+                //String guidKey = new String (pi.getGuid()+pj.getGuid());
                 
-                //	System.out.println(guidKey);
+                //System.out.println(guidKey);
                 
                 Line l =  new Line (pi, pj);
                 
@@ -214,7 +216,7 @@ public static void main(String[] args) {
 
 	//System.out.println ("Arguments: " + ag );
 
-	teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"));
+	teamCount maxBl = new teamCount(ag.getOptionForKey("E"),ag.getOptionForKey("R"),ag.getOptionForKey("N"));
 	
 	DrawTools dt = new DrawTools();	
 	if (ag.hasOption("C"))
@@ -247,9 +249,11 @@ public static void main(String[] args) {
 		allPortals.putAll(portals1);
 		allPortals.putAll(portals2);
 		allPortals.putAll(portals3);
+		System.err.println("== " + allPortals.size() + " portals read ==");
 
         System.err.println("== Reading links ==");
 		ArrayList<Link> links = pf.getPurgedLinks(allPortals.values());
+		System.err.println("== " + links.size() + " links read ==");
 
         System.err.println("== Getting Blocks ==");
         BlockList bl = getLinkBlockersSingle(allPortals.values().toArray(), links);

@@ -59,7 +59,8 @@ public class PortalFactory {
 		
 		
 		try {
-			tmpObj = mapper.readValue(clusterDescription,new TypeReference<Collection<Polygon>>() {});
+			//tmpObj = mapper.readValue(clusterDescription,new TypeReference<Collection<Polygon>>() {});
+			tmpObj = mapper.readValue(clusterDescription,new TypeReference<ArrayList<Polygon>>() {});
 		} catch (com.fasterxml.jackson.databind.JsonMappingException e) {
 			throw new IOException("Invalid Drawtools: " + e);
 		}
@@ -583,11 +584,11 @@ public class PortalFactory {
 		
 		ObjectMapper mapper = new ObjectMapper();
 		
-		ArrayList<HashMap<String,Object>> guidMap = mapper.readValue(result,new TypeReference<ArrayList<HashMap<String,Object>>>(){});
+		HashMap<String,HashMap<String,Object>> guidMap = mapper.readValue(result,new TypeReference<HashMap<String,HashMap<String,Object>>>(){});
 		
 		HashMap<String,Link> resultMap = new HashMap<String,Link>();
 		
-		for (HashMap<String,Object> entry : guidMap ) {
+		for (HashMap<String,Object> entry : guidMap.values() ) {
 			
 			String key = (String)entry.get("guid");
 			
