@@ -59,7 +59,10 @@ public class PortalFactory {
 		
 		
 		try {
+<<<<<<< HEAD
 			//tmpObj = mapper.readValue(clusterDescription,new TypeReference<Collection<Polygon>>() {});
+=======
+>>>>>>> 68b1dd11fb4e922c71968a57ccfa5db41386b139
 			tmpObj = mapper.readValue(clusterDescription,new TypeReference<ArrayList<Polygon>>() {});
 		} catch (com.fasterxml.jackson.databind.JsonMappingException e) {
 			throw new IOException("Invalid Drawtools: " + e);
@@ -584,6 +587,7 @@ public class PortalFactory {
 		
 		ObjectMapper mapper = new ObjectMapper();
 		
+<<<<<<< HEAD
 		HashMap<String,HashMap<String,Object>> guidMap = mapper.readValue(result,new TypeReference<HashMap<String,HashMap<String,Object>>>(){});
 		
 		HashMap<String,Link> resultMap = new HashMap<String,Link>();
@@ -593,15 +597,25 @@ public class PortalFactory {
 			String key = (String)entry.get("guid");
 			
 			
+=======
+		HashMap<String,Object> guidMap = mapper.readValue(result,new TypeReference<HashMap<String,Object>>(){});
+		
+		
+		HashMap<String,Link> resultMap = new HashMap<String,Link>();
+		
+		for (String key : guidMap.keySet()  ) {
+						
+>>>>>>> 68b1dd11fb4e922c71968a57ccfa5db41386b139
 			// HashMap<String,String> portalMap = mapper.readValue(entry.getValue(),HashMap.class);
 			
-			Link link  = new Link (entry);
+			Link link  = new Link ((HashMap<String,Object>)guidMap.get(key));
 			
 			resultMap.put(key,link);
 		}
 		
 		return resultMap;
 		
+		// return guidMap;
 	}
 	
 	public static ArrayList<Line> makeLinksFromSingleCluster(Collection<Portal> portals)
