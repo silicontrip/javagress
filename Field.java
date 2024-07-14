@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.ArrayList; 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.*;
 
@@ -13,6 +14,9 @@ public class Field {
 	public static final Double earthRadius = 6367.0;
 	Portal[] portals;
 	Point[] points;
+
+    private int cachedMU; // Cached MU value
+    private boolean muCached; // Flag to track if MU is cached
 	
 	public Field () {
 		portals = new Portal[3];
@@ -48,10 +52,52 @@ public class Field {
 
 	}
 
-	public double getEstMu() throws ParserConfigurationException, IOException {
-		CellMUDB mudb = CellMUDB.getInstance();
-		return mudb.getEstMu(this);
-	}
+    public int getEstMu() throws java.io.IOException {
+        if (!muCached) {
+            cachedMU = calculateMU();
+            muCached = true;
+        }
+        return cachedMU;
+    }
+
+    private int calculateMU() throws java.io.IOException {
+        HashMap<S2CellId, Double> cellIntersections = getCellIntersection();
+        double totalMU = 0.0;
+
+        // Create a map to store the mu/km2 values for each S2CellId
+        HashMap<S2CellId, UniformDistribution> muMap = new HashMap<>();
+
+        // Prepare a list of S2CellIds to query
+        ArrayList<String> cellIdsToQuery = new ArrayList<>();
+        for (S2CellId cellId : cellIntersections.keySet()) {
+            cellIdsToQuery.add(cellId.toToken());
+        }
+
+        // Query MU/km2 values from cache
+        HashMap<String, UniformDistribution> muValues = MUCache.getInstance().queryMu(cellIdsToQuery.toArray(new String[0]));
+
+        // Populate muMap with retrieved mu/km2 values
+        for (Map.Entry<String, UniformDistribution> entry : muValues.entrySet()) {
+            S2CellId cellId = S2CellId.fromToken(entry.getKey());
+            muMap.put(cellId, entry.getValue());
+        }
+
+        // Calculate total MU
+        for (Map.Entry<S2CellId, Double> entry : cellIntersections.entrySet()) {
+            S2CellId cellId = entry.getKey();
+            double intersectionArea = entry.getValue();
+            UniformDistribution muPerKm2 = muMap.get(cellId);
+
+            if (muPerKm2 != null) {
+                double averageMu = (muPerKm2.getLower() + muPerKm2.getUpper()) / 2;
+                totalMU += intersectionArea * averageMu;
+            }
+        }
+
+        return (int) Math.round(totalMU);
+    }
+
+
 
 	public S2Polygon getS2Polygon()
 	{

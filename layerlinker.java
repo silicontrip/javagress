@@ -34,7 +34,7 @@ public class layerlinker {
         {
             if (list.size() > 0) {
 
-				// how to pick which field sizing algorithm
+		// how to pick which field sizing algorithm
                 //      Double thisArea = sizeFields(list);
                 // we want to maximise number of fields
                 // Double thisArea = new Double(list.size());
@@ -339,10 +339,11 @@ public class layerlinker {
 
 		Map<Double,Field> blockField = new TreeMap<Double,Field>(Collections.reverseOrder());
 			for (Field fi: allfields) {
-				if (calc==0)
+				// do not use getEstMu here it is too time consuming.
+				//if (calc==0)
 					blockField.put(fi.getGeoArea(),fi);
-				else
-					blockField.put(fi.getEstMu(),fi);
+				//else
+				//	blockField.put(new Double(fi.getEstMu()),fi);
 			}
 			System.err.println("==  fields sortered " + rt.split() + " ==");
 			System.err.println("== show matches ==");
