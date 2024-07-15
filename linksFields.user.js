@@ -327,9 +327,14 @@ function wrapper(plugin_info) {
 		countSBUL: function(guid) {
 			// count the number of SBULs on a portal
 			var portalMods = this.portalCache[guid];
+
 			if (portalMods === undefined)
             {
 				return -1;
+            }
+            if (portalMods.team != window.PLAYER.team.slice(0,1))
+            {
+                return 0;
             }
 			if ('mods' in portalMods)
 			{
@@ -490,7 +495,16 @@ function wrapper(plugin_info) {
 						else
 						{
 							var pLinks = window.getPortalLinks(oGuid);
-							src_req[oGuid] = pLinks.out.length +1;
+                            var portal = this.portalCache[oGuid];
+                            //console.log(portal);
+                            if (portal.team == window.PLAYER.team.slice(0,1))
+                            {
+                                src_req[oGuid] = pLinks.out.length +1;
+                            }
+                            else
+                            {
+                                src_req[oGuid] = 0;
+                            }
 						}
 						if (dGuid in key_req)
                         {
@@ -959,6 +973,7 @@ function wrapper(plugin_info) {
 					if (window.plugin.linksFields.intersect(inLink.latLngs,li.latLngs))
 					{
 						//console.log("INTERSECT: " + JSON.stringify(mapLink));
+                        //console.log(mapLink);
 						if (mapLink.team == 'E')
                         {
 							block.enl.push(inLink);
@@ -968,7 +983,8 @@ function wrapper(plugin_info) {
 							block.res.push(inLink);
                         }
                         // new for machina links
-                        if (mapLink.team == 'N')
+                        // some places they are refered to as neutral and some places machina
+                        if (mapLink.team == 'M')
                         {
                             block.neu.push(inLink);
                         }
