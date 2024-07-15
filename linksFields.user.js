@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.2.68
+// @version        0.2.71
 // @updateURL      http://silicontrip.net/portalApi/linksFields.user.js
 // @downloadURL    http://silicontrip.net/portalApi/linksFields.user.js
 // @namespace    http://tampermonkey.net/
@@ -503,7 +503,7 @@ function wrapper(plugin_info) {
                             }
                             else
                             {
-                                src_req[oGuid] = 0;
+                                src_req[oGuid] = 1;
                             }
 						}
 						if (dGuid in key_req)
