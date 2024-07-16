@@ -6,12 +6,12 @@ maxfields.class targetlinker.class megaplan.class portalquery.class spiner.class
 cellfields.class cellper.class exolinker.class portalshadow.class\
 PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class \
 Arguments.class PortalSelectionStrategy.class PortalSelectionRangeStrategy.class PortalSelectionBoxStrategy.class PortalSelectionTriangleStrategy.class \
-CellMUDB.class RunTimer.class
+MUCache.class RunTimer.class UniformDistribution.class UniformDistributionException.class
 
 
 #PolyPoint.class CombinationFactory.class BlockList.class 
 
-CP=cellserver.jar:vecmath.jar:s2-geometry-java.jar:jackson-annotations-2.15.2.jar:jackson-core-2.15.2.jar:jackson-databind-2.15.2.jar:.
+CP=json-java.jar:vecmath.jar:s2-geometry-java.jar:jackson-annotations-2.15.2.jar:jackson-core-2.15.2.jar:jackson-databind-2.15.2.jar:.
 
 all: portaltools.jar
 
