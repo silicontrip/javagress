@@ -1,11 +1,13 @@
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
+//import com.fasterxml.jackson.databind.*;
+//import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Collection;
 import java.io.IOException;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 public class DrawTools {
@@ -23,29 +25,32 @@ public class DrawTools {
 	public DrawTools(String clusterDescription) throws IOException
 	{
 		this();
-		ObjectMapper mapper = new ObjectMapper();
+		//ObjectMapper mapper = new ObjectMapper();
                 
-		JsonNode dtObj = mapper.readTree(clusterDescription);
-		for (JsonNode node: dtObj)
+		//JsonNode dtObj = mapper.readTree(clusterDescription);
+		JSONArray dtObj = new JSONArray(clusterDescription);
+		for (Object o: dtObj)
 		{
-			String type = node.path("type").asText();
-			String colour = node.path("color").asText();
+			JSONObject node = (JSONObject)o;
+
+			String type = node.getString("type");
+			String colour = node.getString("color");
 			if ("polygon".equalsIgnoreCase(type)) 
 			{ 
-				ArrayList<PolyPoint> pp = makeLatLngs(node.path("latLngs"));
+				ArrayList<PolyPoint> pp = makeLatLngs(node.getJSONArray("latLngs"));
 				entities.add(new Polygon(pp,colour));
 			}
 			if ("polyline".equalsIgnoreCase(type)) { 
-				ArrayList<PolyPoint> pp = makeLatLngs(node.path("latLngs"));
+				ArrayList<PolyPoint> pp = makeLatLngs(node.getJSONArray("latLngs"));
 				entities.add(new Polyline(pp,colour));
 			}
 			if ("marker".equalsIgnoreCase(type)) { 
-				PolyPoint pp = new PolyPoint(node.path("latLng"));
+				PolyPoint pp = new PolyPoint(node.getJSONObject("latLng"));
 				entities.add(new Marker(pp,colour));
 			}
 			if ("circle".equalsIgnoreCase(type)) { 
-				PolyPoint pp = new PolyPoint(node.path("latLng"));
-				entities.add(new Circle(pp,node.path("radius").asText(),colour));
+				PolyPoint pp = new PolyPoint(node.getJSONObject("latLng"));
+				entities.add(new Circle(pp,node.getString("radius"),colour));
 			}
 		
 		}
@@ -59,29 +64,35 @@ public class DrawTools {
 	public void jsonNodeParser(String jsonDrawtools) throws IOException
 	{
 
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode dtObj = mapper.readTree(jsonDrawtools);
+		//ObjectMapper mapper = new ObjectMapper();
+		//JsonNode dtObj = mapper.readTree(jsonDrawtools);
 
-		for (JsonNode node: dtObj)
+        JSONArray dtObj = new JSONArray(jsonDrawtools);
+
+		for (Object o: dtObj)
 		{
-			String type = node.path("type").asText();
-			String colour = node.path("color").asText();
+			JSONObject node = (JSONObject)o;
+
+			String type = node.getString("type");
+			String colour = node.getString("color");
 			if ("polygon".equalsIgnoreCase(type)) 
 			{ 
-				ArrayList<PolyPoint> pp = makeLatLngs(node.path("latLngs"));
+				//ArrayList<PolyPoint> pp = makeLatLngs(node.path("latLngs"));
+				ArrayList<PolyPoint> pp = makeLatLngs(node.getJSONArray("latLngs"));
+
 				entities.add(new Polygon(pp,colour));
 			}
 			if ("polyline".equalsIgnoreCase(type)) { 
-				ArrayList<PolyPoint> pp = makeLatLngs(node.path("latLngs"));
+				ArrayList<PolyPoint> pp = makeLatLngs(node.getJSONArray("latLngs"));
 				entities.add(new Polyline(pp,colour));
 			}
 			if ("marker".equalsIgnoreCase(type)) { 
-				PolyPoint pp = new PolyPoint(node.path("latLng"));
+				PolyPoint pp = new PolyPoint(node.getJSONObject("latLng"));
 				entities.add(new Marker(pp,colour));
 			}
 			if ("circle".equalsIgnoreCase(type)) { 
-				PolyPoint pp = new PolyPoint(node.path("latLng"));
-				entities.add(new Circle(pp,node.path("radius").asText(),colour));
+				PolyPoint pp = new PolyPoint(node.getJSONObject("latLng"));
+				entities.add(new Circle(pp,node.getString("radius"),colour));
 			}
 		
 		}
@@ -325,16 +336,15 @@ public class DrawTools {
 	}
 			
 
+// this might be difficult with the different JSON Library.
 	protected static String entToString(ArrayList<PolyObject> ent)
 	{
-
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			return mapper.writeValueAsString(ent);
-		} catch (Exception e) {
-			// probably not the best thing to do with the exception.
-			return e.getMessage();
+		JSONArray jent = new JSONArray();
+		for (PolyObject po: ent)
+		{
+			jent.put(po.getJSONObject());
 		}
+		return jent.toString();
 	}
 // thinking about deprecating this.
 	public String out () { return this.toString();	}
@@ -347,11 +357,14 @@ public class DrawTools {
 				count++;
 		return count;
 	}
-	private ArrayList<PolyPoint> makeLatLngs(JsonNode latLngs)
+	private ArrayList<PolyPoint> makeLatLngs(JSONArray latLngs)
 	{
 		ArrayList<PolyPoint> pt = new ArrayList<PolyPoint>();
-		for (JsonNode jPoint: latLngs)
+		for (Object o: latLngs)
+		{
+			JSONObject jPoint = (JSONObject)o;
 			pt.add(new PolyPoint(jPoint));
+		}
 		return pt;
 	}
 			
@@ -376,6 +389,10 @@ abstract class PolyObject {
 		if ("marker".equalsIgnoreCase(type)) { return PolyType.MARKER; }
 		if ("circle".equalsIgnoreCase(type)) { return PolyType.CIRCLE; }
 		return PolyType.UNKNOWN;
+	}
+	public JSONObject getJSONObject()
+	{
+		return new JSONObject();
 	}
 }
 
@@ -431,6 +448,19 @@ class Polygon extends PolyObject {
 			hc |= this.latLngs.get(i).hashCode();
 		return hc;
 	}
+
+	public JSONObject getJSONObject()
+	{
+		JSONObject jo = new JSONObject();
+		JSONArray ll = new JSONArray();
+		for (PolyPoint pp: latLngs)
+			ll.put(pp.getJSONObject());
+		jo.put("latLngs",ll);
+		jo.put("color",color);
+		jo.put("type",type);
+		return jo;
+	}
+
 }
 
 class Polyline extends PolyObject {
@@ -471,6 +501,18 @@ class Polyline extends PolyObject {
 	}
 	// only works with 1 line segment.  toLines generates this anyway.
 	public String toString() { return latLngs.get(0) + "," +latLngs.get(1); }
+
+	public JSONObject getJSONObject()
+	{
+		JSONObject jo = new JSONObject();
+		JSONArray ll = new JSONArray();
+		for (PolyPoint pp: latLngs)
+			ll.put(pp.getJSONObject());
+		jo.put("latLngs",ll);
+		jo.put("color",color);
+		jo.put("type",type);
+		return jo;
+	}
 	
 }
 
@@ -480,6 +522,14 @@ class Marker extends PolyObject {
 	public Marker(PolyPoint pp) { super("marker"); setPoint(pp); }
 	public Marker(PolyPoint pp,String c) { super("marker"); setPoint(pp); setColour(c); }
 	public void setPoint (PolyPoint pp) { latLng = pp; }
+	public JSONObject getJSONObject()
+	{
+		JSONObject jo = new JSONObject();
+		jo.put("latLng",latLng.getJSONObject());
+		jo.put("color",color);
+		jo.put("type",type);
+		return jo;
+	}
 }
 
 class Circle extends PolyObject {
@@ -490,6 +540,15 @@ class Circle extends PolyObject {
 	public Circle (PolyPoint p, String r, String c) { super ("circle"); setPoint(p); setRadius(r); setColour(c); }
 	public void setPoint (PolyPoint pp) { latLng = pp; }
 	public void setRadius (String r) { radius = r; }
+	public JSONObject getJSONObject()
+	{
+		JSONObject jo = new JSONObject();
+		jo.put("latLng",latLng.getJSONObject());
+		jo.put("radius",radius);
+		jo.put("color",color);
+		jo.put("type",type);
+		return jo;
+	}
 }
 
 class PolyPoint {
@@ -498,7 +557,18 @@ class PolyPoint {
 	public PolyPoint() { lat = "0.0"; lng = "0.0"; }
 	public PolyPoint(String a, String o) { lat = a; lng = o; }
 	public PolyPoint(Double a, Double o) { this(String.valueOf(a),String.valueOf(o)); }
-	public PolyPoint(JsonNode jPoint) { this(jPoint.path("lat").asText(),jPoint.path("lng").asText()); }
+	//public PolyPoint(JsonNode jPoint) { this(jPoint.path("lat").asText(),jPoint.path("lng").asText()); }
+	public PolyPoint(JSONObject jPoint) { this(jPoint.getString("lat"),jPoint.getString("lng")); }
+
+	public JSONObject getJSONObject()
+	{
+		JSONObject jo = new JSONObject();
+		jo.put("lat",lat);
+		jo.put("lng",lng);
+		//System.out.println(jo.toString());
+		return jo;
+	}
+
 	public Point asPoint() { return new Point(lat,lng); }
 
 	@Override
