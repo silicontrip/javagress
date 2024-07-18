@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.2.71
+// @version        0.2.72
 // @updateURL      http://silicontrip.net/portalApi/linksFields.user.js
 // @downloadURL    http://silicontrip.net/portalApi/linksFields.user.js
 // @namespace    http://tampermonkey.net/
@@ -26,11 +26,11 @@ function wrapper(plugin_info) {
 		unloadedDialog: null,
         selectedPortal: null,
 		BLOCK_STYLE : {
-			color: '#C04040',
+			color: '#F0F0F0',
 			opacity: 1,
-			weight: 1.5,
+			weight: 5,
 			clickable: false,
-			dashArray: [6,4],
+			dashArray: [12],
 			smoothFactor: 10,
 		},
 		pathLayer : null,
@@ -202,6 +202,10 @@ function wrapper(plugin_info) {
 				for (ll of link.res) {
 					//poly = L.polyline(ll.latLngs , window.plugin.linksFields.BLOCK_STYLE);
 					//poly.addTo(window.plugin.linksFields.blockLayer);
+					poly = L.geodesicPolyline(ll.latLngs , window.plugin.linksFields.BLOCK_STYLE);
+					window.plugin.linksFields.blockLayer.addLayer(poly);
+				}
+                for (ll of link.neu) {
 					poly = L.geodesicPolyline(ll.latLngs , window.plugin.linksFields.BLOCK_STYLE);
 					window.plugin.linksFields.blockLayer.addLayer(poly);
 				}
