@@ -657,11 +657,12 @@ public class PortalFactory {
 		Map<Double,Field> fieldSize = new TreeMap<Double,Field>(Collections.reverseOrder());
 
 		for (Field f: fields) 
-		if (mu) 
-			fieldSize.put(f.getEstMu(),f);
-		else
+		{
+//		if (mu) 
+//			fieldSize.put(f.getEstMu(),f);
+//		else
 			fieldSize.put(f.getGeoArea(),f);
-		
+		}		
 		Object[] fs = fieldSize.values().toArray();
 		int end = (int) (fs.length * percentile / 100.0);
 
