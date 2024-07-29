@@ -49,6 +49,28 @@ public class MUCache {
 	    apiEndpointUrl = prop.getProperty("cellurl");
     }
 
+    // Public method to query MU using cache for a single token
+    public UniformDistribution queryMu(String s2CellToken) {
+        // Check if the value is already in the cache
+        if (muCache.containsKey(s2CellToken)) {
+            return muCache.get(s2CellToken);
+        }
+
+        // If not in cache, query the servlet for the value
+        Map<String, UniformDistribution> result = queryMuFromServlet(new String[]{s2CellToken});
+
+        // Retrieve the value from the result map
+        UniformDistribution muValue = result.get(s2CellToken);
+
+        // Cache the retrieved value
+        if (muValue != null) {
+            muCache.put(s2CellToken, muValue);
+        }
+
+        return muValue;
+
+    }
+
 	// Public method to query MU using cache for an array of tokens
 	public HashMap<String, UniformDistribution> queryMu(String[] s2CellTokens) {
         HashMap<String, UniformDistribution> result = new HashMap<>();
@@ -165,6 +187,7 @@ public class MUCache {
             return null; // or handle error condition appropriately
         }
     }
+
 
 }
 

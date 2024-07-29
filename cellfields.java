@@ -63,7 +63,8 @@ public static void main(String[] args) {
 		cellid = new S2CellId(Long.decode(id) << 32);
 		System.out.println("Cell selected: " + cellid.toToken());
 
-		CellServer cs = new CellServer();
+		//CellServer cs = new CellServer();
+		MUCache cs = MUCache.getInstance();
 
 		S2Cell cell = new S2Cell(cellid);
 
@@ -127,7 +128,7 @@ public static void main(String[] args) {
 				{
 
 					double area = cellCover.get(lcell);
-					UniformDistribution cmu = cs.getMU(lcell);
+					UniformDistribution cmu = cs.queryMu(lcell.toToken());
 					if (cmu == null)
 					{
 						//thisError = 0;

@@ -63,10 +63,10 @@ public static void printMap(Map mp) {
 					Field fi = new Field (pki,pkj,pkk);
 					
 					Double area;	
-					if (calc==0)
+					//if (calc==0)
 						area = fi.getGeoArea();
-					else
-						area = fi.getEstMu();
+					//else
+					//	area = fi.getEstMu();
 					
 					teamCount block = getBlocks(pki,pkj,pkk,blocksPerLink);
 
@@ -125,10 +125,10 @@ public static void printMap(Map mp) {
 						Field fi = new Field (pki,pkj,pkk);
 						
 						Double area;
-						if (calc==0)
+						//if (calc==0)
 							area = fi.getGeoArea();
-						else
-							area = fi.getEstMu();
+						//else
+						//	area = fi.getEstMu();
 						
 						teamCount block = getBlocks(pki,pkj,pkk,blocksPerLink);
 						
@@ -194,10 +194,10 @@ public static void printMap(Map mp) {
 						Field fi = new Field (pki,pkj,pkk);
 						
 						Double area;
-						if (calc==0)
+						//if (calc==0)
 							area = fi.getGeoArea();
-						else
-							area = fi.getEstMu();
+						//else
+						//	area = fi.getEstMu();
 
 						//System.out.println("1: " + pki.getGuid() + " 2: " + pkj.getGuid() + " 3: " + pkk.getGuid());
 						//printMap(blocksPerLink);
