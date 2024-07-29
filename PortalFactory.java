@@ -13,6 +13,7 @@ public class PortalFactory {
 	
 	protected String portalApi;
 	protected String linkApi;
+	protected String cellApi;
 	private static PortalFactory instance = null;
 	
 	public static PortalFactory getInstance() throws java.io.IOException {
@@ -38,15 +39,23 @@ public class PortalFactory {
 	}
 	
 	public PortalFactory () throws java.io.IOException {
-                        Properties fileProperties = new Properties();
+		Properties fileProperties = new Properties();
 
-                        FileInputStream fis = new FileInputStream(new File("portalfactory.properties"));
-                        fileProperties.load (fis);
-                        fis.close();
+		FileInputStream fis = new FileInputStream(new File("portalfactory.properties"));
+		fileProperties.load (fis);
+		fis.close();
 
-			// will use file:// for cache
-                        linkApi = fileProperties.getProperty("linkurl");
-                        portalApi = fileProperties.getProperty("portalurl");
+		// will use file:// for cache
+		linkApi = fileProperties.getProperty("linkurl");
+		portalApi = fileProperties.getProperty("portalurl");
+		cellApi = fileProperties.getProperty("cellurl");
+
+		if (linkApi == null)
+			throw new RuntimeException("Invalid config file: linkurl not found");
+		if (portalApi == null)
+			throw new RuntimeException("Invalid config file: portalurl not found");
+		if (cellApi == null)
+			throw new RuntimeException("Invalid config file: cellurl not found");
 
 	}
 	
@@ -56,7 +65,6 @@ public class PortalFactory {
 		ObjectMapper mapper = new ObjectMapper();
 		
 		ArrayList<Polygon> tmpObj;
-		
 		
 		try {
 			tmpObj = mapper.readValue(clusterDescription,new TypeReference<ArrayList<Polygon>>() {});
@@ -134,8 +142,7 @@ public class PortalFactory {
 			String[] portalNames = getCornerPortalsFromJSON(clusterDescription);
 
 			return getPortalsInTri(portalNames[0],portalNames[1],portalNames[2]);
-
-			
+	
 		}
 		// get clusters in cell
 		else if (clusterDescription.startsWith("0x"))
@@ -146,18 +153,18 @@ public class PortalFactory {
 
 			HashMap<String,Portal> portals = getPortals("" + loc.latDegrees() + "," + loc.lngDegrees(),"1");
 
-				HashMap<String,Portal> cellportals = new HashMap<String,Portal>();
+			HashMap<String,Portal> cellportals = new HashMap<String,Portal>();
 
-	for (String guid : portals.keySet())
-	{
-		Portal p = portals.get(guid);
-		S2LatLng ploc = S2LatLng.fromE6(p.getLatE6().longValue(),p.getLngE6().longValue());
-		S2CellId pcell = S2CellId.fromLatLng(ploc).parent(13);
-		
-		if (("0x" +pcell.toToken()).equals(clusterDescription))
-			cellportals.put(guid,p);
-	}
-		return cellportals;
+			for (String guid : portals.keySet())
+			{
+				Portal p = portals.get(guid);
+				S2LatLng ploc = S2LatLng.fromE6(p.getLatE6().longValue(),p.getLngE6().longValue());
+				S2CellId pcell = S2CellId.fromLatLng(ploc).parent(13);
+				
+				if (("0x" +pcell.toToken()).equals(clusterDescription))
+					cellportals.put(guid,p);
+			}
+			return cellportals;
 		}
 
 		// single (or range)
@@ -201,23 +208,16 @@ public class PortalFactory {
 	
 	public HashMap<String,Portal> getPortalsInBox (String loc1, String loc2) throws IOException 
 	{
-		
 		String urlString = portalApi + "?ll=" + URLEncoder.encode(loc1,"UTF-8") +"&l2="+URLEncoder.encode(loc2,"UTF-8") ;
 		
-		
 		return readPortalsFromUrl(urlString);
-		
-		
 	}
 	
 	public HashMap<String,Portal> getPortalsInTri (String loc1, String loc2, String loc3) throws IOException
 	{
-		
 		String urlString = portalApi + "?ll=" + URLEncoder.encode(loc1,"UTF-8") +"&l2="+URLEncoder.encode(loc2,"UTF-8") + "&l3=" + URLEncoder.encode(loc3,"UTF-8");
 		
 		return readPortalsFromUrl(urlString);
-		
-		
 	}
 	
 	public HashMap<String,Portal> getPortals(String location, String range) throws IOException
@@ -279,7 +279,6 @@ public class PortalFactory {
 	{
 		HashMap<String,HashMap<String,Object>> newList = new HashMap<String,HashMap<String,Object>>();
 		
-		
 		for (Map.Entry<String, HashMap<String,Object>> entry : pm.entrySet()) {
 			String portalKey = entry.getKey();
 			HashMap<String, Object> portalEntry = entry.getValue();
@@ -301,14 +300,13 @@ public class PortalFactory {
 		boolean guid = locationDesc.matches("^[0-9a-fA-F]{32}.1[16]$");
 		// check for title
 
-
 		String search;
 		
 		if (latlng.length == 2)
 		{
 			return new Point(Double.valueOf(latlng[0]),Double.valueOf(latlng[1]));
 		} else if (guid) {
-			search ="guid";
+			search = "guid";
 		} else {
 			search = "title";
 		}
@@ -453,8 +451,6 @@ public class PortalFactory {
 					HashSet<String> tm = pmatch.get(guid);
 					tm.add(p2.getGuid());
 				}
-
-
 		}
 		// um now what?	
 		
@@ -485,7 +481,6 @@ public class PortalFactory {
 		return portalmap;
 
 	}
-	
 	
 	public ArrayList<Link> getPurgedLinks (Collection<Portal> portals) throws IOException {
 		
@@ -535,13 +530,10 @@ public class PortalFactory {
 		
 		//System.err.println("Bounds: Lat: " + minLat + " - " + maxLat + " Lng: " + minLng + " - " + maxLng);
 		
-		
-		
 		for (Link link: links.values()) {
 			
 			// Line linkLine = link.getLine();
 
-			
 			// if link intesects or is contained in bounding box
 			if ((line0.intersects(link) ||
 				 line1.intersects(link) ||
@@ -558,7 +550,6 @@ public class PortalFactory {
 		return purgeList;
 		
 	}
-	
 	
 	public HashMap<String,Link> getLinks() throws IOException
 	{
@@ -657,9 +648,9 @@ public class PortalFactory {
 		Map<Double,Field> fieldSize = new TreeMap<Double,Field>(Collections.reverseOrder());
 
 		for (Field f: fields) 
-		if (mu) 
-			fieldSize.put(f.getEstMu(),f);
-		else
+	//	if (mu) 
+	//		fieldSize.put(f.getEstMu(),f);
+	//	else
 			fieldSize.put(f.getGeoArea(),f);
 		
 		Object[] fs = fieldSize.values().toArray();
@@ -676,7 +667,6 @@ public class PortalFactory {
 	public static ArrayList<Line> percentileLinks(Collection<Line>lines, Double percentile)
 	{
 		ArrayList<Line> la = new ArrayList<Line>();
-
 
 		Map<Double,Line> linkLength = new TreeMap<Double,Line>(Collections.reverseOrder());
 
@@ -698,7 +688,6 @@ public class PortalFactory {
 		
 		ArrayList<Line> la = new ArrayList<Line>();
 	
-		
 		for (Line l: lines) {
 				
 			teamCount bb = new teamCount();
