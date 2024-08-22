@@ -21,49 +21,45 @@ public class cyclonelinker {
 		} 
 	} 
 
-	private static void initSearch(Object[] fields,DrawTools dt)
-	{
+	private static void initSearch(Object[] fields, DrawTools dt) {
 		int max = 2;
-		// scan through all fields
-		for (int i=0; i<fields.length; i++)
-		{
-			Field thisField = (Field)fields[i];
+		// Scan through all fields
+		for (int i = 0; i < fields.length; i++) {
+			Field thisField = (Field) fields[i];
 			ArrayList<Line> edges = thisField.getAllLines();
-			// try each edge of field.
-			for (Line edge: edges)
-			{
+			// Try each edge of the field
+			for (Line edge : edges) {
 				ArrayList<Field> cadFields = new ArrayList<Field>();
-				// find fields with matching edge
-				for (int j =i+1; j<fields.length; j++)
-				{
-					Field testField = (Field)fields[j];
-					if (testField.hasLine(edge) && !thisField.intersects(testField) && !thisField.equals(testField))
-					{
+				// Find fields with matching edge
+				for (int j = i + 1; j < fields.length; j++) {
+					Field testField = (Field) fields[j];
+					if (testField.hasLine(edge) && !thisField.intersects(testField) && !thisField.equals(testField)) {
 						cadFields.add(testField);
 					}
 				}
 
-				// search the current fields with the 2 non matching edges
-				for (Field cfi: cadFields)
-				{
+				// Search the current fields with the 2 non-matching edges
+				for (Field cfi : cadFields) {
 					ArrayList<Line> medges = cfi.getAllLines();
-					for (Line medge: medges)
-					{
-						if (!thisField.hasLine(medge))
-						{
-							ArrayList<Field> fieldsList = new ArrayList<Field>();
-							fieldsList.add(thisField);
-							fieldsList.add(cfi);
-							max = cycloneIterate(i+1,medge,fields,fieldsList,max,dt);
+					for (Line medge : medges) {
+						if (!thisField.hasLine(medge)) {
+							// Find the third point of thisField that does not share the medge
+							Point thirdPoint = thisField.getOtherPoint(medge);
+
+							if (thirdPoint != null) {
+								ArrayList<Field> fieldsList = new ArrayList<Field>();
+								fieldsList.add(thisField);
+								fieldsList.add(cfi);
+								max = cycloneIterate(i + 1, medge, fields, fieldsList, max, dt, thirdPoint);
+							}
 						}
 					}
 				}
-
-				
 			}
 		}
-
 	}
+
+
 	private static String drawFields(List<Field> fa,DrawTools dt)
         {
 
@@ -88,51 +84,59 @@ public class cyclonelinker {
 		return count;
 	}
 
-	private static int cycloneIterate (int start, Line edge, Object[] fields, ArrayList<Field> fieldsList, int max,DrawTools dt)
-	{
+	
 
-		// if we have a better plan, print it.
-		if (fieldsList.size() > max)
-		{
+	private static int cycloneIterate(int start, Line medge, Object[] fields, ArrayList<Field> fieldsList, int max, DrawTools dt, Point thirdPoint) {
+		// If we have a better plan, print it.
+		if (fieldsList.size() > max) {
 			max = fieldsList.size();
-			// draw tools
-			System.out.println("" + max + " : " + drawFields(fieldsList,dt));
+			// Draw tools
+			System.out.println("" + max + " : " + drawFields(fieldsList, dt));
 		}
+
 		ArrayList<Field> cadFields = new ArrayList<Field>();
-		for (int j =start; j<fields.length; j++)
-		{
-			Field testField = (Field)fields[j];
-			if (testField.hasLine(edge))
-			{
+		for (int j = start; j < fields.length; j++) {
+			Field testField = (Field) fields[j];
+			if (testField.hasLine(medge)) {
 				boolean intersect = false;
-				for (Field thisField: fieldsList)
-					if (thisField.intersects(testField) || thisField.equals(testField))
-					{
+				for (Field thisField : fieldsList) {
+					if (thisField.intersects(testField) || thisField.equals(testField)) {
 						intersect = true;
 						break;
 					}
-				if (!intersect)
+				}
+				if (!intersect) {
+					// Ensure the new field covers the third point of the thisField
+					if (thirdPoint != null && !testField.inside(thirdPoint)) {
+						continue; // Skip this field if it does not cover the necessary point
+					}
 					cadFields.add(testField);
+				}
 			}
 		}
-		for (Field fl: cadFields)
-		{	
-			int pointCount[] = new int[3];
-			for (int i=0;i<3;i++)
+
+		for (Field fl : cadFields) {
+			int[] pointCount = new int[3];
+			for (int i = 0; i < 3; i++) {
 				pointCount[i] = countLinks(fl.getPoint(i), fieldsList);
-			// pick points with fewest links.
+			}
+			// Pick points with fewest links.
 			int maxCount = pointCount[0];
-			int p1=1; int p2=2;
-			if (pointCount[1] > maxCount) { p1 = 0; p2 = 2; }
-			if (pointCount[2] > maxCount) { p1 = 0; p2 = 1; }
-			Line selEdge = new Line (fl.getPoint(p1),fl.getPoint(p2));
+			int p1 = 1;
+			int p2 = 2;
+			int p3 = 0;
+			if (pointCount[1] > maxCount) { p1 = 0; p2 = 2; p3 = 1;}
+			if (pointCount[2] > maxCount) { p1 = 0; p2 = 1; p3 = 2;}
+			Line selEdge = new Line(fl.getPoint(p1), fl.getPoint(p2));
+			thirdPoint = fl.getPoint(p3);
 			ArrayList<Field> newList = new ArrayList<Field>(fieldsList);
 			newList.add(fl);
-			
-			max = cycloneIterate(start,selEdge,fields,newList,max,dt);
+
+			max = cycloneIterate(start, selEdge, fields, newList, max, dt, thirdPoint);
 		}
 		return max;
 	}
+
 
 	public static void main(String[] args) {
 		
