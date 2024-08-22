@@ -47,10 +47,12 @@ public class cyclonelinker {
 							Point thirdPoint = thisField.getOtherPoint(medge);
 
 							if (thirdPoint != null) {
-								ArrayList<Field> fieldsList = new ArrayList<Field>();
-								fieldsList.add(thisField);
-								fieldsList.add(cfi);
-								max = cycloneIterate(i + 1, medge, fields, fieldsList, max, dt, thirdPoint);
+								if (cfi.inside(thirdPoint)) {
+									ArrayList<Field> fieldsList = new ArrayList<Field>();
+									fieldsList.add(thisField);
+									fieldsList.add(cfi);
+									max = cycloneIterate(i + 1, medge, fields, fieldsList, max, dt, thirdPoint);
+								}
 							}
 						}
 					}
