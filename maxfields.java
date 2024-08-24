@@ -78,21 +78,56 @@ public class maxfields {
 
 	}
 	
-	private static Double searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth, boolean sameSize)
+    private static Double calculateBalanceScore(List<Field> fields) {
+        HashMap<Point, Integer> linkCounts = new HashMap<>();
+
+        for (Field field : fields) {
+            Point[] portals = field.getPoints();
+            for (Point portal : portals) {
+                linkCounts.put(portal, linkCounts.getOrDefault(portal, 0) + 1);
+            }
+        }
+
+        int totalLinks = 0;
+        int totalPortals = linkCounts.size();
+        for (int count : linkCounts.values()) {
+            totalLinks += count;
+        }
+
+        double mean = (double) totalLinks / totalPortals;
+        double variance = 0.0;
+
+        for (int count : linkCounts.values()) {
+            variance += Math.pow(count - mean, 2);
+        }
+
+        variance /= totalPortals;
+        return Math.sqrt(variance); // return the standard deviation as the balance score
+    }
+
+	private static SearchResult searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, int maxArea,int depth, boolean sameSize, Double balance)
 	{
 			if (list.size() > 0) {
 				
 			//	Double thisArea = sizeFields(list);
 				// we want to maximise number of fields
 				// Double thisArea = new Double(list.size());
-				Double thisArea = Double.valueOf(list.size());
+				int thisArea = list.size();
 
 
 				if ((thisArea > maxArea) || (sameSize && thisArea == maxArea))
 				{
-					System.out.println(thisArea + " : " + drawFields(list,dt));
-					System.out.println("");
+					Double bal = calculateBalanceScore(list);
+
+					if (thisArea > maxArea || bal < balance) {
+						System.out.println("" + bal + " : " + thisArea + " : " + drawFields(list,dt));
+						System.out.println("");
+						balance = bal;
+					}
+
 					maxArea = thisArea;
+
+
 				}
 			}
 			
@@ -117,12 +152,15 @@ public class maxfields {
 					}
 					*/
 					
-					maxArea = searchFields(dt,newlist,fields,i+1,maxArea,depth+1,sameSize);
+					SearchResult result  = searchFields(dt,newlist,fields,i+1,maxArea,depth+1,sameSize,balance);
+
+					maxArea = result.getMaxArea();
+					balance = result.getBalance();
 				}
 				
 			}
 		
-		return maxArea;
+		    return new SearchResult(maxArea, balance);
 	}
 
 public static void main(String[] args) {
@@ -177,7 +215,7 @@ public static void main(String[] args) {
 			// sort through colliding fields.
 		
 		// iterSearchFields(dt,  fiList.toArray());
-		searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0,sameSize);
+		searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0,0,sameSize,0.0);
 		
       //  System.out.println("]");
 
@@ -191,4 +229,22 @@ public static void main(String[] args) {
 	
 }
 
+}
+
+class SearchResult {
+    private int maxArea;
+    private double balance;
+
+    public SearchResult(int maxArea, double balance) {
+        this.maxArea = maxArea;
+        this.balance = balance;
+    }
+
+    public int getMaxArea() {
+        return maxArea;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
 }

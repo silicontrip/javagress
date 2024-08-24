@@ -145,6 +145,7 @@ public class Field {
 
 	public Portal getPortal(int index) { return portals[index]; }
 	public Point getPoint(int index) { return points[index]; }
+	public Point[] getPoints() { return new Point[] { getPoint(0), getPoint(1), getPoint(2) }; }
 	public S2LatLng getS2LatLng(int index) { return S2LatLng.fromE6(getLat(index),getLng(index)); }
 	/* really don't think fields should be mutable */
 	/*
