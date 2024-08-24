@@ -65,7 +65,7 @@ public class maxfields {
 					newlist.add((Field)fields[i]);
 					
 
-					sStack.add (new Integer(i+1));
+					sStack.add (Integer.valueOf(i+1));
 					fStack.add (newlist);
 
 				}
@@ -78,15 +78,18 @@ public class maxfields {
 
 	}
 	
-	private static Double searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth)
+	private static Double searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, Double maxArea,int depth, boolean sameSize)
 	{
 			if (list.size() > 0) {
 				
 			//	Double thisArea = sizeFields(list);
 				// we want to maximise number of fields
-				Double thisArea = new Double(list.size());
-				
-				if (thisArea > maxArea) {
+				// Double thisArea = new Double(list.size());
+				Double thisArea = Double.valueOf(list.size());
+
+
+				if ((thisArea > maxArea) || (sameSize && thisArea == maxArea))
+				{
 					System.out.println(thisArea + " : " + drawFields(list,dt));
 					System.out.println("");
 					maxArea = thisArea;
@@ -114,7 +117,7 @@ public class maxfields {
 					}
 					*/
 					
-					maxArea = searchFields(dt,newlist,fields,i+1,maxArea,depth+1);
+					maxArea = searchFields(dt,newlist,fields,i+1,maxArea,depth+1,sameSize);
 				}
 				
 			}
@@ -150,6 +153,9 @@ public static void main(String[] args) {
 		if (ag.hasOption("T"))
 			target = pf.getPointsFromString(ag.getOptionForKey("T"));
 
+		boolean sameSize = ag.hasOption("S");
+
+
         System.err.println("== Reading portals ==");
         
         HashMap<String,Portal> portals = pf.portalClusterFromString(ag.getArgumentAt(0));
@@ -171,7 +177,7 @@ public static void main(String[] args) {
 			// sort through colliding fields.
 		
 		// iterSearchFields(dt,  fiList.toArray());
-		searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0);
+		searchFields(dt, new ArrayList<Field>() , fiList.toArray(),0,0.0,0,sameSize);
 		
       //  System.out.println("]");
 
