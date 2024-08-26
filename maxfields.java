@@ -105,7 +105,7 @@ public class maxfields {
         return Math.sqrt(variance); // return the standard deviation as the balance score
     }
 
-	private static SearchResult searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, int maxArea,int depth, boolean sameSize, Double balance)
+	private static Object[] searchFields (DrawTools dt, ArrayList<Field> list, Object[] fields, int start, int maxArea,int depth, boolean sameSize, Double balance)
 	{
 			if (list.size() > 0) {
 				
@@ -152,15 +152,15 @@ public class maxfields {
 					}
 					*/
 					
-					SearchResult result  = searchFields(dt,newlist,fields,i+1,maxArea,depth+1,sameSize,balance);
+		            Object[] result = searchFields(dt, newlist, fields, i + 1, maxArea, depth + 1, sameSize, balance);
 
-					maxArea = result.getMaxArea();
-					balance = result.getBalance();
+        		    maxArea = (int) result[0];
+            		balance = (double) result[1];
 				}
 				
 			}
 		
-		    return new SearchResult(maxArea, balance);
+		    return new Object[]{maxArea, balance};
 	}
 
 public static void main(String[] args) {
@@ -229,22 +229,4 @@ public static void main(String[] args) {
 	
 }
 
-}
-
-class SearchResult {
-    private int maxArea;
-    private double balance;
-
-    public SearchResult(int maxArea, double balance) {
-        this.maxArea = maxArea;
-        this.balance = balance;
-    }
-
-    public int getMaxArea() {
-        return maxArea;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
 }
