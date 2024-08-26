@@ -6,7 +6,7 @@ maxfields.class targetlinker.class megaplan.class portalquery.class spiner.class
 cellfields.class cellper.class exolinker.class portalshadow.class\
 PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class \
 Arguments.class PortalSelectionStrategy.class PortalSelectionRangeStrategy.class PortalSelectionBoxStrategy.class PortalSelectionTriangleStrategy.class \
-MUCache.class RunTimer.class UniformDistribution.class UniformDistributionException.class SearchResult.class
+MUCache.class RunTimer.class UniformDistribution.class UniformDistributionException.class 
 
 
 #PolyPoint.class CombinationFactory.class BlockList.class 
