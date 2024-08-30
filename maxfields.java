@@ -179,10 +179,10 @@ public static void main(String[] args) {
 	else
 		dt.setDefaultColour("#a24ac3");
 
-                if (ag.hasOption("L"))
-                        dt.setOutputAsPolyline();
-                if (ag.hasOption("O"))
-                        dt.setOutputAsIntel();
+    if (ag.hasOption("L"))
+        dt.setOutputAsPolyline();
+    if (ag.hasOption("O"))
+        dt.setOutputAsIntel();
 
 	try {
         PortalFactory pf = PortalFactory.getInstance();
