@@ -10,7 +10,8 @@ public class Line {
 	public static final Double earthRadius = 6367.0;
 	
 	// close to zero threshold
-	final static  double eps = 1E-10;
+	// if too precise appears to consider "touches" as "intersections"
+	final static  double eps = 1E-8;
 	
 	public Long getdLat() { return d.getLatE6(); }
 	public Long getdLng() { return d.getLngE6(); }
@@ -76,19 +77,7 @@ public class Line {
 		return false;
 	}
 	
-	private Vector3d getGreatCircleIntersection (Line l)
-	{
-		Vector3d V = this.getNormal();		
-		Vector3d U = l.getNormal();		
-		Vector3d D = new Vector3d();
-		D.cross( V, U );
 
-		if (D.length() == 0)
-			return D;
-		D.normalize();
-		
-		return D;
-	}
 
 
 	// determines if this point or it's antipode are nearest this line
@@ -176,15 +165,19 @@ public class Line {
 		int count=0;
 
 		for (int i =0; i<4; i++)
-		if (Math.abs(p[i]) < eps)
-			zero++;
-		else
-			count += Math.signum(p[i]);
+		{
+			//System.out.println("Zero: " + p[i]);
+
+			if (Math.abs(p[i]) < eps)
+				zero++;
+			else
+				count += Math.signum(p[i]);
+		}
 
 		if (zero==4)
 			return 0;
 
-		if (count==-4 ||count==4)
+		if (count==-4 || count==4)
 			return 1;
 		
 		if (zero>0)
@@ -193,43 +186,27 @@ public class Line {
 		return 2;
 	}
 
-	
+	private Vector3d getGreatCircleIntersection (Line l)
+	{
+		Vector3d V = this.getNormal();		
+		Vector3d U = l.getNormal();		
+		Vector3d D = new Vector3d();
+		D.cross( V, U );
+
+		if (D.length() == 0)
+			return D;
+		D.normalize();
+		
+		return D;
+	}	
+
 	public int greaterCircleIntersectType (Line l)
 	{
-		
-		Vector3d intPoint = getGreatCircleIntersection(l);		
-
+		Vector3d intPoint = getGreatCircleIntersection(l);
 		return this.pointOn(intPoint,l);
-/*
-		int p1 = this.pointOn(intPoint);
-		int p2 = l.pointOn(intPoint);
-
-		if (p1==1 && p2 == 1)
-			return 1;
-
-		if (p1==0 && p2==0)
-			return 0;
-
-		if (p1==0 || p2==0)
-			return 3;
-
-		return 2;
-*/
 	}
-	public boolean intersects(Line l) {
-		
-		// DrawTools dt = new DrawTools();
-		//dt.addLine(this);
-		//dt.addLine(l);
-		
-		//int i = intersectType(l);
-		int gi = greaterCircleIntersectType(l);
-		
-	//	System.out.println(">>> Intersects: " + gi);
-		
-		// really would like some unit tests now.
-		return (gi == 1);
-	}
+
+	public boolean intersects(Line l) {	return (greaterCircleIntersectType(l) == 1); }
 	public boolean intersectsOrEqual(Line l) { return (greaterCircleIntersectType(l) != 2);	}
 	public boolean equalLine(Line l) { return (greaterCircleIntersectType(l) == 0);	}
 	
