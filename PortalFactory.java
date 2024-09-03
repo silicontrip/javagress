@@ -727,6 +727,31 @@ public class PortalFactory {
 		return fa;
 	}
 
+	public static ArrayList<Field> filterExistingFields(ArrayList<Field> fieldArray, ArrayList<Link> lineArray) {
+		// Resultant array to hold fields that do not have any of the lines in lineArray
+		ArrayList<Field> filteredFields = new ArrayList<>();
+
+		// Iterate through each field in the fieldArray
+		for (Field field : fieldArray) {
+			int matchingLines = 0;
+
+			// Check if the field contains any of the lines in lineArray
+			for (Link link : lineArray) {
+				if (field.hasLine((Line)link)) {
+					matchingLines++;
+				}
+			}
+
+			// If no lines are found in the field, add it to the filteredFields
+			if (matchingLines<3) {
+				filteredFields.add(field);
+			}
+		}
+
+		return filteredFields;
+	}
+
+
 	private static boolean linkExists (Object[] lk, int j, Point p1, Point p2)
 	{
 		
