@@ -202,6 +202,7 @@ public static void main(String[] args) {
 		// check that maxBl is set
 		ArrayList<Line> l2 = pf.filterLinks(li,links,maxBl);
 		ArrayList<Field> allfields = pf.makeFieldsFromSingleLinks(l2);
+		allfields = pf.filterExistingFields(allfields,links);
 
 		ArrayList<Field> fiList = new ArrayList<Field>();
 		
