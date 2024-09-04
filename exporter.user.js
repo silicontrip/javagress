@@ -23,8 +23,8 @@ function wrapper(plugin_info)
 
     //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
     //(leaving them in place might break the 'About IITC' page or break update checks)
-    plugin_info.buildName = 'exporter.0.0.12';
-    plugin_info.dateTimeVersion = '0001';
+    plugin_info.buildName = 'exporter.0.1.0';
+    plugin_info.dateTimeVersion = '202409041555';
     plugin_info.pluginId = '';
     //END PLUGIN AUTHORS NOTE
 
@@ -81,8 +81,6 @@ function wrapper(plugin_info)
         }
         window.saveFile(JSON.stringify(allLinks), 'links.json', 'application/json');
     }
-
-
 
     var setup = plugin.exporter.setup;
 
