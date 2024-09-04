@@ -1,4 +1,16 @@
 # javagress
+
+## Dependencies
+
+* guava (for s2 geometry)
+* jackson-annotations
+* jackson-core
+* jackson-databind
+* json-java
+* s2-geometry-java
+* vecmath
+
+
 ## tools to help create different styles of fielding.
 These tools talk to a db backend (via a web api) without the web api these tools do nothing.  Although they can now work from a file:// url for offline operation. 
 These tools also require the Jackson Library to perform json parsing. https://github.com/FasterXML/jackson
@@ -102,20 +114,16 @@ get portals bounded by the triangle defined by the 3 portals
 returns all portals within a 3 point polygon.  Will only handle a 3 point polygon (not a polyline or a different number of points)
 
 ## portalfactory.properties
+
 looks like this;
-`portalurl: file://path/to/your/portals.json
 
-linkurl: file://path/to/your/links.json
-
-mudburl: file://path/to/cell/mu/db.xml
-
-maxlevel: smallest cell to search (0-32)
-
-minlevel: largest cell to search (0-32)
-
-maxcells: maximum number of cells per field (1-100)
-
-levelmod: modulus for cell level merging (1-100)`
+`portalurl: file://path/to/your/portals.json`
+`linkurl: file://path/to/your/links.json`
+`mudburl: file://path/to/cell/mu/db.xml`
+`maxlevel: 13`
+`minlevel: 1`
+`maxcells: 20`
+`levelmod: 4`
 
 ## backend api
 
