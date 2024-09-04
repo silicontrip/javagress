@@ -2,7 +2,7 @@
 // @id             exporter@user
 // @name           IITC exporter
 // @category       Misc
-// @version        0.0.12
+// @version        0.1.0
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @description    portals and links exporter
 // @include        https://www.ingress.com/intel*
@@ -33,49 +33,53 @@ function wrapper(plugin_info)
 	window.plugin.exporter.setup = function()
 	{
 		console.log('exporter - setup');
-		$('#toolbox').append('<a onclick="window.plugin.exporter.export();return false;" >EXPORT</a>');
-	};
-	window.plugin.exporter.export = function() {
-	var allPortals = {};
-	var allLinks = [];
-	var guid = "";
-	for (guid in window.portals) {
-		if (window.portals.hasOwnProperty(guid))
-		{
-			if (window.portals[guid].options.data.title !== undefined) {
-				var opt =  window.portals[guid].options.data;
-                //console.log(opt);
-				allPortals[guid] =  { guid: opt.guid,  // is the same as guid
-					title: opt.title,
-					health: opt.health,
-					team: opt.team,
-					level: opt.level,
-					lat: opt.latE6,
-					lng: opt.lngE6
-				};
-			}
-		}
-	}
-	for (guid in window.links)
-		if (window.links.hasOwnProperty(guid))
-        {
-             opt = window.links[guid].options.data;
-			allLinks.push( { guid: opt.oGuid,
-                            dguid: opt.dGuid,
-                            dlat: opt.dLatE6,
-                            dlng: opt.dLngE6,
-                            olat: opt.oLatE6,
-                            olng: opt.oLngE6,
-                            team: opt.team
-            });
-        }
+        $('#toolbox').append('<a onclick="window.plugin.exporter.downloadPortals();return false;" >EXPORT Portals</a>');
+        $('#toolbox').append('<a onclick="window.plugin.exporter.downloadLinks();return false;" >EXPORT Links</a>');
 
-	dialog({
-		html: '<p><a onclick="$(\'.ui-dialog-portalSet-copy textarea\').select();">Select all</a> and press CTRL+C to copy it.</p><textarea readonly onclick="$(\'.ui-dialog-portalSet-copy textarea\').select();" >'+JSON.stringify(allPortals)+'</textarea><p><a onclick="$(\'.ui-dialog-linkSet-copy textarea\').select();">Select all</a> and press CTRL+C to copy it.</p><textarea readonly onclick="$(\'.ui-dialog-linkSet-copy textarea\').select();" >'+JSON.stringify(allLinks)+'</textarea> ',
-		width: 600,
-		dialogClass: 'ui-dialog-export-copy',
-		title: 'Export'
-        });
+	};
+    window.plugin.exporter.downloadPortals = function() {
+        var allPortals = {};
+        var guid = "";
+        for (guid in window.portals) {
+            if (window.portals.hasOwnProperty(guid))
+            {
+                if (window.portals[guid].options.data.title !== undefined) {
+                    var opt = window.portals[guid].options.data;
+                    //console.log(opt);
+                    allPortals[guid] = { guid: opt.guid, // is the same as guid
+                                        title: opt.title,
+                                        health: opt.health,
+                                        team: opt.team,
+                                        level: opt.level,
+                                        lat: opt.latE6,
+                                        lng: opt.lngE6
+                                       };
+                }
+            }
+        }
+        window.saveFile(JSON.stringify(allPortals), 'portals.json', 'application/json');
+
+    };
+	window.plugin.exporter.downloadLinks = function() {
+        var allLinks = {};
+        var guid = "";
+
+        for (guid in window.links)
+        {
+            if (window.links.hasOwnProperty(guid))
+            {
+                var opt = window.links[guid].options.data;
+                allLinks[guid] = { guid: opt.oGuid,
+                                  dguid: opt.dGuid,
+                                  dlat: opt.dLatE6,
+                                  dlng: opt.dLngE6,
+                                  olat: opt.oLatE6,
+                                  olng: opt.oLngE6,
+                                  team: opt.team
+                                 };
+            }
+        }
+        window.saveFile(JSON.stringify(allLinks), 'links.json', 'application/json');
     }
 
 
