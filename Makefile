@@ -17,7 +17,7 @@ all: portaltools.jar
 
 
 portaltools.jar: classes
-	jar -cf portaltools.jar $(CLASSES) 'PortalFactory$$1.class' 'PortalFactory$$2.class' 'PortalFactory$$3.class'
+	jar -cfm portaltools.jar MANIFEST.MF  $(CLASSES) 'PortalFactory$$1.class' 'PortalFactory$$2.class' 'PortalFactory$$3.class' jackson-core-2.15.2.jar jackson-databind-2.15.2.jar jackson-annotations-2.15.2.jar
 
 classes: $(CLASSES)
 
