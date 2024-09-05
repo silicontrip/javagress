@@ -395,7 +395,19 @@ public class PortalFactory {
 		url = new URL(urlString);
 		System.err.println("Query: " +url.getQuery());
 
-		rd = new BufferedReader(new InputStreamReader(url.openStream()));
+		if (url.getProtocol().equals("file"))
+		{
+			URL nurl = new URL(url.getProtocol(),
+                   url.getHost(),
+                   url.getPath());
+
+			System.out.println("File read url: " + nurl);
+
+			rd = new BufferedReader(new InputStreamReader(nurl.openStream()));
+
+		} else {
+			rd = new BufferedReader(new InputStreamReader(url.openStream()));
+		}
 		while ((line = rd.readLine()) != null) { result += line; }
 		rd.close();
 		
