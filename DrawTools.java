@@ -1,8 +1,9 @@
-//import com.fasterxml.jackson.databind.*;
-//import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.Collection;
 import java.io.IOException;
 
@@ -60,6 +61,19 @@ public class DrawTools {
                 
 	
 	}
+
+    // Method to get unique points from all entities across all polyObjects
+    public PolyPoint[] getUniquePoints() {
+        Set<PolyPoint> uniquePoints = new HashSet<>();
+
+        for (PolyObject object : entities) {
+            uniquePoints.addAll(Arrays.asList(object.getPoints()));
+        }
+
+        return uniquePoints.toArray(new PolyPoint[uniquePoints.size()]);
+    }
+
+
 
 	public void jsonNodeParser(String jsonDrawtools) throws IOException
 	{
@@ -298,10 +312,10 @@ public class DrawTools {
 				if (d> maxLength)
 					maxLength = d;
 
-				centreLat += Double.parseDouble(pl.latLngs.get(0).lat);
-				centreLng += Double.parseDouble(pl.latLngs.get(0).lng);
-				centreLat += Double.parseDouble(pl.latLngs.get(1).lat);
-				centreLng += Double.parseDouble(pl.latLngs.get(1).lng);
+				centreLat += pl.latLngs.get(0).lat;
+				centreLng += pl.latLngs.get(0).lng;
+				centreLat += pl.latLngs.get(1).lat;
+				centreLng += pl.latLngs.get(1).lng;
 				pointCount +=2;
 
 				if (!first) 
@@ -394,6 +408,10 @@ abstract class PolyObject {
 	{
 		return new JSONObject();
 	}
+	public PolyPoint[] getPoints()
+	{
+		return new PolyPoint[0];
+	}
 }
 
 class Polygon extends PolyObject {
@@ -461,6 +479,12 @@ class Polygon extends PolyObject {
 		return jo;
 	}
 
+    @Override
+    public PolyPoint[] getPoints() {
+        return latLngs.toArray(new PolyPoint[latLngs.size()]); // Assuming PolyPoint has an empty constructor
+    }
+
+
 }
 
 class Polyline extends PolyObject {
@@ -514,6 +538,11 @@ class Polyline extends PolyObject {
 		return jo;
 	}
 	
+	@Override
+    public PolyPoint[] getPoints() {
+        return latLngs.toArray(new PolyPoint[latLngs.size()]); // Assuming PolyPoint has an empty constructor
+    }
+
 }
 
 class Marker extends PolyObject {
@@ -522,6 +551,7 @@ class Marker extends PolyObject {
 	public Marker(PolyPoint pp) { super("marker"); setPoint(pp); }
 	public Marker(PolyPoint pp,String c) { super("marker"); setPoint(pp); setColour(c); }
 	public void setPoint (PolyPoint pp) { latLng = pp; }
+	@Override
 	public JSONObject getJSONObject()
 	{
 		JSONObject jo = new JSONObject();
@@ -529,6 +559,12 @@ class Marker extends PolyObject {
 		jo.put("color",color);
 		jo.put("type",type);
 		return jo;
+	}
+
+	@Override
+	public PolyPoint[] getPoints()
+	{
+		return new PolyPoint[]{latLng};
 	}
 }
 
@@ -540,6 +576,7 @@ class Circle extends PolyObject {
 	public Circle (PolyPoint p, String r, String c) { super ("circle"); setPoint(p); setRadius(r); setColour(c); }
 	public void setPoint (PolyPoint pp) { latLng = pp; }
 	public void setRadius (String r) { radius = r; }
+	@Override
 	public JSONObject getJSONObject()
 	{
 		JSONObject jo = new JSONObject();
@@ -549,16 +586,24 @@ class Circle extends PolyObject {
 		jo.put("type",type);
 		return jo;
 	}
+	@Override
+	public PolyPoint[] getPoints()
+	{
+		return new PolyPoint[]{latLng};
+	}
 }
 
 class PolyPoint {
-	public final String lat;
-	public final String lng;
-	public PolyPoint() { lat = "0.0"; lng = "0.0"; }
-	public PolyPoint(String a, String o) { lat = a; lng = o; }
-	public PolyPoint(Double a, Double o) { this(String.valueOf(a),String.valueOf(o)); }
+	public Double lat;
+	public Double lng;
+	public PolyPoint() { lat = 0.0; lng = 0.0; }
+	public PolyPoint(Double a, Double o) { lat = a; lng = o; }
+	public PolyPoint(String a, String o) { this(Double.valueOf(a),Double.valueOf(o)); }
 	//public PolyPoint(JsonNode jPoint) { this(jPoint.path("lat").asText(),jPoint.path("lng").asText()); }
-	public PolyPoint(JSONObject jPoint) { this(jPoint.getString("lat"),jPoint.getString("lng")); }
+	public PolyPoint(JSONObject jPoint) { this(jPoint.getDouble("lat"),jPoint.getDouble("lng")); }
+
+	public void setLat(Double l) { lat = l; }
+	public void setLng(Double l) { lng = l; }
 
 	public JSONObject getJSONObject()
 	{

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.type.TypeReference;  
 import java.util.*;
 import com.google.common.geometry.*;
+import org.json.*;
+
 
 // This is more than just a portal factory.
 // includes methods for generating link and field sets
@@ -228,6 +230,19 @@ public class PortalFactory {
 		
 	}
 	
+	public HashMap<String,Portal> getPortals(String[] locations) throws IOException
+	{
+		JSONArray jsonLoc = new JSONArray();
+		for (String loc : locations)
+			jsonLoc.put(loc);
+
+		String urlString = portalApi + "?portals=" + URLEncoder.encode(jsonLoc.toString());
+
+System.out.println(urlString);
+
+		return readPortalsFromUrl(urlString);
+
+	}
 	
 	public Portal getPortal(String location) throws IOException
 	{
