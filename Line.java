@@ -40,7 +40,8 @@ public class Line {
 	
 	public Point getD() { return d; }
 	public Point getO() { return o; }
-	
+	public Point[] getPoints() { return new Point[] { getO(), getD() }; }
+
 	public Line (Point d, Point o)
 	{
 		this.d = new Point(d);
@@ -221,6 +222,17 @@ public class Line {
 		return false;
 	}
 	
+	public boolean intersects (ArrayList<Line> lines)
+	{
+		
+		for (Line line : lines)
+		{
+			if (intersects(line)) { return true; }
+		}
+		
+		return false;
+	}
+
 	public boolean intersectsOrEquals (Line[] lines)
 	{
 		for (Line line : lines)
