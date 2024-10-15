@@ -3,7 +3,7 @@ CLASSES = DrawTools.class Field.class Line.class Link.class Point.class Portal.c
 Poly.class  PolyPoint.class BlockList.class \
 layerlinker.class multilinker.class  alllinker.class multilinker2.class manylinks.class  cyclonelinker.class \
 maxfields.class targetlinker.class megaplan.class portalquery.class spiner.class draw.class guardlink.class \
-cellfields.class cellper.class exolinker.class portalshadow.class maxlinks.class \
+cellfields.class cellper.class exolinker.class portalshadow.class maxlinks.class planner.class \
 PolyObject.class Polygon.class Polyline.class Marker.class Circle.class PolyPoint.class PolyType.class \
 Arguments.class PortalSelectionStrategy.class PortalSelectionRangeStrategy.class PortalSelectionBoxStrategy.class PortalSelectionTriangleStrategy.class \
 MUCache.class RunTimer.class UniformDistribution.class UniformDistributionException.class 

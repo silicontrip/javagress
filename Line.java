@@ -26,18 +26,6 @@ public class Line {
 	public Vector3d getoVect() { return o.getVector(); }
 	public Vector3d getdVect() { return d.getVector(); }
 	
-	/*
-	public double getoX() { return o.getX(); }
-	public double getoY() { return o.getY(); }
-	public double getoZ() { return o.getZ(); }
-	
-	public double getdX() { return d.getX(); }
-	public double getdY() { return d.getY(); }
-	public double getdZ() { return d.getZ(); }
-	*/
-	//public void setoLat(Long l) { o.setLat(l); }
-	//public void setoLng(Long l) { o.setLng(l); }
-	
 	public Point getD() { return d; }
 	public Point getO() { return o; }
 	public Point[] getPoints() { return new Point[] { getO(), getD() }; }

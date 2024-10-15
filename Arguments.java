@@ -86,6 +86,7 @@ public Arguments (String a[]) {
 
 
 }
+public int getArgumentCount() { return arg.size(); }
 public ArrayList getArguments() { return arg; }
 public String getArgumentAt(int i) { return arg.get(i); }
 public HashMap getOptions() { return opt; }
