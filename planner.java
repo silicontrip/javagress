@@ -82,7 +82,7 @@ public class planner {
 		return dt;
 	}
 
-	static double search (DrawTools dt, ArrayList<PolyPoint> points,  ArrayList<PolyPoint> combination,ArrayList<PolyObject> polyLines, double cost, int keyPercent, HashMap<String,Portal>portalsLoc)
+	static double search (DrawTools dt, ArrayList<PolyPoint> points,  ArrayList<PolyPoint> combination,ArrayList<PolyObject> polyLines, double cost, int keyPercent)
 	{
 		if (points.size() == 0) {
 			int kcost = keyCost (combination,polyLines);
@@ -100,6 +100,8 @@ public class planner {
 				//System.out.println("");
 				dt = linkOrder(dt,combination,polyLines);
 				System.out.println(dt);
+				System.out.println("");
+
 			}
 		}
 		for (int i =0; i<points.size(); i++) {
@@ -107,7 +109,7 @@ public class planner {
 			newCombination.add(points.get(i));
 			ArrayList<PolyPoint>pointsCopy = new ArrayList<PolyPoint>(points);
 			pointsCopy.remove(i);
-			cost = search (dt,pointsCopy,newCombination,polyLines,cost,keyPercent,portalsLoc);
+			cost = search (dt,pointsCopy,newCombination,polyLines,cost,keyPercent);
 		}
 		return cost;
 	}
@@ -124,7 +126,7 @@ public class planner {
 
 		try{ 
 
-			PortalFactory pf = PortalFactory.getInstance();
+			//PortalFactory pf = PortalFactory.getInstance();
 
 			Integer costPercentage = 50;
 			if (ag.hasOption("k"))
@@ -145,15 +147,15 @@ public class planner {
 				//System.out.println("LL: " + point);
 			}
 
-			HashMap<String,Portal> portalsGuid = pf.getPortals(stringLoc.toArray(new String[stringLoc.size()]));
-			HashMap<String,Portal> portalsLoc = new HashMap<String,Portal>();
+			//HashMap<String,Portal> portalsGuid = pf.getPortals(stringLoc.toArray(new String[stringLoc.size()]));
+		//	HashMap<String,Portal> portalsLoc = new HashMap<String,Portal>();
 
-			for (Portal pn : portalsGuid.values())
-			{
-				System.out.println(pn);
-				String locKey = "" + pn.getLat() + "," + pn.getLng();
-				portalsLoc.put(locKey,pn);
-			}
+			//for (Portal pn : portalsGuid.values())
+			//{
+			//	System.out.println(pn);
+		//		String locKey = "" + pn.getLat() + "," + pn.getLng();
+		//		portalsLoc.put(locKey,pn);
+		//	}
 
 			ArrayList<PolyObject> polyLines = dtp.getAsLines();
 /*
@@ -164,7 +166,7 @@ public class planner {
 			}
 */
 			ArrayList<PolyPoint> combination = new ArrayList<PolyPoint>(Arrays.asList(uniquePoints));
-        	search(dt,combination, new ArrayList<PolyPoint>(),polyLines,1000,costPercentage,portalsLoc);
+        	search(dt,combination, new ArrayList<PolyPoint>(),polyLines,1000,costPercentage);
 
 
 			} catch (Exception e) {
