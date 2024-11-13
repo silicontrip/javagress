@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.2.72
+// @version        0.3
 // @updateURL      http://silicontrip.net/portalApi/linksFields.user.js
 // @downloadURL    http://silicontrip.net/portalApi/linksFields.user.js
 // @namespace    http://tampermonkey.net/
@@ -59,36 +59,6 @@ function wrapper(plugin_info) {
 			window.addLayerGroup('Plan Path', window.plugin.linksFields.pathLayer, false);
 
 			var plan = window.plugin.linksFields.linkify(window.plugin.linksFields.getDrawTools());
-
-/*
-		var cache = localStorage.getItem("window.plugin.linksFields.portalCache");
-		if (cache === null)
-				window.plugin.linksFields.portalCache = {};
-			else
-				window.plugin.linksFields.portalCache = JSON.parse(cache);
-
-
-			// console.log("CACHE: " + JSON.stringify(window.plugin.linksFields.portalCache));
-
-			for (var guid of Object.keys(window.plugin.linksFields.portalCache))
-			{
-				var pt = window.plugin.linksFields.portalCache[guid];
-				console.log("LOCAL PORTAL: " + pt);
-				var found = false;
-				for (var pl of plan) {
-
-					if ((pt.latE6 == pl.latLngs[0].lat * 1000000 && pt.lngE6 == pl.latLngs[0].lng*1000000) ||
-					(pt.latE6 == pl.latLngs[1].lat * 1000000 && pt.lngE6 == pl.latLngs[1].lng*1000000))
-					{
-						found = true;
-						break;
-					}
-				}
-				if (!found)
-					delete window.plugin.linksFields.portalCache[guid];
-			}
-			*/
-			//console.log("<<< links & fields run planner - setup");
 		},
 		portalDetails: function(data) {
 			var portal = data.details;
@@ -101,7 +71,7 @@ function wrapper(plugin_info) {
 		},
 		portalAdded: function(data) {
 			// may want to limit this to portals in the plan
-			console.log("Portal added: " + data.portal.options.guid);
+			//console.log("Portal added: " + data.portal.options.guid);
 			var portal = data.portal.options.data;
 			portal.guid = data.portal.options.guid;
 
@@ -114,49 +84,52 @@ function wrapper(plugin_info) {
 			// console.log("CACHE: " + JSON.stringify(window.plugin.linksFields.portalCache));
 			//console.log("PL of PLAN");
 			for (var pl of plan) {
-				if ((portal.latE6 == pl.latLngs[0].lat * 1000000 && portal.lngE6 == pl.latLngs[0].lng*1000000) ||
-				(portal.latE6 == pl.latLngs[1].lat * 1000000 && portal.lngE6 == pl.latLngs[1].lng*1000000))
-				{
-					// console.log("PLAN PORTAL: " + JSON.stringify(pl));
-					if (portal.guid in window.plugin.linksFields.portalCache)
-					{
-						// don't overwrite if there is no title
-						if ('title' in portal)
+                if (pl.type == 'polyline')
+                {
+                    if ((portal.latE6 == pl.latLngs[0].lat * 1000000 && portal.lngE6 == pl.latLngs[0].lng*1000000) ||
+                        (portal.latE6 == pl.latLngs[1].lat * 1000000 && portal.lngE6 == pl.latLngs[1].lng*1000000))
+                    {
+                        // console.log("PLAN PORTAL: " + JSON.stringify(pl));
+                        if (portal.guid in window.plugin.linksFields.portalCache)
                         {
-							window.plugin.linksFields.portalCache[portal.guid] = portal;
+                            // don't overwrite if there is no title
+                            if ('title' in portal)
+                            {
+                                window.plugin.linksFields.portalCache[portal.guid] = portal;
+                            }
+                            //console.log("PORTAL EXISTS: " + JSON.stringify(portal));
                         }
-						//console.log("PORTAL EXISTS: " + JSON.stringify(portal));
-					}
-					else
-					{
-						window.plugin.linksFields.portalCache[portal.guid] = portal;
-						// is unloaded dialog shown?
-						var unloaded = $('#unloaded');
-						console.log("UNLOADED: " + JSON.stringify(unloaded));
-						if (unloaded.length > 0)
-						{
-							// check that all portals are cached.
-							var missing = window.plugin.linksFields.checkCache(plan);
-							if (missing.length > 0)
-							{
-								var html = window.plugin.linksFields.htmlUnloaded(missing);
-								unloaded.html(html);
-							} else {
-								// close DIALOG
-								//console.log("DIALOG:");
-								//console.log($("ui-dialog-portal"));
-								//console.log(window.dialog);
-								 //$("ui-dialog-portal").dialog('close');
-								// run plan
-								window.plugin.linksFields.unloadedDialog.dialog('close');
-								window.plugin.linksFields.runPlan();
-							}
-						}
+                        else
+                        {
+                            window.plugin.linksFields.portalCache[portal.guid] = portal;
+                            // is unloaded dialog shown?
+                            var unloaded = $('#unloaded');
+                            console.log("UNLOADED: " + JSON.stringify(unloaded));
+                            if (unloaded.length > 0)
+                            {
+                                // check that all portals are cached.
+                                var missing = window.plugin.linksFields.checkCache(plan);
+                                if (missing.length > 0)
+                                {
+                                    var html = window.plugin.linksFields.htmlUnloaded(missing);
+                                    unloaded.html(html);
+                                } else {
+                                    // close DIALOG
+                                    //console.log("DIALOG:");
+                                    //console.log($("ui-dialog-portal"));
+                                    //console.log(window.dialog);
+                                    //$("ui-dialog-portal").dialog('close');
+                                    // run plan
+                                    window.plugin.linksFields.unloadedDialog.dialog('close');
+                                    window.plugin.linksFields.runPlan();
+                                }
+                            }
 
-					}
-		//			localStorage.setItem("window.plugin.linksFields.portalCache", JSON.stringify(window.plugin.linksFields.portalCache));
-		//			break;
-				}
+                        }
+                        //			localStorage.setItem("window.plugin.linksFields.portalCache", JSON.stringify(window.plugin.linksFields.portalCache));
+                        //			break;
+                    }
+                }
 			}
             // console.log("<<< portalAdded");
 		},
@@ -228,69 +201,98 @@ function wrapper(plugin_info) {
 				{
 					if (old_link)
 					{
-						var poly = L.polyline([old_link.latLngs[0],link.latLngs[0]] , window.plugin.linksFields.PATH_STYLE);
+                        var poly;
+                        if (link.type == 'polyline')
+                        {
+                            poly = L.polyline([old_link.latLngs[0],link.latLngs[0]] , window.plugin.linksFields.PATH_STYLE);
+                        }
+                        if (link.type == 'marker')
+                        {
+                            poly = L.polyline([old_link.latLngs[0],link.latLng] , window.plugin.linksFields.PATH_STYLE);
+                        }
 						poly.addTo(window.plugin.linksFields.pathLayer);
 						poly.addTo(window.plugin.linksFields.blockLayer);
 					}
-					old_link = link;
+                    if (link.type == 'polyline')
+                    {
+                        old_link = link;
+                    }
+                    if (link.type == 'marker')
+                    {
+                        old_link = {};
+                        old_link.latLngs = [];
+                        old_link.latLngs[0] = link.latLng;
+                    }
 				}
 			}
 		},
 		// instance methods. called from within the linksFields instance
-		rippleBlocked: function(link_list) {
+		rippleBlocked: function(linkList) {
 			// this is a way to re-sort the link order to remove blocking fields.
 			// still doesn't handle links with fields on 2 sides.
 			// I don't quite know the logic either.
-			var change = true;
+			let change = true;
 			//  do this until no blockers.
 			while (change) {
-				var valid = this.check_plan(link_list);
+				const valid = this.check_plan(linkList);
 				change = false;
-				for (var i =0; i< valid.length; i++)
+				for (let i =0; i< valid.length; i++)
 				{
-					if (valid[i][0] == 'blocked')
+					if (valid[i][0] === 'blocked')
 					{
-						var link = link_list[i];
-						link_list[i] = link_list[i-1];
-						link_list[i-1] = link;
+						const link = linkList[i];
+						linkList[i] = linkList[i-1];
+						linkList[i-1] = link;
 						change = true;
 						break;
 					}
 				}
 			}
-			return link_list;
+			return linkList;
 		},
-		sortExisting: function(link_list) {
-		// this moves existing links to the top of the plan.
-			var exist_list =[];
-            var i;
-			for (i=link_list.length-1;i>=0;i--)
-			{
-				var link = link_list[i];
-				if (this.linkInPlay(link)) {
-					// push into new array
-					exist_list.push(link);
-					// remove from old array
-					link_list.splice(i, 1);
+		rippleMore: function(linkList) {
+			// this is a way to re-sort the link order to remove links with fields on 2 sides.
+			let change = true;
+			//  do this until no blockers.
+			while (change) {
+				const valid = this.check_plan(linkList);
+				change = false;
+				for (let i =valid.length-1; i>= 0; i--)
+				{
+					if (valid[i][0] === 'inner')
+					{
+						const link = linkList[i];
+						linkList[i] = linkList[i+1];
+						linkList[i+1] = link;
+						change = true;
+						break;
+					}
 				}
 			}
-			if (exist_list.length > 0)
-            {
-				return exist_list.concat(link_list);
-            }
-			return link_list;
+			return linkList;
+		},
+
+		sortExisting: function(link_list) {
+			// This moves existing links to the top of the plan.
+			var exist_list = link_list.filter(this.linkInPlay);
+
+			// Filter out existing links from the original array
+			const remainingLinks = link_list.filter(link => !exist_list.includes(link));
+
+			// Concatenate sorted existing links with remaining non-existing links
+			return exist_list.concat(remainingLinks);
 		},
         linkOriginEqPortal(link, portal)
         {
             // console.log(link);
             // console.log(portal);
-            var loLat = link.latLngs[0].lat;
-            var loLng = link.latLngs[0].lng;
-            var pLat = portal.latE6 / 1000000.0;
-            var pLng = portal.lngE6 / 1000000.0;
+            const loLat = link.latLngs[0].lat;
+            const loLng = link.latLngs[0].lng;
+            const pLat = portal.latE6 / 1000000.0;
+            const pLng = portal.lngE6 / 1000000.0;
             return (loLat == pLat && loLng == pLng);
         },
-        sort_to_top: function(link_list, selected_portal)
+        sortPortalToTop: function(link_list, selected_portal)
         {
 			var sort_list =[];
             var i;
@@ -309,30 +311,27 @@ function wrapper(plugin_info) {
             }
             return link_list;
         },
-        sort_to_bottom: function(link_list, selected_portal)
+        sortPortalToBottom: function(linkList, selectedPortal)
         {
-			var sort_list =[];
-            var i;
-			for (i=link_list.length-1;i>=0;i--)
+			const sortList =[];
+
+			for (let i=linkList.length-1;i>=0;i--)
 			{
-                var link = link_list[i];
-                if (this.linkOriginEqPortal(link,selected_portal))
+                var link = linkList[i];
+                if (this.linkOriginEqPortal(link,selectedPortal))
                 {
-                    sort_list.push(link);
-                    link_list.splice(i,1);
+                    sortList.push(link);
+                    linkList.splice(i,1);
                 }
             }
-			if (link_list.length > 0)
-            {
-				return link_list.concat(sort_list);
-            }
-            return sort_list;
+
+			return linkList.concat(sortList);
         },
 		countSBUL: function(guid) {
 			// count the number of SBULs on a portal
-			var portalMods = this.portalCache[guid];
+			const portalMods = this.portalCache[guid];
 
-			if (portalMods === undefined)
+			if (portalMods === undefined || !('mods' in portalMods))
             {
 				return -1;
             }
@@ -340,59 +339,47 @@ function wrapper(plugin_info) {
             {
                 return 0;
             }
-			if ('mods' in portalMods)
-			{
-			// [{"owner":"silicontrip","name":"Portal Shield","rarity":"RARE","stats":{"REMOVAL_STICKINESS":"150000","MITIGATION":"40"}},{"owner":"ororamate","name":"Portal Shield","rarity":"RARE","stats":{"REMOVAL_STICKINESS":"150000","MITIGATION":"40"}},{"owner":"thebeige","name":"SoftBank Ultra Link","rarity":"VERY_RARE","stats":{"LINK_RANGE_MULTIPLIER":"5000","REMOVAL_STICKINESS":"150000","OUTGOING_LINKS_BONUS":"8","LINK_DEFENSE_BOOST":"1500"}},{"owner":"silicontrip","name":"Portal Shield","rarity":"RARE","stats":{"REMOVAL_STICKINESS":"150000","MITIGATION":"40"}}]
-				var existingSBUL = 0;
-				for (var mod of portalMods.mods)
+			let existingSBUL = 0;
+			for (const mod of portalMods.mods)
+            {
+				if (mod && mod.name === 'SoftBank Ultra Link')
                 {
-					if (mod)
-                    {
-						if (mod.name == 'SoftBank Ultra Link')
-                        {
-							existingSBUL++;
-                        }
-                    }
+					existingSBUL++;
                 }
+            }
 
-				return existingSBUL;
-			}
-			return -1;
+			return existingSBUL;
 		},
 		slotsAvailable: function(guid) {
 			// count the number of free slots for this player
-			var portalMods = this.portalCache[guid];
-			if (portalMods === undefined)
-            {
-				return -1;
-            }
-			if ('mods' in portalMods)
-			{
-				var ownerCount = 2;
-				var total = 4;
-				for (var mod of portalMods.mods)
-				{
-					if (mod)
-					{
-						if (mod.owner == window.PLAYER.nickname)
-                        {
-							ownerCount--;
-                        }
+			const portalMods = this.portalCache[guid];
 
-						total --;
-					}
-				}
-				if (ownerCount < total)
-                {
-					return ownerCount;
-                }
-				return total;
+			if (portalMods === undefined || !('mods' in portalMods)) {
+				return -1;
 			}
-			return -1;
+
+            if (portalMods.team != window.PLAYER.team.slice(0,1))
+            {
+                return 2;
+            }
+
+			let ownerCount = 2;
+			let total = 4;
+
+			for (const mod of portalMods.mods) {
+				if (mod && mod.owner === window.PLAYER.nickname) {
+					ownerCount--;
+				}
+				total--;
+			}
+
+			return ownerCount < total ? ownerCount : total;
 		},
 		makeHtml: function(link_list) {
 			var html;
 			html = '<button type="button" onclick="window.plugin.linksFields.sortPlan()">Sort Links</button>';
+			html += '<button type="button" onclick="window.plugin.linksFields.sortPlanMore()">Sort More</button>';
+
 			html += ' <button type="button" onclick="window.plugin.linksFields.export_plan()">Export</button>';
 			html += ' <button type="button" onclick="window.plugin.linksFields.sortToTop()">Selected Portal to Top</button>';
 			html += ' <button type="button" onclick="window.plugin.linksFields.sortToBottom()">Selected Portal to Bottom</button>';
@@ -581,6 +568,33 @@ function wrapper(plugin_info) {
 					}
 					html+= '</tr>';
 				}
+                if (link.type == 'marker') {
+                    var oGuid = this.getPointGuid(link.latLng);
+					html +='<tr>';
+					html +='<td style="background-color:;"> </td>';
+					html +='<td>'+ this.getPortalLink(oGuid) + '</td>';
+					html +='<td></td>';
+					html +='<td></td>';
+                    html += '<td></td>';
+                    html += '<td></td>';
+                    html += '<td></td>';
+						html +='<td>';
+						if (i>0 && validity[i-1][0] != 'exists')
+                        {
+							html +='<a onclick="window.plugin.linksFields.edit('+i+',\'up\')">\u2191</a>';
+                        }
+						if (i>0 && validity[i-1][0] != 'exists' && i<link_list.length-1)
+                        {
+							html+='-'; // maybe would like a bullet
+                        }
+						if (i<link_list.length-1)
+                        {
+							html+='<a onclick="window.plugin.linksFields.edit('+i+',\'down\')">\u2193</a>';
+                        }
+                    html +='</td>';
+                    html+= '</tr>';
+
+                }
 			}
 			html +='</table>';
 			html +="<hr/>";
@@ -648,22 +662,26 @@ function wrapper(plugin_info) {
 			var keyreq={};
 			var gl;
 			for (gl of fp_grid) {
-				var loc = gl.latLngs;
-				//console.log("loc: " + JSON.stringify(loc));
-				var guid = window.plugin.linksFields.getPointGuid(loc[1]);
-				var title = window.plugin.linksFields.portalCache[guid].title;
-				keyreq[title]=0;
+                if (gl.type == 'polyline') {
+                    var loc = gl.latLngs;
+                    //console.log("loc: " + JSON.stringify(loc));
+                    var guid = window.plugin.linksFields.getPointGuid(loc[1]);
+                    var title = window.plugin.linksFields.portalCache[guid].title;
+                    keyreq[title]=0;
+                }
 			}
 			for (var i = 0 ; i < fp_grid.length; i++) {
 				if (validity[i] != 'exists')
 				{
-					 gl = fp_grid[i];
-					 loc = gl.latLngs;
-				//console.log("loc: " + JSON.stringify(loc));
-					 guid = window.plugin.linksFields.getPointGuid(loc[1]);
-					 title = window.plugin.linksFields.portalCache[guid].title;
+                    gl = fp_grid[i];
+                    if (gl.type == 'polyline') {
+                        loc = gl.latLngs;
+                        //console.log("loc: " + JSON.stringify(loc));
+                        guid = window.plugin.linksFields.getPointGuid(loc[1]);
+                        title = window.plugin.linksFields.portalCache[guid].title;
 
-			 		keyreq[title]++;
+                        keyreq[title]++;
+                    }
 			 	}
 			}
 			for (var pk in keyreq) { exp += pk + ": " + keyreq[pk] + "\n"; }
@@ -676,13 +694,15 @@ function wrapper(plugin_info) {
 					var gd =fp_grid[i];
 				//console.log("GD: "+ JSON.stringify(gd));
 					//var guid;
-					guid = window.plugin.linksFields.getPointGuid(gd.latLngs[0]);
-					var stitle = window.plugin.linksFields.portalCache[guid].title;
-					guid = window.plugin.linksFields.getPointGuid(gd.latLngs[1]);
-					var dtitle = window.plugin.linksFields.portalCache[guid].title;
-					exp += count +". " + stitle + " \u2192 " + dtitle + "\n";
+                    if (gd.type == 'polyline') {
+                        guid = window.plugin.linksFields.getPointGuid(gd.latLngs[0]);
+                        var stitle = window.plugin.linksFields.portalCache[guid].title;
+                        guid = window.plugin.linksFields.getPointGuid(gd.latLngs[1]);
+                        var dtitle = window.plugin.linksFields.portalCache[guid].title;
+                        exp += count +". " + stitle + " \u2192 " + dtitle + "\n";
 
-					count ++;
+                        count ++;
+                    }
 				}
 			}
 			exp += "</pre>\n";
@@ -694,52 +714,38 @@ function wrapper(plugin_info) {
 					width: 550
 				});
 		},
-		checkCache: function(link_list) {
-			var missing = [];
+		checkCache: function(linkList) {
+			const missing = [];
 			// var uniq = {};
-			for (var link of link_list)
+			for (const link of linkList)
 			{
-				var loc;
-				var found;
-                var ll;
-				loc = link.latLngs[0];
-
-				found = false;
-				for (ll of missing)
+                if (link.type == 'polyline')
                 {
-					if (this.point_equal(ll,loc))
-                    {
-						found = true;
+                    const loc1 = link.latLngs[0];
+                    const loc2 = link.latLngs[1];
+
+                    if (!missing.some(ll => this.point_equal(ll, loc1))) {
+                        if (this.getPointGuid(loc1) === null) {
+                            missing.push(loc1);
+                        }
+                    }
+
+                    if (!missing.some(ll => this.point_equal(ll, loc2))) {
+                        if (this.getPointGuid(loc2) === null) {
+                            missing.push(loc2);
+                        }
                     }
                 }
-
-				if (!found)
+                if (link.type == 'marker')
                 {
-					if (this.getPointGuid(loc) === null)
-                    {
-						missing.push(loc);
+                    const loc1 = link.latLng;
+                    if (!missing.some(ll => this.point_equal(ll, loc1))) {
+                        if (this.getPointGuid(loc1) === null) {
+                            missing.push(loc1);
+                        }
                     }
+
                 }
-
-				loc = link.latLngs[1];
-
-				found = false;
-				for (ll of missing)
-                {
-					if (this.point_equal(ll,loc))
-                    {
-						found = true;
-                    }
-                }
-
-				if (!found)
-                {
-					if (this.getPointGuid(loc) === null)
-                    {
-						missing.push(loc);
-                    }
-                }
-
 
 			}
 			return missing;
@@ -794,6 +800,18 @@ function wrapper(plugin_info) {
 			window.plugin.drawTools.save();
 			window.plugin.linksFields.updatePlan();
 		},
+		sortPlanMore: function() {
+			var plan = window.plugin.linksFields.getDrawTools();
+			// move existing links to the top of the plan
+			plan = window.plugin.linksFields.sortExisting(plan);
+			// sort out the blocked links...
+			plan = window.plugin.linksFields.rippleMore(plan);
+			// re-save the modified plan
+			window.plugin.drawTools.drawnItems.clearLayers();
+			window.plugin.drawTools.import(plan);
+			window.plugin.drawTools.save();
+			window.plugin.linksFields.updatePlan();
+		},
         sortToTop: function()
         {
             //console.log(window.selectedPortal);
@@ -803,12 +821,14 @@ function wrapper(plugin_info) {
             }
             var portal = window.plugin.linksFields.portalCache[window.selectedPortal];
 			var plan = window.plugin.linksFields.getDrawTools();
-            plan = window.plugin.linksFields.sort_to_top(plan,portal);
+            plan = window.plugin.linksFields.sortPortalToTop(plan,portal);
 			plan = window.plugin.linksFields.sortExisting(plan);
 			window.plugin.drawTools.drawnItems.clearLayers();
 			window.plugin.drawTools.import(plan);
 			window.plugin.drawTools.save();
 			window.plugin.linksFields.updatePlan();
+            window.plugin.linksFields.updatePathLayer();
+
         },
         sortToBottom: function()
         {
@@ -819,13 +839,15 @@ function wrapper(plugin_info) {
             }
             var portal = window.plugin.linksFields.portalCache[window.selectedPortal];
 			var plan = window.plugin.linksFields.getDrawTools();
-            plan = window.plugin.linksFields.sort_to_bottom(plan,portal);
+            plan = window.plugin.linksFields.sortPortalToBottom(plan,portal);
 
 			plan = window.plugin.linksFields.sortExisting(plan);
 			window.plugin.drawTools.drawnItems.clearLayers();
 			window.plugin.drawTools.import(plan);
 			window.plugin.drawTools.save();
 			window.plugin.linksFields.updatePlan();
+            window.plugin.linksFields.updatePathLayer();
+
         },
 		updatePlan: function() {
 			var plan = window.plugin.linksFields.getDrawTools();
@@ -841,44 +863,44 @@ function wrapper(plugin_info) {
 			$('#linkslist').html(html);
 		},
 		getPlanPortals: function() {
-			var link_list = window.plugin.linksFields.linkify(window.plugin.linksFields.getDrawTools());
-			var portalGuids = {};
-			for (var link of link_list)
+			const linkList = window.plugin.linksFields.linkify(window.plugin.linksFields.getDrawTools());
+			const portalGuids = {};
+			for (const link of linkList)
 			{
-				var oGuid = window.plugin.linksFields.getPointGuid(link.latLngs[0]);
-				var dGuid = window.plugin.linksFields.getPointGuid(link.latLngs[1]);
-				// check that these portals exist
-				if (oGuid)
+                if (link.type == 'polyline')
                 {
-					portalGuids[oGuid] = window.plugin.linksFields.portalCache[oGuid];
-                }
-				if (dGuid)
-                {
-					portalGuids[dGuid] = window.plugin.linksFields.portalCache[dGuid];
+                    const oGuid = window.plugin.linksFields.getPointGuid(link.latLngs[0]);
+                    const dGuid = window.plugin.linksFields.getPointGuid(link.latLngs[1]);
+                    // check that these portals exist
+                    if (oGuid && !portalGuids[oGuid]) {
+                        portalGuids[oGuid] = window.plugin.linksFields.portalCache[oGuid];
+                    }
+                    if (dGuid && !portalGuids[dGuid]) {
+                        portalGuids[dGuid] = window.plugin.linksFields.portalCache[dGuid];
+                    }
                 }
 			}
 			return portalGuids;
 		},
 		getPointGuid: function(point) {
-			var keys = Object.keys(window.plugin.linksFields.portalCache);
-			for (var i=0; i< keys.length;i++)
-			{
-				// console.log("i: " + i + " key: " + keys[i]);
-				var portal = window.plugin.linksFields.portalCache[keys[i]];
-				if (portal.latE6 == point.lat * 1000000 && portal.lngE6 == point.lng*1000000)
-                {
-					return keys[i];
-                }
+			const guid = Object.keys(window.plugin.linksFields.portalCache).find(key => {
+				const cachedPortal = window.plugin.linksFields.portalCache[key];
+				return cachedPortal && cachedPortal.latE6 === point.lat * 1000000 && cachedPortal.lngE6 === point.lng*1000000;
+			});
+
+			if (guid) {
+				return guid;
 			}
-            for (var guid in window.portals)
+
+            for (const g in window.portals)
             {
-                if (window.portals.hasOwnProperty(guid))
+                if (window.portals.hasOwnProperty(g))
                 {
-                    portal = window.portals[guid].options.data;
+                    const portal = window.portals[g].options.data;
                     if (portal.latE6 == point.lat * 1000000 && portal.lngE6 == point.lng*1000000)
                     {
-                        window.plugin.linksFields.portalCache[guid]=portal;
-                        return guid;
+                        window.plugin.linksFields.portalCache[g]=portal;
+                        return g;
                     }
                 }
             }
@@ -962,62 +984,60 @@ function wrapper(plugin_info) {
 		},
 		// static method
 		getBlockers: function(plan) {
-			var keys = Object.keys(window.plugin.linksFields.edgeCache);
-			var blockers = [];
-			for (var l=0; l < plan.length; l++)
+			const keys = Object.keys(window.plugin.linksFields.edgeCache);
+			const blockers = [];
+			for (let l=0; l < plan.length; l++)
 			{
-				var li = plan[l];
-				var block = { 'enl': [], 'res': [], 'neu': [] };
-				for (var i=0; i< keys.length;i++)
-				{
-					var mapLink = window.plugin.linksFields.edgeCache[keys[i]];
-					var inLink = { latLngs: [ { 'lat': (mapLink.oLatE6 / 1000000), 'lng': (mapLink.oLngE6 / 1000000) } , { 'lat': (mapLink.dLatE6 / 1000000), 'lng': (mapLink.dLngE6 / 1000000) }] };
-					//console.log("intel link: " + JSON.stringify(inLink));
-					//console.log("plan link: " + JSON.stringify(li));
-					if (window.plugin.linksFields.intersect(inLink.latLngs,li.latLngs))
-					{
-						//console.log("INTERSECT: " + JSON.stringify(mapLink));
-                        //console.log(mapLink);
-						if (mapLink.team == 'E')
+                const block = { 'enl': [], 'res': [], 'neu': [] };
+
+				const li = plan[l];
+                if (li.type == 'polyline')
+                {
+                    for (let i=0; i< keys.length;i++)
+                    {
+                        const mapLink = window.plugin.linksFields.edgeCache[keys[i]];
+                        const inLink = { latLngs: [ { 'lat': (mapLink.oLatE6 / 1000000), 'lng': (mapLink.oLngE6 / 1000000) } , { 'lat': (mapLink.dLatE6 / 1000000), 'lng': (mapLink.dLngE6 / 1000000) }] };
+                        //console.log("intel link: " + JSON.stringify(inLink));
+                        //console.log("plan link: " + JSON.stringify(li));
+                        if (window.plugin.linksFields.intersect(inLink.latLngs,li.latLngs))
                         {
-							block.enl.push(inLink);
+                            //console.log("INTERSECT: " + JSON.stringify(mapLink));
+                            //console.log(mapLink);
+                            if (mapLink.team == 'E') {
+                                block.enl.push(inLink);
+                            } else if (mapLink.team == 'R') {
+                                block.res.push(inLink);
+                            } else if (mapLink.team == 'M') {
+                                // new for machina links
+                                // some places they are refered to as neutral and some places machina
+                                block.neu.push(inLink);
+                            }
                         }
-						if (mapLink.team == 'R')
-                        {
-							block.res.push(inLink);
-                        }
-                        // new for machina links
-                        // some places they are refered to as neutral and some places machina
-                        if (mapLink.team == 'M')
-                        {
-                            block.neu.push(inLink);
-                        }
-					}
-				}
-				blockers.push(block);
+                    }
+                }
+                blockers.push(block);
+
 			}
 			return blockers;
 		},
 		linkInPlay: function(li) {
-			// just like linkExists but for links that already created
-			var keys = Object.keys(window.plugin.linksFields.edgeCache);
-			//console.log("link cache count: "+ keys.length);
-			for (var i=0; i< keys.length;i++)
-			{
-				var mapLink = window.plugin.linksFields.edgeCache[keys[i]];
+            // just like linkExists but for links that already created
+            const keys = Object.keys(window.plugin.linksFields.edgeCache);
+            //console.log("link cache count: " + keys.length);
+            for (const key of keys) {
+                const mapLink = window.plugin.linksFields.edgeCache[key];
                 // check that link is correct faction
-                if (mapLink.team == window.PLAYER.team.slice(0,1))
-                {
-                    //console.log(window.PLAYER);
-                    var inLink = { latLngs: [ { 'lat': (mapLink.oLatE6 / 1000000), 'lng': (mapLink.oLngE6 / 1000000) } , { 'lat': (mapLink.dLatE6 / 1000000), 'lng': (mapLink.dLngE6 / 1000000) }] };
+                if (mapLink.team === window.PLAYER.team.slice(0,1)) {
+                    const inLink = { latLngs: [
+                        { 'lat': (mapLink.oLatE6 / 1000000), 'lng': (mapLink.oLngE6 / 1000000) },
+                        { 'lat': (mapLink.dLatE6 / 1000000), 'lng': (mapLink.dLngE6 / 1000000)}] };
                     //console.log("link: " + JSON.stringify(window.plugin.linksFields.edgeCache[keys[i]]));
-                    if (window.plugin.linksFields.link_equal(inLink,li))
-                    {
+                    if (window.plugin.linksFields.link_equal(inLink, li)) {
                         return true;
                     }
                 }
-			}
-			return false;
+            }
+            return false;
 		},
 		tri_sign: function (p1,p2,p3)
 		{
@@ -1075,26 +1095,33 @@ function wrapper(plugin_info) {
 		},
 		get_prevents : function(grid)
 		{
+            console.log(grid);
 			var fields = window.plugin.linksFields.fieldify(grid);
 			var portals = window.plugin.linksFields.getPlanPortals();
 			var field_dep = [];
 
 			for (var fd of fields)
 			{
-				var prevents=[];
-				var fdpt = window.plugin.linksFields.contains_portal(fd,portals);
-				//console.log("FDPT: " + JSON.stringify(fdpt));
-				for (var pt of fdpt)
-				{
-					for (var li of grid)
+                if (fd.type == 'polygon')
+                {
+                    var prevents=[];
+                    var fdpt = window.plugin.linksFields.contains_portal(fd,portals);
+                    //console.log("FDPT: " + JSON.stringify(fdpt));
+                    for (var pt of fdpt)
                     {
-						if (window.plugin.linksFields.point_equal(pt,li.latLngs[0]))
+                        for (var li of grid)
                         {
-							prevents.push(li);
+                            if (li.type == 'polyline')
+                            {
+                                if (window.plugin.linksFields.point_equal(pt,li.latLngs[0]))
+                                {
+                                    prevents.push(li);
+                                }
+                            }
                         }
                     }
-				}
-				field_dep.push({"field":fd, "prevents": prevents});
+                    field_dep.push({"field":fd, "prevents": prevents});
+                }
 			}
 			return field_dep;
 		},
@@ -1103,9 +1130,12 @@ function wrapper(plugin_info) {
 			var rt = [];
 			for (var link of order)
             {
-				if (window.plugin.linksFields.point_equal(link.latLngs[0],pt) || window.plugin.linksFields.point_equal(link.latLngs[1],pt))
+                if (link.type == 'polyline')
                 {
-					rt.push(link);
+                    if (window.plugin.linksFields.point_equal(link.latLngs[0],pt) || window.plugin.linksFields.point_equal(link.latLngs[1],pt))
+                    {
+                        rt.push(link);
+                    }
                 }
             }
 
@@ -1126,23 +1156,27 @@ function wrapper(plugin_info) {
 		},
 		complete_field : function(order,link)
 		{
-			var p1link = window.plugin.linksFields.get_links(order,link.latLngs[0]);
-			var p2link = window.plugin.linksFields.get_links(order,link.latLngs[1]);
-
-			var complete_fields = [];
-
-			for (var l1 of p1link)
+            if (link.type == 'polyline')
             {
-				for (var l2 of p2link) {
-					var pt = window.plugin.linksFields.common_point(l1,l2);
-					if (pt !== null)
-                    {
-						complete_fields.push(pt);
-                    }
-				}
-            }
+                const p1link = window.plugin.linksFields.get_links(order,link.latLngs[0]);
+                const p2link = window.plugin.linksFields.get_links(order,link.latLngs[1]);
 
-			return complete_fields;
+                const complete_fields = [];
+
+                for (let l1 of p1link)
+                {
+                    for (let l2 of p2link) {
+                        const pt = window.plugin.linksFields.common_point(l1,l2);
+                        if (pt !== null)
+                        {
+                            complete_fields.push(pt);
+                        }
+                    }
+                }
+
+                return complete_fields;
+            }
+            return [];
 		},
 		// field2 inside field1?
 		field_contains: function(f1,f2)
@@ -1166,13 +1200,17 @@ function wrapper(plugin_info) {
 		},
 		link_equal : function(l1,l2)
 		{
-			return (window.plugin.linksFields.point_equal(l1.latLngs[0],l2.latLngs[0]) && window.plugin.linksFields.point_equal(l1.latLngs[1],l2.latLngs[1])) || (window.plugin.linksFields.point_equal(l1.latLngs[1],l2.latLngs[0]) && window.plugin.linksFields.point_equal(l1.latLngs[0],l2.latLngs[1]));
+            if (l1.type == 'polyline' && l2.type == 'polyline')
+            {
+                return (window.plugin.linksFields.point_equal(l1.latLngs[0],l2.latLngs[0]) && window.plugin.linksFields.point_equal(l1.latLngs[1],l2.latLngs[1])) || (window.plugin.linksFields.point_equal(l1.latLngs[1],l2.latLngs[0]) && window.plugin.linksFields.point_equal(l1.latLngs[0],l2.latLngs[1]));
+            }
+            return false;
 		},
 // check if field blocks any links not yet made.
 // based on the dependencies "deps"
 // and the order of links so far "order"
 
-//needs update for short links that can now be thrown under fields.
+//needs update for short links (2km) that can now be thrown under fields.
 		check_block : function(field, deps, order)
 		{
 			var blocked = [];
@@ -1196,7 +1234,7 @@ function wrapper(plugin_info) {
 							blocked.push(li);
                         }
 					}
-		}
+				}
 			}
 			return blocked;
 		},
@@ -1208,6 +1246,7 @@ function wrapper(plugin_info) {
 		},
 		check_plan : function (grid)
 		{
+            //console.log(grid);
 			var order = [];
 			var ll = grid.length;
 			var field_prevents = window.plugin.linksFields.get_prevents(grid);
@@ -1307,7 +1346,7 @@ function wrapper(plugin_info) {
 
 						}
                     }
-					// console.log("INNER LINKS: " + JSON.stringify(inner));
+					// three or more fields.
 					result[i] = ["more",inner];
 
 				}
@@ -1540,6 +1579,8 @@ function wrapper(plugin_info) {
 							ll.push(dtn);
                         }
 					}
+                } else if (dto.type == 'marker') {
+                    ll.push(dto);
 				} else {
 					// don't handle these objects
 					ll[JSON.stringify(dto)]=true;
