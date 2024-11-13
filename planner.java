@@ -64,7 +64,10 @@ public class planner {
 		dt.erase();
 		ArrayList<PolyPoint>visited = new ArrayList<PolyPoint>();
 		visited.add(combination.get(0));
+		dt.addMarker(combination.get(0));
+
 		for (int i = 1; i < combination.size(); i++) {
+			boolean linked = false;
 			PolyPoint thisPoint = combination.get(i);
 			for (PolyObject po : polyLines)
 			{
@@ -74,8 +77,14 @@ public class planner {
 						(thisPoint.equals(po.getPoints()[1]) && visitPoint.equals(po.getPoints()[0])) )
 						{
 							dt.addLine(thisPoint,visitPoint);
+							linked = true;
 						}
 				}
+
+			}
+			if (!linked)
+			{
+				dt.addMarker(thisPoint);
 			}
 			visited.add(thisPoint);
 		}
