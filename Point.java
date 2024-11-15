@@ -55,8 +55,8 @@ public class Point {
 	protected void setLngFromRad(Double l) { setLng(l * 180 / Math.PI); }
 
 
-	protected void setLat(Double d) {  d *= new Double(1000000.0); setLat(d.longValue()); }
-	protected void setLng(Double d) {  d *= new Double(1000000.0); setLng(d.longValue()); }
+	protected void setLat(Double d) {  d *= 1000000.0; setLat(d.longValue()); }
+	protected void setLng(Double d) {  d *= 1000000.0; setLng(d.longValue()); }
 
 	protected void setLat(String s) { setLat(Double.parseDouble(s)); }
 	protected void setLng(String s) { setLng(Double.parseDouble(s)); }
@@ -112,8 +112,8 @@ public class Point {
 		setXYZ();
 	}
 	public Point (Double la,Double ln) {
-		la *= new Double(1000000.0);
-		ln *= new Double(1000000.0);
+		la *= 1000000.0;
+		ln *= 1000000.0;
 		setLat(la.longValue());
 		setLng(ln.longValue());
 		v = new Vector3d();
@@ -129,9 +129,9 @@ public class Point {
 		setXYZ();
 	}
 
-
+	@Override
 	public String toString() {
-		return new String (lat + ", " + lng);
+		return "" + lat + ", " + lng;
 	}
 
 	public Point inverse() {
