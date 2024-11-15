@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.3
-// @updateURL      http://silicontrip.net/portalApi/linksFields.user.js
-// @downloadURL    http://silicontrip.net/portalApi/linksFields.user.js
+// @version        0.3.1
+// @updateURL      https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
+// @downloadURL    https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @namespace    http://tampermonkey.net/
 // @description  convert drawtools links to fields or fields to links
 // @author       silicontrip
@@ -692,15 +692,35 @@ function wrapper(plugin_info) {
 				if (validity[i] != 'exists')
 				{
 					var gd =fp_grid[i];
-				//console.log("GD: "+ JSON.stringify(gd));
+                    //console.log("GD: "+ JSON.stringify(gd));
 					//var guid;
                     if (gd.type == 'polyline') {
                         guid = window.plugin.linksFields.getPointGuid(gd.latLngs[0]);
                         var stitle = window.plugin.linksFields.portalCache[guid].title;
                         guid = window.plugin.linksFields.getPointGuid(gd.latLngs[1]);
                         var dtitle = window.plugin.linksFields.portalCache[guid].title;
-                        exp += count +". " + stitle + " \u2192 " + dtitle + "\n";
+                        var kcount;
+                        if (stitle in keyreq)
+                        {
+                            kcount = keyreq[stitle];
+                        } else {
+                            kcount = 0;
+                        }
+                        exp += count +". " + "("+ kcount + ") " + stitle + " \u2192 " + dtitle + "\n";
 
+                        count ++;
+                    }
+                    if (gd.type == 'marker') {
+                        guid = window.plugin.linksFields.getPointGuid(gd.latLng);
+                        var stitle = window.plugin.linksFields.portalCache[guid].title;
+                        var kcount;
+                        if (stitle in keyreq)
+                        {
+                            kcount = keyreq[stitle];
+                        } else {
+                            kcount = 0;
+                        }
+                        exp += count +". " + "("+ kcount + ") " + stitle + "\n";
                         count ++;
                     }
 				}
@@ -1022,18 +1042,21 @@ function wrapper(plugin_info) {
 		},
 		linkInPlay: function(li) {
             // just like linkExists but for links that already created
-            const keys = Object.keys(window.plugin.linksFields.edgeCache);
-            //console.log("link cache count: " + keys.length);
-            for (const key of keys) {
-                const mapLink = window.plugin.linksFields.edgeCache[key];
-                // check that link is correct faction
-                if (mapLink.team === window.PLAYER.team.slice(0,1)) {
-                    const inLink = { latLngs: [
-                        { 'lat': (mapLink.oLatE6 / 1000000), 'lng': (mapLink.oLngE6 / 1000000) },
-                        { 'lat': (mapLink.dLatE6 / 1000000), 'lng': (mapLink.dLngE6 / 1000000)}] };
-                    //console.log("link: " + JSON.stringify(window.plugin.linksFields.edgeCache[keys[i]]));
-                    if (window.plugin.linksFields.link_equal(inLink, li)) {
-                        return true;
+
+            if (li.type == 'polyline') {
+                const keys = Object.keys(window.plugin.linksFields.edgeCache);
+                //console.log("link cache count: " + keys.length);
+                for (const key of keys) {
+                    const mapLink = window.plugin.linksFields.edgeCache[key];
+                    // check that link is correct faction
+                    if (mapLink.team === window.PLAYER.team.slice(0,1)) {
+                        const inLink = { latLngs: [
+                            { 'lat': (mapLink.oLatE6 / 1000000), 'lng': (mapLink.oLngE6 / 1000000) },
+                            { 'lat': (mapLink.dLatE6 / 1000000), 'lng': (mapLink.dLngE6 / 1000000)}] };
+                        //console.log("link: " + JSON.stringify(window.plugin.linksFields.edgeCache[keys[i]]));
+                        if (window.plugin.linksFields.link_equal(inLink, li)) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -1200,7 +1223,8 @@ function wrapper(plugin_info) {
 		},
 		link_equal : function(l1,l2)
 		{
-            if (l1.type == 'polyline' && l2.type == 'polyline')
+
+            if ("latLngs" in l1 && "latLngs" in l2)
             {
                 return (window.plugin.linksFields.point_equal(l1.latLngs[0],l2.latLngs[0]) && window.plugin.linksFields.point_equal(l1.latLngs[1],l2.latLngs[1])) || (window.plugin.linksFields.point_equal(l1.latLngs[1],l2.latLngs[0]) && window.plugin.linksFields.point_equal(l1.latLngs[0],l2.latLngs[1]));
             }
