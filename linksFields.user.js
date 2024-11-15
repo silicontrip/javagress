@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.3.1
+// @version        0.3.2
 // @updateURL      https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @downloadURL    https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @namespace    http://tampermonkey.net/
@@ -367,10 +367,13 @@ function wrapper(plugin_info) {
 			let total = 4;
 
 			for (const mod of portalMods.mods) {
-				if (mod && mod.owner === window.PLAYER.nickname) {
-					ownerCount--;
-				}
-				total--;
+                if ( !(mod === null))
+                {
+                    if (mod && mod.owner === window.PLAYER.nickname) {
+                        ownerCount--;
+                    }
+                    total--;
+                }
 			}
 
 			return ownerCount < total ? ownerCount : total;
@@ -1118,7 +1121,7 @@ function wrapper(plugin_info) {
 		},
 		get_prevents : function(grid)
 		{
-            console.log(grid);
+            //console.log(grid);
 			var fields = window.plugin.linksFields.fieldify(grid);
 			var portals = window.plugin.linksFields.getPlanPortals();
 			var field_dep = [];
