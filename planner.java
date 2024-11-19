@@ -20,6 +20,31 @@ public class planner {
 		return distance;
 	}
 
+	static int countVisitedPoints(PolyPoint pp, ArrayList<PolyPoint>visited, ArrayList<PolyObject>links)
+	{
+		int cost = 0;
+		for (PolyObject poly : links)
+		{
+			PolyPoint[] linkPoints = poly.getPoints();
+			boolean hasVisited = false;
+
+			if (pp.equals(linkPoints[0]) || pp.equals(linkPoints[1]))
+			{
+				for (PolyPoint visit : visited) 
+				{
+					if (visit.equals(linkPoints[0]) || visit.equals(linkPoints[1]))
+					{
+						hasVisited = true;
+						break;
+					}
+				}
+				if (hasVisited)
+					cost ++;
+			}
+		}
+		return cost;
+	}
+
 	static int countUnvisitedPoints(PolyPoint pp, ArrayList<PolyPoint>visited, ArrayList<PolyObject>links)
 	{
 		int cost = 0;
@@ -51,12 +76,24 @@ public class planner {
 		int maxCost = 0;
 		for (int i=0; i<planOrder.size(); i++)
 		{
+			int sbulLimit = countVisitedPoints(planOrder.get(i), visited, links);
+			if (sbulLimit>8)
+				return 1000;
 			int pointCost = countUnvisitedPoints (planOrder.get(i),visited,links);
 			if (pointCost > maxCost)
 				maxCost = pointCost;
 			visited.add(planOrder.get(i));
 		}
 		return maxCost;
+	}
+
+	static double getTotalCost (ArrayList<PolyPoint>combination, ArrayList<PolyObject>polyLines, int keyPercent)
+	{
+		int kcost = keyCost (combination,polyLines);
+		double dist = geoCost (combination);
+
+		return (kcost * keyPercent / 100.0 ) + ( dist * 1 - keyPercent / 100.0);
+ 
 	}
 
 	static DrawTools linkOrder(DrawTools dt, ArrayList<PolyPoint> combination,ArrayList<PolyObject> polyLines)
@@ -91,17 +128,77 @@ public class planner {
 		return dt;
 	}
 
+	static ArrayList<PolyPoint> generateRandom (ArrayList<PolyPoint> points)
+	{
+		ArrayList<PolyPoint>newCombination = new ArrayList<>(points);
+		Collections.shuffle(newCombination);
+		return newCombination;
+	}
+
+	static ArrayList<PolyPoint> perturbSolution(ArrayList<PolyPoint> combination)
+	{
+		int n = combination.size();
+
+		int i = new Random().nextInt(n);
+		int j = new Random().nextInt(n-1);
+		if (j >= i) 
+			j++;
+
+		ArrayList<PolyPoint> newCombination = new ArrayList<>(combination);
+		Collections.swap(newCombination,i,j);
+		return newCombination;
+	}
+
+	static void simulatedAnnealing (DrawTools dt, ArrayList<PolyPoint> combination, ArrayList<PolyObject> polyLines, int keyPercent, double initialTemperature, double coolingRate, int iterations)
+	{
+		double bestCost = 1000;
+
+		int n = combination.size();
+		ArrayList<PolyPoint> bestCombination = new ArrayList<>();
+
+		for (double temperature = initialTemperature; temperature > 1e-6; temperature *= coolingRate)
+		{
+			ArrayList<PolyPoint> currentCombination = generateRandom(combination);
+
+			double currentCost = getTotalCost(currentCombination,polyLines,keyPercent);
+
+			for (int iter =0; iter < iterations; iter++)
+			{
+				
+				ArrayList<PolyPoint> newCombination = perturbSolution(currentCombination);
+
+				double newCost = getTotalCost(newCombination, polyLines,keyPercent);
+				if (newCost < currentCost || Math.exp((currentCost - newCost) / temperature) > Math.random())
+				{
+					currentCombination = newCombination;
+					currentCost = newCost;
+
+					if (newCost < bestCost)
+					{
+						bestCost = newCost;
+						bestCombination = new ArrayList<>(newCombination);
+
+						int kcost = keyCost(bestCombination,polyLines);
+						double dist = geoCost(bestCombination);
+						System.out.print("" + kcost + " " + dist + " : ");
+						dt = linkOrder(dt,bestCombination,polyLines);
+						System.out.println(dt);
+						System.out.println("");
+					}
+				}
+			}
+		}
+	}
 	static double search (DrawTools dt, ArrayList<PolyPoint> points,  ArrayList<PolyPoint> combination,ArrayList<PolyObject> polyLines, double cost, int keyPercent)
 	{
 		if (points.size() == 0) {
-			int kcost = keyCost (combination,polyLines);
-			double dist = geoCost (combination);
-
-			double totalCost = (kcost * keyPercent / 100.0 ) + ( dist * 1 - keyPercent / 100.0);
+			double totalCost = getTotalCost (combination,polyLines,keyPercent);
  
  			if (totalCost < cost)
  			{
 				cost = totalCost;
+				int kcost = keyCost(combination,polyLines);
+				double dist = geoCost(combination);
 				System.out.print("" + kcost + " " + dist + " : ");
 				//for (PolyPoint point : combination) {
 				//	System.out.print(portalsLoc.get(point.toString()) + " ; ");
@@ -175,8 +272,9 @@ public class planner {
 			}
 */
 			ArrayList<PolyPoint> combination = new ArrayList<PolyPoint>(Arrays.asList(uniquePoints));
-        	search(dt,combination, new ArrayList<PolyPoint>(),polyLines,1000,costPercentage);
+        	//search(dt,combination, new ArrayList<PolyPoint>(),polyLines,1000,costPercentage);
 
+			simulatedAnnealing(dt, combination, polyLines, costPercentage, 1000.0, 0.95, 10000);
 
 			} catch (Exception e) {
 				System.out.print ("Exception: ");
