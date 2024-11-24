@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Collection;
+import java.util.Collections;
 import java.io.IOException;
 
 import org.json.JSONArray;
@@ -21,6 +22,14 @@ public class DrawTools {
 	public DrawTools() {
 		entities = new ArrayList<PolyObject>();	
 		colour = "#ffffff";
+	}
+
+	public DrawTools(DrawTools dt)
+	{
+		entities = new ArrayList<PolyObject>();	
+		for (int i =0; i < dt.size(); i++)
+			entities.add(dt.get(i));
+		colour = new String(dt.getColour());
 	}
 
 	public DrawTools(String clusterDescription) throws IOException
@@ -73,8 +82,6 @@ public class DrawTools {
         return uniquePoints.toArray(new PolyPoint[uniquePoints.size()]);
     }
 
-
-
 	public void jsonNodeParser(String jsonDrawtools) throws IOException
 	{
 
@@ -120,6 +127,7 @@ public class DrawTools {
 	public void setOutputAsIs() { outputType = 0; }
 
 	public void setDefaultColour(String c) { colour = c; }
+	public String getColour() { return colour; }
 
 	public void addLine (Line l) {
 		Polyline pg = new Polyline();
@@ -364,6 +372,9 @@ public class DrawTools {
 	public String out () { return this.toString();	}
 
 	public int size ()  { return entities.size(); }
+	public PolyObject get(int i) { return entities.get(i); }
+	public ArrayList<PolyObject> getEntities() { return entities; }
+
 	public int countPolygons() {
 		int count =0;
 		for (PolyObject po: entities)
@@ -420,6 +431,35 @@ class Polygon extends PolyObject {
 	public Polygon () { super ("polygon"); latLngs = new ArrayList<PolyPoint>(); }
 	public Polygon(ArrayList<PolyPoint> pp) { super("polygon"); latLngs = pp; }
 	public Polygon(ArrayList<PolyPoint> pp, String c) { super("polygon"); latLngs = pp; setColour(c); }
+	public Polygon(PolyPoint p1, PolyPoint p2, PolyPoint p3) {
+		super ("polygon");
+        this.latLngs = new ArrayList<PolyPoint>();
+        this.latLngs.add(p1);
+        this.latLngs.add(p2);
+        this.latLngs.add(p3);
+		ensureClockwise();
+    }
+	public void ensureClockwise() {
+		double sum = 0;
+		for(int i=0; i<latLngs.size()-1; i++) {
+			PolyPoint p1 = latLngs.get(i);
+			PolyPoint p2 = latLngs.get(i+1);
+   
+			// Subtract the longitude of point1 from that of point2
+			double x = (p2.lng - p1.lng) * Math.cos((p1.lat + p2.lat)/2);
+   
+			// Subtract the latitude of point1 from that of point2
+			double y = p2.lat - p1.lat;
+   
+			sum += x*y;
+		}
+   
+		// If sum is negative, points are counterclockwise. If it's positive, they're clockwise.
+		if(sum < 0) {
+			Collections.reverse(latLngs);
+		}
+   }
+   
 	public void addPoint(PolyPoint pp) { latLngs.add(pp); }
 	public ArrayList<PolyPoint> getLatLngs() { return latLngs; }
 	@Override
@@ -483,7 +523,6 @@ class Polygon extends PolyObject {
     public PolyPoint[] getPoints() {
         return latLngs.toArray(new PolyPoint[latLngs.size()]); // Assuming PolyPoint has an empty constructor
     }
-
 
 }
 

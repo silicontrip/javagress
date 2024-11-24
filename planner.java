@@ -7,6 +7,198 @@ import java.util.*;
 
 public class planner {
 
+	public static boolean containsPoint(Polygon polygon, PolyPoint point) 
+	{
+
+		for (PolyPoint vertex : polygon.latLngs) {
+			if (point.lat == vertex.lat && point.lng == vertex.lng) {
+				return false; // Point is exactly on a vertex, return true (inside)
+			}
+		}
+	
+
+		int crossCount = 0;
+		ArrayList<PolyPoint> points = polygon.getLatLngs();
+		for (int i = 1; i < points.size(); ++i) {
+			PolyPoint p1 = points.get(i - 1);
+			PolyPoint p2 = points.get(i);
+
+			if ((p1.lat > point.lat) != (p2.lat > point.lat) && point.lng < (p2.lng - p1.lng) * (point.lat - p1.lat) / (p2.lat - p1.lat) + p1.lng) 
+			{
+				crossCount++;
+			}
+		}
+	 
+		// Check the segment from the last point to the first
+		PolyPoint p1 = points.get(points.size() - 1);
+		PolyPoint p2 = points.get(0);
+
+		if ((p1.lat > point.lat) != (p2.lat > point.lat) && point.lng < (p2.lng - p1.lng) * (point.lat - p1.lat) / (p2.lat - p1.lat) + p1.lng) 
+		{
+			crossCount++;
+		}
+	 
+		return (crossCount & 1) == 1;// If odd, point is inside the polygon
+		
+	}
+	public static boolean containsPoint(ArrayList<Polygon> polys, PolyPoint point) 
+	{
+		for (Polygon polygon: polys)
+		{
+			if (containsPoint(polygon,point))
+				return true;
+		}
+		return false;
+	}
+
+	public static boolean containsPoint(Polygon polygon, ArrayList<PolyPoint> points) 
+	{
+		for (PolyPoint point: points)
+		{
+			if (containsPoint(polygon,point))
+				return true;
+		}
+		return false;
+	}
+
+	static ArrayList<Polygon> completeField(ArrayList<Polyline> order, Polyline pl) {
+		ArrayList<Polygon> completedFields = new ArrayList<>();
+	
+		// Iterate through all possible pairs of polylines from the order list and the new polyline
+		for (int i = 0; i < order.size(); i++) {
+			Polyline p1 = order.get(i);
+
+			for (int j = i + 1; j < order.size(); j++) {
+				Polyline p2 = order.get(j);
+	
+				PolyPoint p1o = p1.latLngs.get(0);
+				PolyPoint p1d = p1.latLngs.get(1);
+				PolyPoint p2o = p2.latLngs.get(0);
+				PolyPoint p2d = p2.latLngs.get(1);				
+				PolyPoint plo = pl.latLngs.get(0);
+				PolyPoint pld = pl.latLngs.get(1);
+
+				if (p1o.equals(p2o) &&
+					((plo.equals(p1d) && pld.equals(p2d)) ||
+					(plo.equals(p2d) && pld.equals(p1d)))
+				) {
+					Polygon potentialPolygon = new Polygon(p1o,plo,pld);
+					completedFields.add(potentialPolygon);
+				} else if (p1d.equals(p2o) &&
+					((plo.equals(p1o) && pld.equals(p2d)) ||
+					(plo.equals(p2d) && pld.equals(p1o)))
+				) {
+					Polygon potentialPolygon = new Polygon(p1d,plo,pld);
+					completedFields.add(potentialPolygon);
+				} else if (p1o.equals(p2d) &&
+					((plo.equals(p1d) && pld.equals(p2o)) ||
+					(plo.equals(p2o) && pld.equals(p1d)))
+				) {
+					Polygon potentialPolygon = new Polygon(p1o,plo,pld);
+					completedFields.add(potentialPolygon);
+				} else if (p1d.equals(p2d) &&
+					((plo.equals(p1o) && pld.equals(p2o)) ||
+					(plo.equals(p2o) && pld.equals(p1o)))
+				) {
+					Polygon potentialPolygon = new Polygon(p1d,plo,pld);
+					completedFields.add(potentialPolygon);
+				} 
+
+			}
+		}
+	
+		return completedFields;
+	}
+	
+	static boolean checkPlan (DrawTools dt)
+	{
+		ArrayList<Polyline> order = new ArrayList<Polyline>();
+		ArrayList<Polygon> completed = new ArrayList<Polygon>();
+
+		for (int i=0; i < dt.size(); i++)
+		{
+			PolyObject po = dt.get(i);
+			if (po.EnumType() == PolyType.POLYLINE)
+			{
+				Polyline pl = (Polyline)po;
+				if (containsPoint(completed,pl.latLngs.get(0)))
+					return false;
+
+				ArrayList<Polygon> completeFields = completeField(order,pl);
+				// can't check for 2 or more fields on one side.
+				for (Polygon pg: completeFields)
+					completed.add(pg);
+
+				order.add(pl);
+			}
+		}
+		return true;
+	}
+	
+	static boolean checkSame (DrawTools dt)
+	{
+		ArrayList<Polyline> order = new ArrayList<Polyline>();
+
+		for (int i=0; i < dt.size(); i++)
+		{
+			PolyObject po = dt.get(i);
+			if (po.EnumType() == PolyType.POLYLINE)
+			{
+				Polyline pl = (Polyline)po;
+
+				ArrayList<Polygon> completeFields = completeField(order,pl);
+				//  check for 2 or more fields on one side.
+				if (completeFields.size()>2) {
+
+					/* 
+					System.out.println("Fields created: " + completeFields.size());
+					boolean first = true;
+
+					System.out.println("[");
+					for (Polygon fi: completeFields)
+					{
+						if (!first)
+						
+							System.out.println(",");
+						first = false;
+						System.out.println(fi.getJSONObject());
+					}
+					System.out.println("]");
+					*/
+
+					return false;
+				}
+				if (completeFields.size() == 2)
+				{
+					if (containsPoint(completeFields.get(0),completeFields.get(1).getLatLngs()))
+					{
+						/* 
+						System.out.println("[");
+						System.out.println(completeFields.get(0).getJSONObject());
+						System.out.println(",");
+						System.out.println(completeFields.get(1).getJSONObject());
+						System.out.println("]");
+						*/
+						return false;
+					}
+					if (containsPoint(completeFields.get(1),completeFields.get(0).getLatLngs()))
+					{
+						 /*
+						System.out.println("[");
+						System.out.println(completeFields.get(0).getJSONObject());
+						System.out.println(",");
+						System.out.println(completeFields.get(1).getJSONObject());
+						System.out.println("]");
+						*/
+						return false;
+					}
+				}
+				order.add(pl);
+			}
+		}
+		return true;
+	}
+
 	static double geoCost(ArrayList<PolyPoint>pp)
 	{
 		double distance = 0;
@@ -89,11 +281,117 @@ public class planner {
 
 	static double getTotalCost (ArrayList<PolyPoint>combination, ArrayList<PolyObject>polyLines, int keyPercent)
 	{
+		DrawTools dt = new DrawTools();
 		int kcost = keyCost (combination,polyLines);
 		double dist = geoCost (combination);
 
+		if (kcost < 1000)
+		{
+			dt = linkOrder(dt,combination,polyLines);
+			if (!checkPlan(dt))
+				kcost = 10000;
+		}
 		return (kcost * keyPercent / 100.0 ) + ( dist * 1 - keyPercent / 100.0);
  
+	}
+
+	static int factorial(int n) {
+		int result = 1;
+		for (int i = 2; i <= n; i++) {
+			result *= i;
+		}
+		return result;
+	}
+
+    // Method to generate the next permutation based on the counter
+    static boolean nextPermutation(List<PolyPoint> visited, int step) {
+        int n = visited.size();
+        
+		if (n==1)
+			return true;
+        // If step exceeds the total number of permutations, return false (end of permutations)
+        if (step >= factorial(n)) {
+            return false;
+        }
+
+        int[] p = new int[n];
+
+        for (int i=0; i < n; i++)
+            p[i] = 0;
+
+        int j = 1;
+        int i = 1;
+        if (step > 0)
+            while (i < n)
+            {
+                if (p[i] < i)
+                {
+                    j = i % 2 * p[i];
+                    step --;
+                    if (step == 0)
+                        break;
+                    p[i]++;
+                    i = 1;
+                } else {
+                    p[i] = 0;
+                    i++;
+                }
+            }
+        // Perform the swap with only one element per iteration based on swapIndex
+        //System.err.println("swap: " + j + " <-> " + i);
+        Collections.swap(visited, j, i);
+
+        return true;
+    }
+
+	static DrawTools linkOrderSame(DrawTools dt, ArrayList<PolyPoint> combination,ArrayList<PolyObject> polyLines)
+	{
+		dt.erase();
+		ArrayList<PolyPoint>visited = new ArrayList<PolyPoint>();
+		visited.add(combination.get(0));
+		dt.addMarker(combination.get(0));
+
+		for (int i = 1; i < combination.size(); i++) 
+		{
+			PolyPoint thisPoint = combination.get(i);
+			ArrayList<PolyPoint> outLinks = new ArrayList<PolyPoint>();
+
+			for (PolyPoint visitPoint : visited)
+			{
+				for (PolyObject po : polyLines)
+				{
+					if ((thisPoint.equals(po.getPoints()[0]) && visitPoint.equals(po.getPoints()[1])) ||
+						(thisPoint.equals(po.getPoints()[1]) && visitPoint.equals(po.getPoints()[0])) )
+					{
+						outLinks.add(visitPoint);
+					}
+				}
+			}
+			if (outLinks.size() > 0)
+			{
+				boolean validPlan = false;
+				int counter = 0;
+				DrawTools ndt = new DrawTools(dt);
+
+				int countLimit = factorial(outLinks.size());
+
+				while (!validPlan && counter < countLimit) {
+					ndt = new DrawTools(dt);
+					nextPermutation(outLinks, counter++);
+					for (PolyPoint pp: outLinks)
+					{
+						ndt.addLine(thisPoint, pp);
+					}
+
+					validPlan = checkSame(ndt);
+				}
+				dt = ndt;
+			} else {
+				dt.addMarker(thisPoint);
+			}
+			visited.add(thisPoint);
+		}
+		return dt;
 	}
 
 	static DrawTools linkOrder(DrawTools dt, ArrayList<PolyPoint> combination,ArrayList<PolyObject> polyLines)
@@ -106,19 +404,21 @@ public class planner {
 		for (int i = 1; i < combination.size(); i++) {
 			boolean linked = false;
 			PolyPoint thisPoint = combination.get(i);
-			for (PolyObject po : polyLines)
+
+			for (PolyPoint visitPoint : visited)
 			{
-				for (PolyPoint visitPoint : visited)
+				for (PolyObject po : polyLines)
 				{
 					if ((thisPoint.equals(po.getPoints()[0]) && visitPoint.equals(po.getPoints()[1])) ||
 						(thisPoint.equals(po.getPoints()[1]) && visitPoint.equals(po.getPoints()[0])) )
-						{
-							dt.addLine(thisPoint,visitPoint);
-							linked = true;
-						}
+					{
+						dt.addLine(thisPoint,visitPoint);
+						linked = true;
+					}
 				}
 
 			}
+			
 			if (!linked)
 			{
 				dt.addMarker(thisPoint);
@@ -181,9 +481,15 @@ public class planner {
 						int kcost = keyCost(bestCombination,polyLines);
 						double dist = geoCost(bestCombination);
 						System.out.print("" + kcost + " " + dist + " : ");
-						dt = linkOrder(dt,bestCombination,polyLines);
-						System.out.println(dt);
+						//dt = linkOrder(dt,bestCombination,polyLines);
+						//System.out.println(dt);
 						System.out.println("");
+						if (kcost < 1000)
+						{
+							dt = linkOrderSame(dt,bestCombination,polyLines);
+							System.out.println(dt);
+							System.out.println("");
+						}
 					}
 				}
 			}
@@ -259,7 +565,7 @@ public class planner {
 			//for (Portal pn : portalsGuid.values())
 			//{
 			//	System.out.println(pn);
-		//		String locKey = "" + pn.getLat() + "," + pn.getLng();
+		//		String locKey = "" + pn.lat + "," + pn.lng;
 		//		portalsLoc.put(locKey,pn);
 		//	}
 
