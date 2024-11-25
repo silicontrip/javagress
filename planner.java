@@ -7,6 +7,21 @@ import java.util.*;
 
 public class planner {
 
+	private int keyPercent;
+	private int sbulAvailable;
+	private DrawTools dt;
+	private int sbulLimit;
+	private ArrayList<PolyObject> polyLines;
+	
+	public planner (int k, int s, DrawTools d,ArrayList<PolyObject>p)
+	{
+		keyPercent = k;
+		sbulAvailable = s;
+		dt = d;
+		polyLines = p;
+		sbulLimit = 8 + sbulAvailable * 8;
+	}
+
 	public static boolean containsPoint(Polygon polygon, PolyPoint point) 
 	{
 
@@ -110,17 +125,18 @@ public class planner {
 		return completedFields;
 	}
 	
-	static boolean checkPlan (DrawTools dt)
+	static boolean checkPlan (DrawTools dts)
 	{
 		ArrayList<Polyline> order = new ArrayList<Polyline>();
 		ArrayList<Polygon> completed = new ArrayList<Polygon>();
 
-		for (int i=0; i < dt.size(); i++)
+		for (int i=0; i < dts.size(); i++)
 		{
-			PolyObject po = dt.get(i);
+			PolyObject po = dts.get(i);
 			if (po.EnumType() == PolyType.POLYLINE)
 			{
 				Polyline pl = (Polyline)po;
+				// check if link is less than 2000m
 				if (containsPoint(completed,pl.latLngs.get(0)))
 					return false;
 
@@ -135,13 +151,13 @@ public class planner {
 		return true;
 	}
 	
-	static boolean checkSame (DrawTools dt)
+	static boolean checkSame (DrawTools dts)
 	{
 		ArrayList<Polyline> order = new ArrayList<Polyline>();
 
-		for (int i=0; i < dt.size(); i++)
+		for (int i=0; i < dts.size(); i++)
 		{
-			PolyObject po = dt.get(i);
+			PolyObject po = dts.get(i);
 			if (po.EnumType() == PolyType.POLYLINE)
 			{
 				Polyline pl = (Polyline)po;
@@ -212,10 +228,10 @@ public class planner {
 		return distance;
 	}
 
-	static int countVisitedPoints(PolyPoint pp, ArrayList<PolyPoint>visited, ArrayList<PolyObject>links)
+	int countVisitedPoints(PolyPoint pp, ArrayList<PolyPoint>visited)
 	{
 		int cost = 0;
-		for (PolyObject poly : links)
+		for (PolyObject poly : polyLines)
 		{
 			PolyPoint[] linkPoints = poly.getPoints();
 			boolean hasVisited = false;
@@ -237,10 +253,10 @@ public class planner {
 		return cost;
 	}
 
-	static int countUnvisitedPoints(PolyPoint pp, ArrayList<PolyPoint>visited, ArrayList<PolyObject>links)
+	int countUnvisitedPoints(PolyPoint pp, ArrayList<PolyPoint>visited)
 	{
 		int cost = 0;
-		for (PolyObject poly : links)
+		for (PolyObject poly : polyLines)
 		{
 			PolyPoint[] linkPoints = poly.getPoints();
 			boolean hasVisited = false;
@@ -262,16 +278,16 @@ public class planner {
 		return cost;
 	}
 
-	static int keyCost(ArrayList<PolyPoint>planOrder, ArrayList<PolyObject>links)
+	int keyCost(ArrayList<PolyPoint>planOrder)
 	{
 		ArrayList<PolyPoint>visited = new ArrayList<PolyPoint>();
 		int maxCost = 0;
 		for (int i=0; i<planOrder.size(); i++)
 		{
-			int sbulLimit = countVisitedPoints(planOrder.get(i), visited, links);
-			if (sbulLimit>8)
+			int linkLimit = countVisitedPoints(planOrder.get(i), visited);
+			if (linkLimit>sbulLimit)
 				return 1000;
-			int pointCost = countUnvisitedPoints (planOrder.get(i),visited,links);
+			int pointCost = countUnvisitedPoints (planOrder.get(i),visited);
 			if (pointCost > maxCost)
 				maxCost = pointCost;
 			visited.add(planOrder.get(i));
@@ -279,16 +295,16 @@ public class planner {
 		return maxCost;
 	}
 
-	static double getTotalCost (ArrayList<PolyPoint>combination, ArrayList<PolyObject>polyLines, int keyPercent)
+	double getTotalCost (ArrayList<PolyPoint>combination)
 	{
-		DrawTools dt = new DrawTools();
-		int kcost = keyCost (combination,polyLines);
+		DrawTools dts = new DrawTools();
+		int kcost = keyCost (combination);
 		double dist = geoCost (combination);
 
 		if (kcost < 1000)
 		{
-			dt = linkOrder(dt,combination,polyLines);
-			if (!checkPlan(dt))
+			dts = linkOrder(dts,combination);
+			if (!checkPlan(dts))
 				kcost = 10000;
 		}
 		return (kcost * keyPercent / 100.0 ) + ( dist * 1 - keyPercent / 100.0);
@@ -344,12 +360,12 @@ public class planner {
         return true;
     }
 
-	static DrawTools linkOrderSame(DrawTools dt, ArrayList<PolyPoint> combination,ArrayList<PolyObject> polyLines)
+	DrawTools linkOrderSame(DrawTools dts, ArrayList<PolyPoint> combination)
 	{
-		dt.erase();
+		dts.erase();
 		ArrayList<PolyPoint>visited = new ArrayList<PolyPoint>();
 		visited.add(combination.get(0));
-		dt.addMarker(combination.get(0));
+		dts.addMarker(combination.get(0));
 
 		for (int i = 1; i < combination.size(); i++) 
 		{
@@ -371,12 +387,12 @@ public class planner {
 			{
 				boolean validPlan = false;
 				int counter = 0;
-				DrawTools ndt = new DrawTools(dt);
+				DrawTools ndt = new DrawTools(dts);
 
 				int countLimit = factorial(outLinks.size());
 
 				while (!validPlan && counter < countLimit) {
-					ndt = new DrawTools(dt);
+					ndt = new DrawTools(dts);
 					nextPermutation(outLinks, counter++);
 					for (PolyPoint pp: outLinks)
 					{
@@ -385,21 +401,21 @@ public class planner {
 
 					validPlan = checkSame(ndt);
 				}
-				dt = ndt;
+				dts = ndt;
 			} else {
-				dt.addMarker(thisPoint);
+				dts.addMarker(thisPoint);
 			}
 			visited.add(thisPoint);
 		}
-		return dt;
+		return dts;
 	}
 
-	static DrawTools linkOrder(DrawTools dt, ArrayList<PolyPoint> combination,ArrayList<PolyObject> polyLines)
+	DrawTools linkOrder(DrawTools dts, ArrayList<PolyPoint> combination)
 	{
-		dt.erase();
+		dts.erase();
 		ArrayList<PolyPoint>visited = new ArrayList<PolyPoint>();
 		visited.add(combination.get(0));
-		dt.addMarker(combination.get(0));
+		dts.addMarker(combination.get(0));
 
 		for (int i = 1; i < combination.size(); i++) {
 			boolean linked = false;
@@ -412,7 +428,7 @@ public class planner {
 					if ((thisPoint.equals(po.getPoints()[0]) && visitPoint.equals(po.getPoints()[1])) ||
 						(thisPoint.equals(po.getPoints()[1]) && visitPoint.equals(po.getPoints()[0])) )
 					{
-						dt.addLine(thisPoint,visitPoint);
+						dts.addLine(thisPoint,visitPoint);
 						linked = true;
 					}
 				}
@@ -421,11 +437,11 @@ public class planner {
 			
 			if (!linked)
 			{
-				dt.addMarker(thisPoint);
+				dts.addMarker(thisPoint);
 			}
 			visited.add(thisPoint);
 		}
-		return dt;
+		return dts;
 	}
 
 	static ArrayList<PolyPoint> generateRandom (ArrayList<PolyPoint> points)
@@ -449,7 +465,7 @@ public class planner {
 		return newCombination;
 	}
 
-	static void simulatedAnnealing (DrawTools dt, ArrayList<PolyPoint> combination, ArrayList<PolyObject> polyLines, int keyPercent, double initialTemperature, double coolingRate, int iterations)
+	void simulatedAnnealing (ArrayList<PolyPoint> combination, double initialTemperature, double coolingRate, int iterations)
 	{
 		double bestCost = 1000;
 
@@ -460,14 +476,14 @@ public class planner {
 		{
 			ArrayList<PolyPoint> currentCombination = generateRandom(combination);
 
-			double currentCost = getTotalCost(currentCombination,polyLines,keyPercent);
+			double currentCost = getTotalCost(currentCombination);
 
 			for (int iter =0; iter < iterations; iter++)
 			{
 				
 				ArrayList<PolyPoint> newCombination = perturbSolution(currentCombination);
 
-				double newCost = getTotalCost(newCombination, polyLines,keyPercent);
+				double newCost = getTotalCost(newCombination);
 				if (newCost < currentCost || Math.exp((currentCost - newCost) / temperature) > Math.random())
 				{
 					currentCombination = newCombination;
@@ -478,15 +494,15 @@ public class planner {
 						bestCost = newCost;
 						bestCombination = new ArrayList<>(newCombination);
 
-						int kcost = keyCost(bestCombination,polyLines);
+						int kcost = keyCost(bestCombination);
 						double dist = geoCost(bestCombination);
 						System.out.print("" + kcost + " " + dist + " : ");
-						//dt = linkOrder(dt,bestCombination,polyLines);
+						//dt = linkOrder(dt,bestCombination);
 						//System.out.println(dt);
 						System.out.println("");
 						if (kcost < 1000)
 						{
-							dt = linkOrderSame(dt,bestCombination,polyLines);
+							dt = linkOrderSame(dt,bestCombination);
 							System.out.println(dt);
 							System.out.println("");
 						}
@@ -495,22 +511,22 @@ public class planner {
 			}
 		}
 	}
-	static double search (DrawTools dt, ArrayList<PolyPoint> points,  ArrayList<PolyPoint> combination,ArrayList<PolyObject> polyLines, double cost, int keyPercent)
+	double search (ArrayList<PolyPoint> points,  ArrayList<PolyPoint> combination, double cost)
 	{
 		if (points.size() == 0) {
-			double totalCost = getTotalCost (combination,polyLines,keyPercent);
+			double totalCost = getTotalCost (combination);
  
  			if (totalCost < cost)
  			{
 				cost = totalCost;
-				int kcost = keyCost(combination,polyLines);
+				int kcost = keyCost(combination);
 				double dist = geoCost(combination);
 				System.out.print("" + kcost + " " + dist + " : ");
 				//for (PolyPoint point : combination) {
 				//	System.out.print(portalsLoc.get(point.toString()) + " ; ");
 				//}
 				//System.out.println("");
-				dt = linkOrder(dt,combination,polyLines);
+				dt = linkOrder(dt,combination);
 				System.out.println(dt);
 				System.out.println("");
 
@@ -521,7 +537,7 @@ public class planner {
 			newCombination.add(points.get(i));
 			ArrayList<PolyPoint>pointsCopy = new ArrayList<PolyPoint>(points);
 			pointsCopy.remove(i);
-			cost = search (dt,pointsCopy,newCombination,polyLines,cost,keyPercent);
+			cost = search (pointsCopy,newCombination,cost);
 		}
 		return cost;
 	}
@@ -543,6 +559,12 @@ public class planner {
 			Integer costPercentage = 50;
 			if (ag.hasOption("k"))
 				costPercentage = Integer.valueOf(ag.getOptionForKey("k"));
+
+			// don't blame me if you specify more than 2 for a single agent or more than 4
+			Integer sbulCount = 0;
+			if (ag.hasOption("s"))
+				sbulCount = Integer.valueOf(ag.getOptionForKey("s"));
+			
 
 			if (ag.getArgumentCount() != 1) {
 				System.out.println("Please provide a JSON string as an argument.");
@@ -580,7 +602,9 @@ public class planner {
 			ArrayList<PolyPoint> combination = new ArrayList<PolyPoint>(Arrays.asList(uniquePoints));
         	//search(dt,combination, new ArrayList<PolyPoint>(),polyLines,1000,costPercentage);
 
-			simulatedAnnealing(dt, combination, polyLines, costPercentage, 1000.0, 0.95, 10000);
+			planner p = new planner(costPercentage, sbulCount, dt, polyLines);
+
+			p.simulatedAnnealing(combination, 1000.0, 0.95, 10000);
 
 			} catch (Exception e) {
 				System.out.print ("Exception: ");
