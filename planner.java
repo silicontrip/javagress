@@ -606,12 +606,12 @@ public class planner {
 
 			p.simulatedAnnealing(combination, 1000.0, 0.95, 10000);
 
-			} catch (Exception e) {
-				System.out.print ("Exception: ");
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			}
-
+		} catch (Exception e) {
+			System.out.print ("Exception: ");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
+
+	}
 
 }
