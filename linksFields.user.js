@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.3.2
+// @version        0.4
 // @updateURL      https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @downloadURL    https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @namespace    http://tampermonkey.net/
@@ -1119,6 +1119,27 @@ function wrapper(plugin_info) {
 		{
 			return p1.lat == p2.lat && p1.lng == p2.lng;
 		},
+        haversine_distance : function (p1, p2)
+        {
+            const R = 6367e3; // Ingress Earth Radius in metres
+
+            const lat1 = p1.lat * Math.PI / 180;
+            const lon1 = p1.lng * Math.PI / 180;
+            const lat2 = p2.lat * Math.PI / 180;
+            const lon2 = p2.lng * Math.PI / 180;
+
+            const dLat = lat2 - lat1;
+            const dLon = lon2 - lon1;
+
+            const a =
+                  Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1) * Math.cos(lat2) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c; // Distance in metres
+        },
 		get_prevents : function(grid)
 		{
             //console.log(grid);
@@ -1139,7 +1160,7 @@ function wrapper(plugin_info) {
                         {
                             if (li.type == 'polyline')
                             {
-                                if (window.plugin.linksFields.point_equal(pt,li.latLngs[0]))
+                                if (window.plugin.linksFields.point_equal(pt,li.latLngs[0]) && window.plugin.linksFields.haversine_distance(pt,li.latLngs[1]) > 2000)
                                 {
                                     prevents.push(li);
                                 }
