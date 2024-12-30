@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.*;
+import javax.vecmath.*;
 
 public class planner {
 
@@ -13,7 +14,10 @@ public class planner {
 	private int sbulLimit;
 	private boolean allow2km;
 	private ArrayList<PolyObject> polyLines;
-	
+
+	private static Map<Polygon, List<PolyPoint>> polygonsMap;
+
+	ArrayList<Polyline> order = new ArrayList<>();
 	public planner (int k, int s, DrawTools d,ArrayList<PolyObject>p, boolean a2k)
 	{
 		keyPercent = k;
@@ -22,8 +26,54 @@ public class planner {
 		polyLines = p;
 		sbulLimit = 8 + sbulAvailable * 8;
 		allow2km = a2k;
+
+		PolyPoint[] uniquePoints = d.getUniquePoints();
+		polygonsMap = new HashMap<Polygon, List<PolyPoint>>();
+
+		for (int i = 0; i < p.size(); i++) {
+			PolyObject po = p.get(i);
+			if (po.EnumType() == PolyType.POLYLINE) {
+				Polyline pl = (Polyline) po;
+				ArrayList<Polygon> completeFields = completeField(order, pl);
+				for (Polygon pg : completeFields) {
+					if (!polygonsMap.containsKey(pg))
+					{
+						polygonsMap.put(pg, new ArrayList<>());
+					}
+					for (PolyPoint pp: uniquePoints) 
+					{
+						if (containsPoint(pg,pp))
+						{
+							polygonsMap.get(pg).add(pp);
+						}
+					}
+				}
+			}
+
+		}
+
 	}
 
+/*
+public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
+    final double EPSILON = 1e-6; // Small value to account for floating-point precision
+
+    // Calculate vectors from triangle vertices to the point
+    Vector3d v0 = new Vector3d(triangle.latLngs.get(0).lng - point.lng, triangle.latLngs.get(0).lat - point.lat, 0);
+    Vector3d v1 = new Vector3d(triangle.latLngs.get(1).lng - point.lng, triangle.latLngs.get(1).lat - point.lat, 0);
+    Vector3d v2 = new Vector3d(triangle.latLngs.get(2).lng - point.lng, triangle.latLngs.get(2).lat - point.lat, 0);
+
+    // Calculate the cross product of each edge vector with the vector from the point to the opposite vertex
+    double crossProduct1 = v0.cross(v1).length();
+    double crossProduct2 = v1.cross(v2).length();
+    double crossProduct3 = v2.cross(v0).length();
+
+    // Check if all cross products have the same sign (positive or negative)
+    return (crossProduct1 >= -EPSILON && crossProduct1 <= EPSILON)
+            && (crossProduct2 >= -EPSILON && crossProduct2 <= EPSILON)
+            && (crossProduct3 >= -EPSILON && crossProduct3 <= EPSILON);
+}
+*/
 	public static boolean containsPoint(Polygon polygon, PolyPoint point) 
 	{
 
@@ -155,7 +205,8 @@ public class planner {
 	boolean checkPlan (DrawTools dts)
 	{
 		ArrayList<Polyline> order = new ArrayList<Polyline>();
-		ArrayList<Polygon> completed = new ArrayList<Polygon>();
+		//ArrayList<Polygon> completed = new ArrayList<Polygon>();
+		HashSet<PolyPoint> coveredPoints = new HashSet<PolyPoint>();
 
 		for (int i=0; i < dts.size(); i++)
 		{
@@ -164,13 +215,17 @@ public class planner {
 			{
 				Polyline pl = (Polyline)po;
 				// check if link is less than 2000m
-				if (containsPoint(completed,pl.latLngs.get(0)) && !(haversineDistance(pl) <= 2.0 && allow2km))
+				if (coveredPoints.contains(pl.latLngs.get(0)) && !(haversineDistance(pl) <= 2.0 && allow2km))
 					return false;
+			//	if (containsPoint(completed,pl.latLngs.get(0)) && !(haversineDistance(pl) <= 2.0 && allow2km))
+			//		return false;
 
 				ArrayList<Polygon> completeFields = completeField(order,pl);
 				// can't check for 2 or more fields on one side.
 				for (Polygon pg: completeFields)
-					completed.add(pg);
+                                        if (polygonsMap.containsKey(pg))
+						coveredPoints.addAll(polygonsMap.get(pg));
+					//completed.add(pg);
 
 				order.add(pl);
 			}
@@ -623,6 +678,10 @@ public class planner {
 		//	}
 
 			ArrayList<PolyObject> polyLines = dtp.getAsLines();
+
+		// or put this in planner constructor.
+		// get As Polygons
+		// create polygon HashMap, with array of contained points.
 /*
 			for (PolyObject po : polyLines)
 			{
