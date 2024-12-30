@@ -164,7 +164,7 @@ public class planner {
 			{
 				Polyline pl = (Polyline)po;
 				// check if link is less than 2000m
-				if (containsPoint(completed,pl.latLngs.get(0)) && (haversineDistance(pl)>2.0 || !allow2km))
+				if (containsPoint(completed,pl.latLngs.get(0)) && !(haversineDistance(pl) <= 2.0 && allow2km))
 					return false;
 
 				ArrayList<Polygon> completeFields = completeField(order,pl);
