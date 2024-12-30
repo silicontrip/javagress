@@ -11,15 +11,17 @@ public class planner {
 	private int sbulAvailable;
 	private DrawTools dt;
 	private int sbulLimit;
+	private boolean allow2km;
 	private ArrayList<PolyObject> polyLines;
 	
-	public planner (int k, int s, DrawTools d,ArrayList<PolyObject>p)
+	public planner (int k, int s, DrawTools d,ArrayList<PolyObject>p, boolean a2k)
 	{
 		keyPercent = k;
 		sbulAvailable = s;
 		dt = d;
 		polyLines = p;
 		sbulLimit = 8 + sbulAvailable * 8;
+		allow2km = a2k;
 	}
 
 	public static boolean containsPoint(Polygon polygon, PolyPoint point) 
@@ -124,8 +126,33 @@ public class planner {
 	
 		return completedFields;
 	}
+
+	static double haversineDistance(Polyline pl) 
+	{
+		final int R = 6367; // Ingress Radius of the Earth in Km
+
+		// Convert latitude and longitude from degrees to radians
+		double lat1Rad = Math.toRadians(pl.latLngs.get(0).lat);
+		double lon1Rad = Math.toRadians(pl.latLngs.get(0).lng);
+		double lat2Rad = Math.toRadians(pl.latLngs.get(1).lat);
+		double lon2Rad = Math.toRadians(pl.latLngs.get(1).lng);
+
+		// Calculate differences between the points' coordinates
+		double dLat = lat2Rad - lat1Rad;
+		double dLon = lon2Rad - lon1Rad;
+
+		// Haversine formula
+		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+			Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+			Math.sin(dLon / 2) * Math.sin(dLon / 2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+		// Calculate the distance between the points
+		return R * c;
+	}
+
 	
-	static boolean checkPlan (DrawTools dts)
+	boolean checkPlan (DrawTools dts)
 	{
 		ArrayList<Polyline> order = new ArrayList<Polyline>();
 		ArrayList<Polygon> completed = new ArrayList<Polygon>();
@@ -137,7 +164,7 @@ public class planner {
 			{
 				Polyline pl = (Polyline)po;
 				// check if link is less than 2000m
-				if (containsPoint(completed,pl.latLngs.get(0)))
+				if (containsPoint(completed,pl.latLngs.get(0)) && (haversineDistance(pl)>2.0 || !allow2km))
 					return false;
 
 				ArrayList<Polygon> completeFields = completeField(order,pl);
@@ -564,6 +591,10 @@ public class planner {
 			Integer sbulCount = 0;
 			if (ag.hasOption("s"))
 				sbulCount = Integer.valueOf(ag.getOptionForKey("s"));
+
+			boolean allow2km = false;
+			if (ag.hasOption("l"))
+				allow2km = true;
 			
 
 			if (ag.getArgumentCount() != 1) {
@@ -602,7 +633,7 @@ public class planner {
 			ArrayList<PolyPoint> combination = new ArrayList<PolyPoint>(Arrays.asList(uniquePoints));
         	//search(dt,combination, new ArrayList<PolyPoint>(),polyLines,1000,costPercentage);
 
-			planner p = new planner(costPercentage, sbulCount, dt, polyLines);
+			planner p = new planner(costPercentage, sbulCount, dt, polyLines, allow2km);
 
 			p.simulatedAnnealing(combination, 1000.0, 0.95, 10000);
 
