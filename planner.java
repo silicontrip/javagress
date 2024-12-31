@@ -17,8 +17,7 @@ public class planner {
 
 	private static Map<Polygon, List<PolyPoint>> polygonsMap;
 
-	ArrayList<Polyline> order = new ArrayList<>();
-	public planner (int k, int s, DrawTools d,ArrayList<PolyObject>p, boolean a2k)
+	public planner (int k, int s, DrawTools d, DrawTools din, ArrayList<PolyObject>p, boolean a2k)
 	{
 		keyPercent = k;
 		sbulAvailable = s;
@@ -27,8 +26,11 @@ public class planner {
 		sbulLimit = 8 + sbulAvailable * 8;
 		allow2km = a2k;
 
-		PolyPoint[] uniquePoints = d.getUniquePoints();
+		PolyPoint[] uniquePoints = din.getUniquePoints();
 		polygonsMap = new HashMap<Polygon, List<PolyPoint>>();
+		ArrayList<Polyline> order = new ArrayList<>();
+
+		//System.out.println("unique points: " + uniquePoints.length);
 
 		for (int i = 0; i < p.size(); i++) {
 			PolyObject po = p.get(i);
@@ -36,18 +38,24 @@ public class planner {
 				Polyline pl = (Polyline) po;
 				ArrayList<Polygon> completeFields = completeField(order, pl);
 				for (Polygon pg : completeFields) {
+					//System.out.println("completed field: " + pg);
 					if (!polygonsMap.containsKey(pg))
 					{
+						//System.out.println("Adding Array.");
+
 						polygonsMap.put(pg, new ArrayList<>());
 					}
 					for (PolyPoint pp: uniquePoints) 
 					{
 						if (containsPoint(pg,pp))
 						{
+							//System.out.println("Adding Point: " + pp);
+
 							polygonsMap.get(pg).add(pp);
 						}
 					}
 				}
+				order.add(pl);
 			}
 
 		}
@@ -216,16 +224,22 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 				// check if link is less than 2000m
 				if (coveredPoints.contains(pl.latLngs.get(0)) && !(haversineDistance(pl) <= 2.0 && allow2km))
 					return false;
-			//	if (containsPoint(completed,pl.latLngs.get(0)) && !(haversineDistance(pl) <= 2.0 && allow2km))
-			//		return false;
+				//if (containsPoint(completed,pl.latLngs.get(0)) && !(haversineDistance(pl) <= 2.0 && allow2km))
+				//	return false;
 
 				ArrayList<Polygon> completeFields = completeField(order,pl);
 				// can't check for 2 or more fields on one side.
-				for (Polygon pg: completeFields)
-					if (polygonsMap.containsKey(pg))
-						coveredPoints.addAll(polygonsMap.get(pg));
-					//completed.add(pg);
+				for (Polygon pg: completeFields) {
+					//System.err.println("" + completeFields.size() + " fields completed");
 
+					if (polygonsMap.containsKey(pg))
+					{
+						//System.err.println("Adding points: " + polygonsMap.get(pg) );
+						coveredPoints.addAll(polygonsMap.get(pg));
+					}
+				
+					//completed.add(pg);
+				}
 				order.add(pl);
 			}
 		}
@@ -701,7 +715,7 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 			ArrayList<PolyPoint> combination = new ArrayList<PolyPoint>(Arrays.asList(uniquePoints));
         	//search(dt,combination, new ArrayList<PolyPoint>(),polyLines,1000,costPercentage);
 
-			planner p = new planner(costPercentage, sbulCount, dt, polyLines, allow2km);
+			planner p = new planner(costPercentage, sbulCount, dt, dtp, polyLines, allow2km);
 
 			p.simulatedAnnealing(combination, initialTemperature, 0.95, iterations);
 
