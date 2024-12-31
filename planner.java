@@ -74,7 +74,7 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
             && (crossProduct3 >= -EPSILON && crossProduct3 <= EPSILON);
 }
 */
-	public static boolean containsPoint(Polygon polygon, PolyPoint point) 
+	static boolean containsPoint(Polygon polygon, PolyPoint point) 
 	{
 
 		for (PolyPoint vertex : polygon.latLngs) {
@@ -83,7 +83,6 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 			}
 		}
 	
-
 		int crossCount = 0;
 		ArrayList<PolyPoint> points = polygon.getLatLngs();
 		for (int i = 1; i < points.size(); ++i) {
@@ -108,7 +107,7 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 		return (crossCount & 1) == 1;// If odd, point is inside the polygon
 		
 	}
-	public static boolean containsPoint(ArrayList<Polygon> polys, PolyPoint point) 
+	static boolean containsPoint(ArrayList<Polygon> polys, PolyPoint point) 
 	{
 		for (Polygon polygon: polys)
 		{
@@ -118,7 +117,7 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 		return false;
 	}
 
-	public static boolean containsPoint(Polygon polygon, ArrayList<PolyPoint> points) 
+	static boolean containsPoint(Polygon polygon, ArrayList<PolyPoint> points) 
 	{
 		for (PolyPoint point: points)
 		{
@@ -223,7 +222,7 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 				ArrayList<Polygon> completeFields = completeField(order,pl);
 				// can't check for 2 or more fields on one side.
 				for (Polygon pg: completeFields)
-                                        if (polygonsMap.containsKey(pg))
+					if (polygonsMap.containsKey(pg))
 						coveredPoints.addAll(polygonsMap.get(pg));
 					//completed.add(pg);
 
@@ -465,7 +464,7 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 					}
 				}
 			}
-			if (outLinks.size() > 0)
+			if (!outLinks.isEmpty())
 			{
 				boolean validPlan = false;
 				int counter = 0;
@@ -551,12 +550,13 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 	{
 		double bestCost = 1000;
 
-		int n = combination.size();
-		ArrayList<PolyPoint> bestCombination = new ArrayList<>();
+		// int n = combination.size();
+		ArrayList<PolyPoint> bestCombination; // = new ArrayList<>();
+		ArrayList<PolyPoint> currentCombination = generateRandom(combination);
 
 		for (double temperature = initialTemperature; temperature > 1e-6; temperature *= coolingRate)
 		{
-			ArrayList<PolyPoint> currentCombination = generateRandom(combination);
+			//ArrayList<PolyPoint> currentCombination = generateRandom(combination);
 
 			double currentCost = getTotalCost(currentCombination);
 
@@ -578,7 +578,7 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 
 						int kcost = keyCost(bestCombination);
 						double dist = geoCost(bestCombination);
-						System.out.print("" + kcost + " " + dist + " : ");
+						System.out.print("" + kcost + " " + dist + " : (" + temperature + "/" + iter+")");
 						//dt = linkOrder(dt,bestCombination);
 						//System.out.println(dt);
 						System.out.println("");
@@ -595,7 +595,7 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 	}
 	double search (ArrayList<PolyPoint> points,  ArrayList<PolyPoint> combination, double cost)
 	{
-		if (points.size() == 0) {
+		if (points.isEmpty()) {
 			double totalCost = getTotalCost (combination);
  
  			if (totalCost < cost)
@@ -651,6 +651,15 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 			if (ag.hasOption("l"))
 				allow2km = true;
 			
+			// hopefully these are good default values for other plans.
+			double initialTemperature = 2.0;
+			if (ag.hasOption("t"))
+				initialTemperature = Double.valueOf(ag.getOptionForKey("t"));
+
+			// good default?
+			int iterations = 2000;
+			if (ag.hasOption("i"))
+				iterations = Integer.valueOf(ag.getOptionForKey("i"));
 
 			if (ag.getArgumentCount() != 1) {
 				System.out.println("Please provide a JSON string as an argument.");
@@ -694,7 +703,7 @@ public static boolean triContainsPoint(Polygon triangle, PolyPoint point) {
 
 			planner p = new planner(costPercentage, sbulCount, dt, polyLines, allow2km);
 
-			p.simulatedAnnealing(combination, 1000.0, 0.95, 10000);
+			p.simulatedAnnealing(combination, initialTemperature, 0.95, iterations);
 
 		} catch (Exception e) {
 			System.out.print ("Exception: ");
