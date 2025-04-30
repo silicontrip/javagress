@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.4
+// @version        0.4.1
 // @updateURL      https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @downloadURL    https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @namespace    http://tampermonkey.net/
@@ -104,7 +104,7 @@ function wrapper(plugin_info) {
                             window.plugin.linksFields.portalCache[portal.guid] = portal;
                             // is unloaded dialog shown?
                             var unloaded = $('#unloaded');
-                            console.log("UNLOADED: " + JSON.stringify(unloaded));
+                            //console.log("UNLOADED: " + JSON.stringify(unloaded));
                             if (unloaded.length > 0)
                             {
                                 // check that all portals are cached.
@@ -271,7 +271,6 @@ function wrapper(plugin_info) {
 			}
 			return linkList;
 		},
-
 		sortExisting: function(link_list) {
 			// This moves existing links to the top of the plan.
 			var exist_list = link_list.filter(this.linkInPlay);
@@ -284,10 +283,17 @@ function wrapper(plugin_info) {
 		},
         linkOriginEqPortal(link, portal)
         {
-            // console.log(link);
-            // console.log(portal);
-            const loLat = link.latLngs[0].lat;
-            const loLng = link.latLngs[0].lng;
+            //console.log(link);
+            //console.log(portal);
+            var loLat;
+            var loLng;
+            if (link.type == "polyline") {
+                loLat = link.latLngs[0].lat;
+                loLng = link.latLngs[0].lng;
+            } else if ( link.type == "marker") {
+                loLat = link.latLng.lat;
+                loLng = link.latLng.lng;
+            }
             const pLat = portal.latE6 / 1000000.0;
             const pLng = portal.lngE6 / 1000000.0;
             return (loLat == pLat && loLng == pLng);
@@ -314,17 +320,20 @@ function wrapper(plugin_info) {
         sortPortalToBottom: function(linkList, selectedPortal)
         {
 			const sortList =[];
-
+            //console.log(linkList);
+            //console.log("length: " + linkList.length);
 			for (let i=linkList.length-1;i>=0;i--)
 			{
                 var link = linkList[i];
+                //console.log(i);
+                //console.log(link);
                 if (this.linkOriginEqPortal(link,selectedPortal))
                 {
                     sortList.push(link);
                     linkList.splice(i,1);
                 }
             }
-
+            //console.log(linkList.concat(sortList));
 			return linkList.concat(sortList);
         },
 		countSBUL: function(guid) {
@@ -1638,25 +1647,25 @@ function wrapper(plugin_info) {
 			return ll;
 		},
 		toLinks: function() {
-			console.log(">>> toLinks");
+			//console.log(">>> toLinks");
 			var data = this.getDrawTools();
 			window.plugin.drawTools.drawnItems.clearLayers();
 			var ll = this.linkify(data);
-			console.log("links: " + ll.length);
+			//console.log("links: " + ll.length);
 
 			window.plugin.drawTools.import(ll);
 			window.plugin.drawTools.save();
 		},
 		toFields: function() {
-			console.log(">>> toFields");
+			//console.log(">>> toFields");
 
 			var data = this.getDrawTools();
 			window.plugin.drawTools.drawnItems.clearLayers();
 			var ll = this.linkify(data);
-			console.log("Pre links: " + ll.length);
+			//console.log("Pre links: " + ll.length);
 			var ff = this.fieldify(ll);
-			console.log("Fields: " + ff.length);
-			console.log(ff.length);
+			//console.log("Fields: " + ff.length);
+			//console.log(ff.length);
 			window.plugin.drawTools.import(ff);
 			window.plugin.drawTools.save();
 

@@ -1,5 +1,9 @@
 # javagress
 
+## development of these tools have ceased and migrated to c++
+
+https://github.com/silicontrip/cgress
+
 ## Dependencies
 
 * guava (for s2 geometry)
