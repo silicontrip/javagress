@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.5.0
+// @version        0.5.2
 // @updateURL      https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @downloadURL    https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @namespace    http://tampermonkey.net/
@@ -397,7 +397,8 @@ function wrapper(plugin_info) {
 			html += ' <button type="button" onclick="window.plugin.linksFields.sortToBottom()">Selected Portal to Bottom</button>';
 
 			html += '<hr/>';
-			html += '<table><tr><td style="width:5px;"></td><td>Start Portal</td><td></td><td>End Portal</td><td>ENL</td><td>RES</td><td>NEU</td><td></td><td></td></tr>';
+			html += '<style>#linkslist table { width: 100%; table-layout: fixed; } #linkslist .portalColumn span { display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #linkslist tr td:nth-child(1) { width: 4px; } #linkslist tr td:nth-child(2) { width: 42%; } #linkslist tr td:nth-child(3) { width: 25px; text-align: center; } #linkslist tr td:nth-child(4) { width: 42%; } #linkslist tr td:nth-child(5) { width: 35px; text-align: center; } #linkslist tr td:nth-child(6) { width: 35px; text-align: center; } #linkslist tr td:nth-child(7) { width: 35px; text-align: center; } #linkslist tr td:nth-child(8) { width: 30px; text-align: center; } </style>';
+			html += '<table><tr><td></td><td>Start Portal</td><td></td><td>End Portal</td><td>ENL</td><td>RES</td><td>NEU</td><td></td><td></td></tr>';
 			var key_req = {};
 			var src_req = {};
 			var i ;
@@ -411,6 +412,8 @@ function wrapper(plugin_info) {
 			// get_blockers
 
 			var blockers = this.getBlockers(link_list);
+
+			const portalSuffixes = this.generatePortalSuffixes();
 
 			for (i=0;i<link_list.length;i++)
 			{
@@ -521,9 +524,9 @@ function wrapper(plugin_info) {
 
 					html +='<tr>';
 					html +='<td style="background-color:' + colour + ';"> </td>';
-					html +='<td>'+ this.getPortalLink(oGuid) + '</td>';
+					html +='<td><div class="portalColumn"><span>'+ this.getPortalLink(oGuid, portalSuffixes[oGuid]) + '</span></div></td>';
 					html +='<td><a onclick="window.plugin.linksFields.edit('+i+',\'swap\')">\u27f7</a></td>';
-					html +='<td>'+ this.getPortalLink(dGuid) + '</td>';
+					html +='<td><div class="portalColumn"><span>'+ this.getPortalLink(dGuid, portalSuffixes[dGuid]) + '</span></div></td>';
 
 					if (blockers[i].enl.length > 0)
                     {
@@ -584,7 +587,7 @@ function wrapper(plugin_info) {
                     var oGuid = this.getPointGuid(link.latLng);
 					html +='<tr>';
 					html +='<td style="background-color:;"> </td>';
-					html +='<td>'+ this.getPortalLink(oGuid) + '</td>';
+					html +='<td><div class="portalColumn">'+ this.getPortalLink(oGuid, portalSuffixes[oGuid]) + '</div></td>';
 					html +='<td></td>';
 					html +='<td></td>';
                     html += '<td></td>';
@@ -610,6 +613,26 @@ function wrapper(plugin_info) {
 			}
 			html +='</table>';
 			html +="<hr/>";
+
+            var planPortals = this.getPlanPortals();
+            var portalTitles = {};
+            var hasDuplicateTitles = false;
+
+            for (var guid in planPortals) {
+                var portal = planPortals[guid];
+                if (portal && portal.title) {
+                    if (portalTitles[portal.title]) {
+                        hasDuplicateTitles = true;
+                        break;
+                    } else {
+                        portalTitles[portal.title] = 1;
+                    }
+                }
+            }
+
+            if (hasDuplicateTitles) {
+                html += "<div>Non-Unique Titles</div>";
+            }
 
 			if (status === "")
             {
@@ -670,43 +693,7 @@ function wrapper(plugin_info) {
 			var fp_grid = window.plugin.linksFields.getDrawTools();
 			var validity = this.check_plan(fp_grid);
 
-            // Create a map of portal titles to an array of portal objects with that title
-            const portalTitleMap = {};
-            for (const guid in this.portalCache) {
-                const portal = this.portalCache[guid];
-                if (portal.title) {
-                    if (!portalTitleMap[portal.title]) {
-                        portalTitleMap[portal.title] = [];
-                    }
-                    portalTitleMap[portal.title].push(portal);
-                }
-            }
-
-            const portalSuffixes = {}; // guid -> suffix
-
-            for (const title in portalTitleMap) {
-                const portals = portalTitleMap[title];
-                if (portals.length > 1) {
-                    // Calculate center point
-                    let centerLat = 0;
-                    let centerLng = 0;
-                    for (const p of portals) {
-                        centerLat += p.latE6 / 1000000;
-                        centerLng += p.lngE6 / 1000000;
-                    }
-                    centerLat /= portals.length;
-                    centerLng /= portals.length;
-                    const centerPoint = { lat: centerLat, lng: centerLng };
-
-                    for (const p of portals) {
-                        const portalPoint = { lat: p.latE6 / 1000000, lng: p.lngE6 / 1000000 };
-                        const distance = Math.round(this.haversine_distance(centerPoint, portalPoint));
-                        const bearing = this.calculate_bearing(centerPoint, portalPoint);
-                        const compass = this.bearing_to_compass(bearing);
-                        portalSuffixes[p.guid] = ` [${compass} ${distance}m]`;
-                    }
-                }
-            }
+			const portalSuffixes = this.generatePortalSuffixes();
 
 
 			var exp = "<pre>";
@@ -967,6 +954,13 @@ function wrapper(plugin_info) {
                         portalGuids[dGuid] = window.plugin.linksFields.portalCache[dGuid];
                     }
                 }
+                if (link.type == 'marker')
+                {
+                    const oGuid = window.plugin.linksFields.getPointGuid(link.latLng);
+                    if (oGuid && !portalGuids[oGuid]) {
+                        portalGuids[oGuid] = window.plugin.linksFields.portalCache[oGuid];
+                    }
+                }
 			}
 			return portalGuids;
 		},
@@ -994,45 +988,47 @@ function wrapper(plugin_info) {
             }
 			return null;
 		},
-		getPortalLink: function(guid) {
+		getPortalLink: function(guid, suffix) {
 
-			if (guid === null)
+            if (guid === null)
             {
-				return null;
+                return null;
             }
-			var portal = window.plugin.linksFields.portalCache[guid];
-		// how do we have a GUID but no portal?
+            var portal = window.plugin.linksFields.portalCache[guid];
+        // how do we have a GUID but no portal?
 
-			if (portal === undefined)
+            if (portal === undefined)
             {
-				return null;
+                return null;
             }
-			//console.log("PORTAL: " + JSON.stringify(portal));
+            //console.log("PORTAL: " + JSON.stringify(portal));
 
-			var lat = portal.latE6 / 1000000;
-			var lng = portal.lngE6 / 1000000;
+            var lat = portal.latE6 / 1000000;
+            var lng = portal.lngE6 / 1000000;
 
-			var latlng = [lat,lng].join();
-			var jsSingleClick = 'window.renderPortalDetails(\''+guid+'\');return false';
-			var jsDoubleClick = 'window.zoomToAndShowPortal(\''+guid+'\', ['+latlng+']);return false';
-			var perma = '/intel?ll='+lat+','+lng+'&z=17&pll='+lat+','+lng;
-			if (!portal.title)
-			{
-				portal.title='undefined';
-				jsSingleClick = 'window.renderPortalDetails(\''+guid+'\');window.plugin.linksFields.updatePlan();return false';
-			}
+            var latlng = [lat,lng].join();
+            var jsSingleClick = 'window.renderPortalDetails(\''+guid+'\');return false';
+            var jsDoubleClick = 'window.zoomToAndShowPortal(\''+guid+'\', ['+latlng+']);return false';
+            var perma = '/intel?ll='+lat+','+lng+'&z=17&pll='+lat+','+lng;
+            if (!portal.title)
+            {
+                portal.title='undefined';
+                jsSingleClick = 'window.renderPortalDetails(\''+guid+'\');window.plugin.linksFields.updatePlan();return false';
+            }
 
-			//Use Jquery to create the link, which escape characters in TITLE and ADDRESS of portal
-			var a = $('<a>',{
-				//"class": 'help',
-				text: portal.title,
-				//title: portal.address,
-				href: perma,
-				onClick: jsSingleClick,
-				onDblClick: jsDoubleClick
-			})[0].outerHTML;
-			var div = '<div class="portalTitle">'+a+'</div>';
-			return div;
+            //Use Jquery to create the link, which escape characters in TITLE and ADDRESS of portal
+            var a = $('<a>',{
+                //"class": 'help',
+                text: portal.title,
+                //title: portal.address,
+                href: perma,
+                onClick: jsSingleClick,
+                onDblClick: jsDoubleClick
+            })[0].outerHTML;
+            if (suffix) {
+                return a + suffix;
+            }
+            return a;
 		},
 		edit: function(item,op) {
 			var link_list = window.plugin.linksFields.linkify(window.plugin.linksFields.getDrawTools());
@@ -1221,6 +1217,45 @@ function wrapper(plugin_info) {
             const index = Math.floor((bearing + 22.5) / 45) % 8;
             return directions[index];
         },
+		generatePortalSuffixes: function() {
+			const portalTitleMap = {};
+			for (const guid in this.portalCache) {
+				const portal = this.portalCache[guid];
+				if (portal.title) {
+					if (!portalTitleMap[portal.title]) {
+						portalTitleMap[portal.title] = [];
+					}
+					portalTitleMap[portal.title].push(portal);
+				}
+			}
+
+			const portalSuffixes = {}; // guid -> suffix
+
+			for (const title in portalTitleMap) {
+				const portals = portalTitleMap[title];
+				if (portals.length > 1) {
+					// Calculate center point
+					let centerLat = 0;
+					let centerLng = 0;
+					for (const p of portals) {
+						centerLat += p.latE6 / 1000000;
+						centerLng += p.lngE6 / 1000000;
+					}
+					centerLat /= portals.length;
+					centerLng /= portals.length;
+					const centerPoint = { lat: centerLat, lng: centerLng };
+
+					for (const p of portals) {
+						const portalPoint = { lat: p.latE6 / 1000000, lng: p.lngE6 / 1000000 };
+						const distance = Math.round(this.haversine_distance(centerPoint, portalPoint));
+						const bearing = this.calculate_bearing(centerPoint, portalPoint);
+						const compass = this.bearing_to_compass(bearing);
+						portalSuffixes[p.guid] = ` [${compass} ${distance}m]`;
+					}
+				}
+			}
+			return portalSuffixes;
+		},
 		get_prevents : function(grid)
 		{
             //console.log(grid);
