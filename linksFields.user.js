@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.4.1
+// @version        0.5.0
 // @updateURL      https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @downloadURL    https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @namespace    http://tampermonkey.net/
@@ -669,6 +669,46 @@ function wrapper(plugin_info) {
 		{
 			var fp_grid = window.plugin.linksFields.getDrawTools();
 			var validity = this.check_plan(fp_grid);
+
+            // Create a map of portal titles to an array of portal objects with that title
+            const portalTitleMap = {};
+            for (const guid in this.portalCache) {
+                const portal = this.portalCache[guid];
+                if (portal.title) {
+                    if (!portalTitleMap[portal.title]) {
+                        portalTitleMap[portal.title] = [];
+                    }
+                    portalTitleMap[portal.title].push(portal);
+                }
+            }
+
+            const portalSuffixes = {}; // guid -> suffix
+
+            for (const title in portalTitleMap) {
+                const portals = portalTitleMap[title];
+                if (portals.length > 1) {
+                    // Calculate center point
+                    let centerLat = 0;
+                    let centerLng = 0;
+                    for (const p of portals) {
+                        centerLat += p.latE6 / 1000000;
+                        centerLng += p.lngE6 / 1000000;
+                    }
+                    centerLat /= portals.length;
+                    centerLng /= portals.length;
+                    const centerPoint = { lat: centerLat, lng: centerLng };
+
+                    for (const p of portals) {
+                        const portalPoint = { lat: p.latE6 / 1000000, lng: p.lngE6 / 1000000 };
+                        const distance = Math.round(this.haversine_distance(centerPoint, portalPoint));
+                        const bearing = this.calculate_bearing(centerPoint, portalPoint);
+                        const compass = this.bearing_to_compass(bearing);
+                        portalSuffixes[p.guid] = ` [${compass} ${distance}m]`;
+                    }
+                }
+            }
+
+
 			var exp = "<pre>";
 			exp += "===== KEYS REQUIRED =====\n";
 			var keyreq={};
@@ -679,6 +719,9 @@ function wrapper(plugin_info) {
                     //console.log("loc: " + JSON.stringify(loc));
                     var guid = window.plugin.linksFields.getPointGuid(loc[1]);
                     var title = window.plugin.linksFields.portalCache[guid].title;
+                    if (portalSuffixes[guid]) {
+                        title += portalSuffixes[guid];
+                    }
                     keyreq[title]=0;
                 }
 			}
@@ -691,6 +734,9 @@ function wrapper(plugin_info) {
                         //console.log("loc: " + JSON.stringify(loc));
                         guid = window.plugin.linksFields.getPointGuid(loc[1]);
                         title = window.plugin.linksFields.portalCache[guid].title;
+                        if (portalSuffixes[guid]) {
+                            title += portalSuffixes[guid];
+                        }
 
                         keyreq[title]++;
                     }
@@ -709,8 +755,15 @@ function wrapper(plugin_info) {
                     if (gd.type == 'polyline') {
                         guid = window.plugin.linksFields.getPointGuid(gd.latLngs[0]);
                         var stitle = window.plugin.linksFields.portalCache[guid].title;
+                        if (portalSuffixes[guid]) {
+                            stitle += portalSuffixes[guid];
+                        }
                         guid = window.plugin.linksFields.getPointGuid(gd.latLngs[1]);
                         var dtitle = window.plugin.linksFields.portalCache[guid].title;
+                        if (portalSuffixes[guid]) {
+                            dtitle += portalSuffixes[guid];
+                        }
+
                         var kcount;
                         if (stitle in keyreq)
                         {
@@ -725,6 +778,9 @@ function wrapper(plugin_info) {
                     if (gd.type == 'marker') {
                         guid = window.plugin.linksFields.getPointGuid(gd.latLng);
                         var stitle = window.plugin.linksFields.portalCache[guid].title;
+                        if (portalSuffixes[guid]) {
+                            stitle += portalSuffixes[guid];
+                        }
                         var kcount;
                         if (stitle in keyreq)
                         {
@@ -738,13 +794,13 @@ function wrapper(plugin_info) {
 				}
 			}
 			exp += "</pre>\n";
-				dialog({
-					html: '<div id="export">' + exp + '</div>',
-					dialogClass: 'ui-dialog-portal',
-					title: 'Export Plan',
-					id: 'portal-exportplan',
-					width: 550
-				});
+			dialog({
+				html: '<div id="export">' + exp + '</div>',
+				dialogClass: 'ui-dialog-portal',
+				title: 'Export Plan',
+				id: 'portal-exportplan',
+				width: 550
+			});
 		},
 		checkCache: function(linkList) {
 			const missing = [];
@@ -1148,6 +1204,22 @@ function wrapper(plugin_info) {
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
             return R * c; // Distance in metres
+        },
+        calculate_bearing: function(p1, p2) {
+            const lat1 = p1.lat * Math.PI / 180;
+            const lon1 = p1.lng * Math.PI / 180;
+            const lat2 = p2.lat * Math.PI / 180;
+            const lon2 = p2.lng * Math.PI / 180;
+
+            const y = Math.sin(lon2 - lon1) * Math.cos(lat2);
+            const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
+            const brng = Math.atan2(y, x);
+            return (brng * 180 / Math.PI + 360) % 360; // bearing in degrees
+        },
+        bearing_to_compass: function(bearing) {
+            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            const index = Math.floor((bearing + 22.5) / 45) % 8;
+            return directions[index];
         },
 		get_prevents : function(grid)
 		{
