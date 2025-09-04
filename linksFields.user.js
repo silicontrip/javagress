@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         linksFields
 // @category       Layer
-// @version        0.5.2
+// @version        0.6.0
 // @updateURL      https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @downloadURL    https://github.com/silicontrip/javagress/raw/refs/heads/master/linksFields.user.js
 // @namespace    http://tampermonkey.net/
@@ -58,7 +58,7 @@ function wrapper(plugin_info) {
 			window.addLayerGroup('Plan Blockers', window.plugin.linksFields.blockLayer, false);
 			window.addLayerGroup('Plan Path', window.plugin.linksFields.pathLayer, false);
 
-			var plan = window.plugin.linksFields.linkify(window.plugin.linksFields.getDrawTools());
+			//var plan = window.plugin.linksFields.linkify(window.plugin.linksFields.getDrawTools());
 		},
 		portalDetails: function(data) {
 			var portal = data.details;
@@ -271,17 +271,58 @@ function wrapper(plugin_info) {
 			}
 			return linkList;
 		},
-		sortExisting: function(link_list) {
-			// This moves existing links to the top of the plan.
-			var exist_list = link_list.filter(this.linkInPlay);
+		sortExisting: function(rawPlan) {
 
-			// Filter out existing links from the original array
-			const remainingLinks = link_list.filter(link => !exist_list.includes(link));
+			     // Helper function for creating consistent keys
+			     const latLngToKey = (latLng) => `${latLng.lat},${latLng.lng}`;
 
-			// Concatenate sorted existing links with remaining non-existing links
-			return exist_list.concat(remainingLinks);
-		},
-        linkOriginEqPortal(link, portal)
+			     // --- Step 1: Initialization ---
+			     const completedLinks = [];
+			     const executionPlan = [];
+
+		        // Pre-populate the Set with any markers the user has already manually added.
+		        // This is our idempotency check.
+		        const portalsWithMarkers = new Set(
+		            rawPlan
+		                .filter(item => item.type === 'marker')
+		                .map(marker => latLngToKey(marker.latLng))
+		        );
+
+		        // --- Step 2: The Single Processing Loop ---
+		        for (const item of rawPlan) {
+
+		            if (item.type === 'polyline' && this.linkInPlay(item)) {
+		                // --- Case A: The item is a COMPLETED link ---
+
+		                // 1. Add it to the list that will be moved to the top.
+		                completedLinks.push(item);
+
+		                // 2. Check if we need to insert a "tombstone" marker.
+		                const originKey = latLngToKey(item.latLngs[0]);
+		                if (!portalsWithMarkers.has(originKey)) {
+		                    // If no marker exists for this portal yet, create and add one.
+		                    const newMarker = { type: "marker",
+                                              latLng: item.latLngs[0],
+                                              color: item.color};
+		                    executionPlan.push(newMarker);
+
+		                    // Crucially, update the set so we don't add another marker for this portal.
+		                    portalsWithMarkers.add(originKey);
+		                }
+
+		            } else {
+		                // --- Case B: The item is a PENDING link or a MANUAL marker ---
+
+		                // Add it directly to the execution plan to preserve its order.
+		                executionPlan.push(item);
+		            }
+                }
+
+            // --- Step 3: Return the Final Structure ---
+            return completedLinks.concat(executionPlan);
+
+		    },
+        linkOriginEqPortal: function(link, portal)
         {
             //console.log(link);
             //console.log(portal);
